@@ -19,6 +19,12 @@
 	<resources>
 		<resource-root path="picketlink-jbas7-2.1.5.Final.jar" />
 		<resource-root path="picketlink-core-2.1.5.Final.jar" />
+		<resource-root path="picketlink-common-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-core-api-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-core-impl-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-idm-api-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-idm-impl-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-idm-schema-3.0.0.Alpha1.jar" />
 		<resource-root path="picketlink-as7-extension-1.0.2-SNAPSHOT.jar" />
 	</resources>
 
@@ -54,5 +60,26 @@
 		<module name="org.apache.log4j" />
 		<module name="org.apache.santuario.xmlsec" />
 		<module name="javax.api" />
+
+        <!-- CDI -->
+        <module name="org.jboss.as.weld"/>
+        <module name="org.jboss.weld.api"/>
+        <module name="org.jboss.weld.core"/>
+        <module name="org.jboss.weld.spi"/>
+		
+		<!-- JPA -->
+        <module name="javax.persistence.api"/>
+        <module name="org.jboss.as.jpa"/>
+        <module name="org.jboss.as.jpa.hibernate" slot="4" services="import"/>
+        <module name="org.jboss.as.jpa.spi"/>
+        <module name="org.hibernate" services="import"/>
+        <module name="org.hibernate.validator" services="import"/>
+        <module name="org.javassist"/>
+        
+        <!-- JavaEE -->
+        <module name="javax.api"/>
+        <module name="javax.servlet.api"/>
+        <module name="javax.enterprise.api"/>
+        <module name="javaee.api"/>
 	</dependencies>
 </module>
