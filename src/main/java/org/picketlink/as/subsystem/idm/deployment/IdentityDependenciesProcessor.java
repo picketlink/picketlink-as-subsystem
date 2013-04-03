@@ -34,6 +34,7 @@ import org.jboss.as.server.deployment.module.ModuleSpecification;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
+import org.picketlink.as.subsystem.deployment.IdentityMarkerProcessor;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>

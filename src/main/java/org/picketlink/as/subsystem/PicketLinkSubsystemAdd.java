@@ -1,5 +1,7 @@
 package org.picketlink.as.subsystem;
 
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+
 import java.util.List;
 
 import org.jboss.as.controller.AbstractBoottimeAddStepHandler;
@@ -20,12 +22,12 @@ import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.value.ImmediateValue;
+import org.picketlink.as.subsystem.deployment.IdentityMarkerProcessor;
 import org.picketlink.as.subsystem.federation.deployment.IdentityProviderDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.PicketLinkDependencyDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.ServiceProviderDeploymentProcessor;
 import org.picketlink.as.subsystem.idm.deployment.IdentityCdiExtensionInstallerProcessor;
 import org.picketlink.as.subsystem.idm.deployment.IdentityDependenciesProcessor;
-import org.picketlink.as.subsystem.idm.deployment.IdentityMarkerProcessor;
 import org.picketlink.as.subsystem.idm.service.IdentityService;
 
 /**
@@ -67,13 +69,13 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
         
         context.addStep(new AbstractDeploymentChainStep() {
             public void execute(DeploymentProcessorTarget processorTarget) {
-                PicketLinkLogger.ROOT_LOGGER.trace("Installing the PicketLink Dependency deployment processor.");
+                ROOT_LOGGER.trace("Installing the PicketLink Dependency deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, PicketLinkDependencyDeploymentProcessor.PHASE, PicketLinkDependencyDeploymentProcessor.PRIORITY,
                         new PicketLinkDependencyDeploymentProcessor());
-                PicketLinkLogger.ROOT_LOGGER.trace("Installing the PicketLink Identity Provider deployment processor.");
+                ROOT_LOGGER.trace("Installing the PicketLink Identity Provider deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, IdentityProviderDeploymentProcessor.PHASE,
                         IdentityProviderDeploymentProcessor.PRIORITY, new IdentityProviderDeploymentProcessor());
-                PicketLinkLogger.ROOT_LOGGER.trace("Installing the PicketLink Service Provider deployment processor.");
+                ROOT_LOGGER.trace("Installing the PicketLink Service Provider deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, ServiceProviderDeploymentProcessor.PHASE,
                         ServiceProviderDeploymentProcessor.PRIORITY, new ServiceProviderDeploymentProcessor());
                 

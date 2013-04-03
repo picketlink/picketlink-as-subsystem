@@ -34,6 +34,7 @@ import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
+import org.picketlink.as.subsystem.deployment.IdentityMarkerProcessor;
 import org.picketlink.as.subsystem.idm.cdi.PicketLinkCdiExtension;
 import org.picketlink.deltaspike.core.api.provider.BeanManagerProvider;
 import org.picketlink.deltaspike.security.impl.extension.SecurityExtension;

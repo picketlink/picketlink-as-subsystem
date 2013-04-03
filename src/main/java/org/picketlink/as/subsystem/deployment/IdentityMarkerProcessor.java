@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.picketlink.as.subsystem.idm.deployment;
+package org.picketlink.as.subsystem.deployment;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 
