@@ -21,6 +21,8 @@
  */
 package org.picketlink.as.subsystem.idm.service;
 
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,7 +34,6 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.jpa.hibernate4.JBossAppServerJtaPlatform;
 import org.jboss.as.jpa.transaction.JtaManagerImpl;
 import org.jboss.as.naming.deployment.ContextNames;
-import org.jboss.logging.Logger;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -46,8 +47,6 @@ import org.jboss.msc.service.StopContext;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class IdentityService implements Service<IdentityService> {
-
-    private static final Logger log = Logger.getLogger("org.eventjuggler.services.identity");
 
     public static ServiceName SERVICE_NAME = ServiceName.JBOSS.append("identity");
 
@@ -75,9 +74,9 @@ public class IdentityService implements Service<IdentityService> {
 
     @Override
     public void start(StartContext context) throws StartException {
-        log.info("Starting Identity Service");
+        ROOT_LOGGER.info("Starting Identity Service");
 
-        log.info("Creating entity manager factory");
+        ROOT_LOGGER.info("Creating entity manager factory");
 
         Map<Object, Object> properties = new HashMap();
         properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
@@ -87,9 +86,9 @@ public class IdentityService implements Service<IdentityService> {
 
     @Override
     public void stop(StopContext context) {
-        log.info("Stopping Identity Service");
+        ROOT_LOGGER.info("Stopping Identity Service");
 
-        log.info("Closing entity manager factory");
+        ROOT_LOGGER.info("Closing entity manager factory");
         emf.close();
     }
 

@@ -21,13 +21,14 @@
  */
 package org.picketlink.as.subsystem.idm.cdi;
 
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
-import org.jboss.logging.Logger;
 import org.picketlink.IdentityConfigurationEvent;
 import org.picketlink.authentication.internal.DefaultAuthenticatorSelector;
 import org.picketlink.authentication.internal.IdmAuthenticator;
@@ -62,8 +63,6 @@ import org.picketlink.producer.IdentityManagerProducer;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class PicketLinkCdiExtension implements Extension {
-
-    private static final Logger log = Logger.getLogger("org.eventjuggler.services.identity");
 
     public void register(@Observes BeforeBeanDiscovery bbd, BeanManager bm) {
 
@@ -133,12 +132,12 @@ public class PicketLinkCdiExtension implements Extension {
         config.getFeatureSet().setSupportsMultiRealm(true);
         event.getConfig().addStoreConfiguration(config);
 
-        log.info("Config PicketLink JPA identity store config");
+        ROOT_LOGGER.info("Config PicketLink JPA identity store config");
     }
 
     public <X> void vetoJPAIdentityStoreAutoConfig(@Observes ProcessAnnotatedType<X> event) {
         if (event.getAnnotatedType().getJavaClass().equals(JPAIdentityStoreAutoConfig.class)) {
-            log.info("Veto bundled PicketLink JPA identity store config");
+            ROOT_LOGGER.info("Veto bundled PicketLink JPA identity store config");
             event.veto();
         }
     }

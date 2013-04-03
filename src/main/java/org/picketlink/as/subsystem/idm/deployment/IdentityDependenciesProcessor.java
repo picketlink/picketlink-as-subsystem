@@ -21,6 +21,8 @@
  */
 package org.picketlink.as.subsystem.idm.deployment;
 
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
@@ -29,7 +31,6 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
-import org.jboss.logging.Logger;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
@@ -38,8 +39,6 @@ import org.jboss.modules.ModuleLoader;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class IdentityDependenciesProcessor implements DeploymentUnitProcessor {
-
-    private static final Logger log = Logger.getLogger("org.eventjuggler.services.identity");
 
     public static final Phase PHASE = Phase.DEPENDENCIES;
 
@@ -60,7 +59,7 @@ public class IdentityDependenciesProcessor implements DeploymentUnitProcessor {
 
         moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, PICKETLINK, false, true, false, false));
 
-        log.infov("Added picketlink dependencies to {0}", deploymentUnit.getName());
+        ROOT_LOGGER.infov("Added picketlink dependencies to {0}", deploymentUnit.getName());
     }
 
     @Override

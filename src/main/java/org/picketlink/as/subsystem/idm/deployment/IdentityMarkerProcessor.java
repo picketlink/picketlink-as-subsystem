@@ -21,6 +21,8 @@
  */
 package org.picketlink.as.subsystem.idm.deployment;
 
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+
 import org.jboss.as.server.deployment.AttachmentKey;
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
@@ -30,7 +32,6 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
-import org.jboss.logging.Logger;
 import org.jboss.modules.ModuleIdentifier;
 
 /**
@@ -43,8 +44,6 @@ public class IdentityMarkerProcessor implements DeploymentUnitProcessor {
     public static final String IDENTITY_IDENTIFIER_NAME = "org.picketlink";
 
     public static final ModuleIdentifier IDENTITY_IDENTIFIER = ModuleIdentifier.create(IDENTITY_IDENTIFIER_NAME);
-
-    private static final Logger log = Logger.getLogger("org.eventjuggler.services.identity");
 
     public static final Phase PHASE = Phase.STRUCTURE;
 
@@ -63,7 +62,7 @@ public class IdentityMarkerProcessor implements DeploymentUnitProcessor {
             Boolean existingValue = deploymentUnit.putAttachment(ENABLE_IDENTITY_KEY, true);
 
             if (existingValue == null) {
-                log.infov("Enabling identity for {0}", deploymentUnit.getName());
+                ROOT_LOGGER.infov("Enabling identity for {0}", deploymentUnit.getName());
             }
         }
     }

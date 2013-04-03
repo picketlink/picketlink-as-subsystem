@@ -21,6 +21,8 @@
  */
 package org.picketlink.as.subsystem.idm.deployment;
 
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+
 import javax.enterprise.inject.spi.Extension;
 
 import org.jboss.as.server.deployment.AttachmentList;
@@ -30,7 +32,6 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.weld.deployment.WeldAttachments;
-import org.jboss.logging.Logger;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
 import org.picketlink.as.subsystem.idm.cdi.PicketLinkCdiExtension;
@@ -42,8 +43,6 @@ import org.picketlink.permission.internal.JPAPermissionStoreConfig;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class IdentityCdiExtensionInstallerProcessor implements DeploymentUnitProcessor {
-
-    private static final Logger log = Logger.getLogger("org.eventjuggler.services.identity");
 
     public static final Phase PHASE = Phase.PARSE;
 
@@ -70,7 +69,7 @@ public class IdentityCdiExtensionInstallerProcessor implements DeploymentUnitPro
             }
         }
 
-        log.infov("Enabling identity extension for {0}", deploymentUnit.getName());
+        ROOT_LOGGER.infov("Enabling identity extension for {0}", deploymentUnit.getName());
 
         addExtensions(deploymentUnit, new PicketLinkCdiExtension(), new JPAPermissionStoreConfig(), new SecurityExtension(),
                 new BeanManagerProvider());
