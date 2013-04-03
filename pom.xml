@@ -138,7 +138,7 @@
 				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
-			
+
 			<!-- JBoss AS Dependencies -->
 			<dependency>
 				<groupId>org.jboss.as</groupId>
@@ -153,7 +153,7 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
-			
+
 			<!-- Arquillian Drone Dependencies for the Federation Integration Tests -->
 			<dependency>
 				<groupId>org.jboss.arquillian.extension</groupId>
@@ -193,13 +193,13 @@
 			<groupId>org.jboss.as</groupId>
 			<artifactId>jboss-as-weld</artifactId>
 		</dependency>
-		
+
 		<!-- JPA/Hibernate Dependencies -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging-processor</artifactId>
@@ -208,7 +208,7 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		
+
 		<!-- PicketLink v3 Dependencies. Identity Management and Core. -->
 		<dependency>
 			<groupId>org.picketlink</groupId>
@@ -244,7 +244,7 @@
 			<groupId>org.picketlink</groupId>
 			<artifactId>picketlink-tomcat7-single</artifactId>
 		</dependency>
-		
+
 		<!-- Test Dependencies -->
 		<dependency>
 			<groupId>org.jboss.as</groupId>
@@ -254,11 +254,6 @@
 		<dependency>
 			<groupId>org.jboss.arquillian.junit</groupId>
 			<artifactId>arquillian-junit-container</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.as</groupId>
-			<artifactId>jboss-as-arquillian-container-managed</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -436,6 +431,26 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+		<profile>
+			<id>arquillian-managed</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>arquillian-remote</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-remote</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
 		</profile>
 		<!-- This profiles executes all integration tests during the build process. -->
 		<profile>
