@@ -27,8 +27,8 @@ import static org.jboss.as.controller.parsing.ParseUtils.requireNoAttributes;
 import static org.jboss.as.controller.parsing.ParseUtils.unexpectedElement;
 import static org.picketlink.as.subsystem.model.ModelElement.FEDERATION;
 import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER;
-import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER;
 import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN;
+import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER;
 
 import java.util.List;
 
@@ -51,6 +51,7 @@ import org.picketlink.as.subsystem.federation.model.idp.IdentityProviderResource
 import org.picketlink.as.subsystem.federation.model.idp.TrustDomainResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.IDMResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.as.subsystem.model.XMLElement;
 
@@ -146,6 +147,9 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                 case SAML:
                     parseSAMLConfig(reader, list, federationNode);
                     break;
+                case IDENTITY_MANAGEMENT:
+                    parseIdentityManagement(reader, list, parentNode);
+                    break;
                 default:
                     unexpectedElement(reader);
             }
@@ -224,6 +228,11 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
             throws XMLStreamException {
         return parseConfig(reader, FEDERATION, FederationResourceDefinition.ALIAS.getName(), list, parentNode,
                 FederationResourceDefinition.INSTANCE.getAttributes());
+    }
+    
+    private void parseIdentityManagement(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode parentNode)
+            throws XMLStreamException {
+        parseConfig(reader, ModelElement.IDENTITY_MANAGEMENT, null, list, parentNode, IDMResourceDefinition.INSTANCE.getAttributes());
     }
 
     /**

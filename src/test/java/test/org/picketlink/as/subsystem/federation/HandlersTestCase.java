@@ -19,20 +19,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package test.org.picketlink.as.subsystem.federation.parser;
+package test.org.picketlink.as.subsystem.federation;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
-import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.Property;
 import org.junit.Test;
 import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
 import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
-import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.identity.federation.core.config.SPConfiguration;
 import org.picketlink.identity.federation.core.handler.config.Handler;
 import org.picketlink.identity.federation.core.handler.config.Handlers;
 
@@ -40,7 +36,7 @@ import org.picketlink.identity.federation.core.handler.config.Handlers;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * 
  */
-public class HandlersTestCase extends AbstractPicketLinkSubsystemTestCase {
+public class HandlersTestCase extends AbstractFederationSubsystemTestCase {
 
     private static final String FAKE_HANDLER_CLASS_NAME = "org.picketlink.NonExistentHandler";
 

@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package test.org.picketlink.as.subsystem.federation.parser;
+package test.org.picketlink.as.subsystem.federation;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -38,7 +38,7 @@ import org.picketlink.identity.federation.core.config.SPConfiguration;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  *
  */
-public class ServiceProviderServiceTestCase extends AbstractPicketLinkSubsystemTestCase {
+public class ServiceProviderServiceTestCase extends AbstractFederationSubsystemTestCase {
 
     /**
      * <p>

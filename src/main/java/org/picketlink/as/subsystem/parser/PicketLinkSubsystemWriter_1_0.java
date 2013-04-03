@@ -51,6 +51,7 @@ public class PicketLinkSubsystemWriter_1_0 implements XMLStreamConstants, XMLEle
     static {
         writers = new HashMap<String, ModelWriter>();
         
+        writers.put(ModelElement.IDENTITY_MANAGEMENT.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_MANAGEMENT, writers));
         writers.put(ModelElement.FEDERATION.getName(), new GenericModelElementWriter(ModelElement.FEDERATION, writers));
         writers.put(ModelElement.IDENTITY_PROVIDER.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_PROVIDER, writers));
         writers.put(ModelElement.KEY_STORE.getName(), new GenericModelElementWriter(ModelElement.KEY_STORE, writers));
@@ -75,7 +76,15 @@ public class PicketLinkSubsystemWriter_1_0 implements XMLStreamConstants, XMLEle
         List<ModelNode> federation = context.getModelNode().asList();
 
         for (ModelNode modelNode : federation) {
-            writers.get(ModelElement.FEDERATION.getName()).write(writer, modelNode);            
+            String modelName = modelNode.asProperty().getName();
+            
+            if (modelName.equals(ModelElement.FEDERATION.getName())) {
+                writers.get(ModelElement.FEDERATION.getName()).write(writer, modelNode);         
+            } else if (modelName.equals(ModelElement.IDENTITY_MANAGEMENT.getName())) {
+                writers.get(ModelElement.IDENTITY_MANAGEMENT.getName()).write(writer, modelNode);
+            } else {
+                throw new XMLStreamException("Not supported element [" + modelName + "]");
+            }
         }
         
         // End subsystem

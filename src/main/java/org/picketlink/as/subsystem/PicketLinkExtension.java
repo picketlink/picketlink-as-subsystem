@@ -33,6 +33,7 @@ import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.controller.registry.OperationEntry;
 import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.IDMResourceDefinition;
 
 /**
  * <p>An extension to the JBoss Application Server to enable PicketLink configurations.</p>
@@ -83,6 +84,7 @@ public class PicketLinkExtension implements Extension {
         picketlink.registerOperationHandler(DESCRIBE, GenericSubsystemDescribeHandler.INSTANCE, GenericSubsystemDescribeHandler.INSTANCE, false, OperationEntry.EntryType.PRIVATE);
 
         picketlink.registerSubModel(FederationResourceDefinition.INSTANCE);
+        picketlink.registerSubModel(IDMResourceDefinition.INSTANCE);
         
         subsystem.registerXMLElementWriter(Namespace.CURRENT.getXMLWriter());
     }

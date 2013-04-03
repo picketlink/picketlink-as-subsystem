@@ -1,5 +1,7 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
-
+	
+	<identity-management store="jpa"/>
+	
 	<federation alias="federation-ws-trust-enabled">
 		<security-token-service alias="PicketLinkSTS"
 			endpoint="http://localhost:8080/picketlink-sts2" security-domain="picketlink-sts" />

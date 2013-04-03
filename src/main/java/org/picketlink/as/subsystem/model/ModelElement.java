@@ -50,6 +50,12 @@ public enum ModelElement {
     COMMON_HANDLER_PARAMETER ("handler-parameter"),
 
     /*
+     * Identity Management model elements
+     */
+    IDENTITY_MANAGEMENT("identity-management"),
+    IDENTITY_STORE ("store"),
+    
+    /*
      * Federation model elements
      */
     FEDERATION("federation"),
