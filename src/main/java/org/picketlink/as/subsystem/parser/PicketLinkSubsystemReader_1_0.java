@@ -43,16 +43,16 @@ import org.jboss.staxmapper.XMLElementReader;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.picketlink.as.subsystem.Namespace;
 import org.picketlink.as.subsystem.PicketLinkExtension;
+import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.KeyProviderResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.handlers.HandlerParameterResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.handlers.HandlerResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.idp.IdentityProviderResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.idp.TrustDomainResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.as.subsystem.model.XMLElement;
-import org.picketlink.as.subsystem.model.federation.FederationResourceDefinition;
-import org.picketlink.as.subsystem.model.federation.KeyProviderResourceDefinition;
-import org.picketlink.as.subsystem.model.handlers.HandlerParameterResourceDefinition;
-import org.picketlink.as.subsystem.model.handlers.HandlerResourceDefinition;
-import org.picketlink.as.subsystem.model.idp.IdentityProviderResourceDefinition;
-import org.picketlink.as.subsystem.model.idp.TrustDomainResourceDefinition;
-import org.picketlink.as.subsystem.model.saml.SAMLResourceDefinition;
-import org.picketlink.as.subsystem.model.sp.ServiceProviderResourceDefinition;
 
 /**
  * <p>

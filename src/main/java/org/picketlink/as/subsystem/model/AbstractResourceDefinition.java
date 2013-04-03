@@ -32,7 +32,7 @@ import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.picketlink.as.subsystem.PicketLinkExtension;
-import org.picketlink.as.subsystem.model.idp.IDPWriteAttributeHandler;
+import org.picketlink.as.subsystem.federation.model.idp.IDPWriteAttributeHandler;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

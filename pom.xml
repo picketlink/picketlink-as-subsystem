@@ -138,6 +138,8 @@
 				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
+			
+			<!-- JBoss AS Dependencies -->
 			<dependency>
 				<groupId>org.jboss.as</groupId>
 				<artifactId>jboss-as-parent</artifactId>
@@ -151,6 +153,8 @@
 					</exclusion>
 				</exclusions>
 			</dependency>
+			
+			<!-- Arquillian Drone Dependencies for the Federation Integration Tests -->
 			<dependency>
 				<groupId>org.jboss.arquillian.extension</groupId>
 				<artifactId>arquillian-drone-bom</artifactId>
@@ -162,6 +166,7 @@
 	</dependencyManagement>
 
 	<dependencies>
+		<!-- JBoss AS Dependencies -->
 		<dependency>
 			<groupId>org.jboss.as</groupId>
 			<artifactId>jboss-as-server</artifactId>
@@ -175,6 +180,12 @@
 			<artifactId>jboss-as-web</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.jboss.as</groupId>
+			<artifactId>jboss-as-jpa-hibernate4</artifactId>
+		</dependency>
+
+		<!-- CDI/Weld Dependencies -->
+		<dependency>
 			<groupId>javax.enterprise</groupId>
 			<artifactId>cdi-api</artifactId>
 		</dependency>
@@ -182,14 +193,13 @@
 			<groupId>org.jboss.as</groupId>
 			<artifactId>jboss-as-weld</artifactId>
 		</dependency>
+		
+		<!-- JPA/Hibernate Dependencies -->
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.jboss.as</groupId>
-			<artifactId>jboss-as-jpa-hibernate4</artifactId>
-		</dependency>
+		
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging-processor</artifactId>
@@ -198,7 +208,8 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-
+		
+		<!-- PicketLink v3 Dependencies. Identity Management and Core. -->
 		<dependency>
 			<groupId>org.picketlink</groupId>
 			<artifactId>picketlink-core-api</artifactId>
@@ -220,11 +231,11 @@
 			<artifactId>picketlink-idm-schema</artifactId>
 		</dependency>
 
+		<!-- PicketLink v2 Dependencies -->
 		<dependency>
 			<groupId>org.picketlink</groupId>
 			<artifactId>picketlink-core</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.picketlink.distribution</groupId>
 			<artifactId>picketlink-jbas7</artifactId>
@@ -233,6 +244,8 @@
 			<groupId>org.picketlink</groupId>
 			<artifactId>picketlink-tomcat7-single</artifactId>
 		</dependency>
+		
+		<!-- Test Dependencies -->
 		<dependency>
 			<groupId>org.jboss.as</groupId>
 			<artifactId>jboss-as-subsystem-test</artifactId>
@@ -686,6 +699,7 @@
 								</goals>
 								<configuration>
 									<artifactItems>
+										<!-- PicketLink v2 Federation Dependencies -->
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-core</artifactId>
@@ -698,6 +712,56 @@
 											<groupId>org.picketlink.distribution</groupId>
 											<artifactId>picketlink-jbas7</artifactId>
 											<version>${version.picketlink}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+										</artifactItem>
+
+										<!-- PicketLink v3 Dependencies -->
+										<artifactItem>
+											<groupId>org.picketlink</groupId>
+											<artifactId>picketlink-core-api</artifactId>
+											<version>${version.org.picketlink}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.picketlink</groupId>
+											<artifactId>picketlink-core-impl</artifactId>
+											<version>${version.org.picketlink}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.picketlink</groupId>
+											<artifactId>picketlink-idm-api</artifactId>
+											<version>${version.org.picketlink}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.picketlink</groupId>
+											<artifactId>picketlink-idm-impl</artifactId>
+											<version>${version.org.picketlink}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.picketlink</groupId>
+											<artifactId>picketlink-idm-schema</artifactId>
+											<version>${version.org.picketlink}</version>
+											<type>jar</type>
+											<overWrite>true</overWrite>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+										</artifactItem>
+										<artifactItem>
+											<groupId>org.picketlink</groupId>
+											<artifactId>picketlink-common</artifactId>
+											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>

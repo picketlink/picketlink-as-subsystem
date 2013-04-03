@@ -32,7 +32,7 @@ import org.jboss.as.controller.operations.common.GenericSubsystemDescribeHandler
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.jboss.as.controller.registry.OperationEntry;
-import org.picketlink.as.subsystem.model.federation.FederationResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
 
 /**
  * <p>An extension to the JBoss Application Server to enable PicketLink configurations.</p>
