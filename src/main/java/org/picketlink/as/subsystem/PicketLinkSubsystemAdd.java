@@ -28,7 +28,8 @@ import org.picketlink.as.subsystem.federation.deployment.PicketLinkDependencyDep
 import org.picketlink.as.subsystem.federation.deployment.ServiceProviderDeploymentProcessor;
 import org.picketlink.as.subsystem.idm.deployment.IdentityCdiExtensionInstallerProcessor;
 import org.picketlink.as.subsystem.idm.deployment.IdentityDependenciesProcessor;
-import org.picketlink.as.subsystem.idm.service.IdentityService;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
+import org.picketlink.idm.IdentityManager;
 
 /**
  * <p>
@@ -63,7 +64,7 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
         
         final ServiceTarget target = context.getServiceTarget();
         
-        final ServiceController<IdentityService> controller = IdentityService.addService(target, verificationHandler);
+        final ServiceController<IdentityManager> controller = IdentityManagerService.addService(target, verificationHandler);
         
         controllers.add(controller);
         
@@ -92,12 +93,12 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
 
         final BinderService binderService = new BinderService("IdentityService");
         final ServiceBuilder<ManagedReferenceFactory> builder = context.getServiceTarget().addService(
-                IdentityService.JNDI_SERVICE_NAME, binderService);
+                IdentityManagerService.JNDI_SERVICE_NAME, binderService);
         builder.addDependency(ContextNames.JBOSS_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                 binderService.getNamingStoreInjector());
-        builder.addDependency(IdentityService.SERVICE_NAME, IdentityService.class, new Injector<IdentityService>() {
+        builder.addDependency(IdentityManagerService.SERVICE_NAME, IdentityManager.class, new Injector<IdentityManager>() {
             @Override
-            public void inject(final IdentityService value) throws InjectionException {
+            public void inject(final IdentityManager value) throws InjectionException {
                 binderService.getManagedObjectInjector().inject(
                         new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
             }
