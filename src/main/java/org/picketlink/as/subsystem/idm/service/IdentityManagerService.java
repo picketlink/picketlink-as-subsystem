@@ -77,6 +77,8 @@ public class IdentityManagerService implements Service<IdentityManager> {
         IdentityManagerService service = new IdentityManagerService();
         ServiceBuilder<IdentityManager> serviceBuilder = target.addService(SERVICE_NAME, service);
 
+        serviceBuilder.addDependency(ContextNames.JBOSS_CONTEXT_SERVICE_NAME.append("datasources", "ExampleDS"));
+
         serviceBuilder.addListener(verificationHandler);
         return serviceBuilder.install();
     }
