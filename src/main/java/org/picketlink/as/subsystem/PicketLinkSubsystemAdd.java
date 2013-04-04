@@ -8,24 +8,14 @@ import org.jboss.as.controller.AbstractBoottimeAddStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.as.naming.ManagedReferenceFactory;
-import org.jboss.as.naming.ServiceBasedNamingStore;
-import org.jboss.as.naming.ValueManagedReferenceFactory;
-import org.jboss.as.naming.deployment.ContextNames;
-import org.jboss.as.naming.service.BinderService;
 import org.jboss.as.server.AbstractDeploymentChainStep;
 import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.dmr.ModelNode;
-import org.jboss.msc.inject.InjectionException;
-import org.jboss.msc.inject.Injector;
-import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
-import org.jboss.msc.value.ImmediateValue;
 import org.picketlink.as.subsystem.deployment.PicketLinkDependencyDeploymentProcessor;
-import org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor;
-import org.picketlink.as.subsystem.federation.deployment.IdentityProviderDeploymentProcessor;
-import org.picketlink.as.subsystem.federation.deployment.ServiceProviderDeploymentProcessor;
+import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
+import org.picketlink.as.subsystem.federation.deployment.FederationDeploymentProcessor;
 import org.picketlink.as.subsystem.idm.deployment.IdentityCdiExtensionInstallerProcessor;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.idm.IdentityManager;
@@ -69,45 +59,21 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
         
         context.addStep(new AbstractDeploymentChainStep() {
             public void execute(DeploymentProcessorTarget processorTarget) {
+                ROOT_LOGGER.trace("Installing the PicketLink Marker deployment processor.");
+                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
+                        PicketLinkStructureDeploymentProcessor.PHASE, PicketLinkStructureDeploymentProcessor.PRIORITY, new PicketLinkStructureDeploymentProcessor());
                 ROOT_LOGGER.trace("Installing the PicketLink Dependency deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, PicketLinkDependencyDeploymentProcessor.PHASE, PicketLinkDependencyDeploymentProcessor.PRIORITY,
                         new PicketLinkDependencyDeploymentProcessor());
                 ROOT_LOGGER.trace("Installing the PicketLink Identity Provider deployment processor.");
-                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, IdentityProviderDeploymentProcessor.PHASE,
-                        IdentityProviderDeploymentProcessor.PRIORITY, new IdentityProviderDeploymentProcessor());
-                ROOT_LOGGER.trace("Installing the PicketLink Service Provider deployment processor.");
-                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, ServiceProviderDeploymentProcessor.PHASE,
-                        ServiceProviderDeploymentProcessor.PRIORITY, new ServiceProviderDeploymentProcessor());
-                
-                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
-                        PicketLinkMarkerDeploymentProcessor.PHASE, PicketLinkMarkerDeploymentProcessor.PRIORITY, new PicketLinkMarkerDeploymentProcessor());
+                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, FederationDeploymentProcessor.PHASE,
+                        FederationDeploymentProcessor.PRIORITY, new FederationDeploymentProcessor());
+                ROOT_LOGGER.trace("Installing the PicketLink Core deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
                         IdentityCdiExtensionInstallerProcessor.PHASE, IdentityCdiExtensionInstallerProcessor.PRIORITY,
                         new IdentityCdiExtensionInstallerProcessor());
             }
         }, OperationContext.Stage.RUNTIME);
-
-        final BinderService binderService = new BinderService("IdentityService");
-        final ServiceBuilder<ManagedReferenceFactory> builder = context.getServiceTarget().addService(
-                IdentityManagerService.JNDI_SERVICE_NAME, binderService);
-        builder.addDependency(ContextNames.JBOSS_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
-                binderService.getNamingStoreInjector());
-        builder.addDependency(IdentityManagerService.SERVICE_NAME, IdentityManager.class, new Injector<IdentityManager>() {
-            @Override
-            public void inject(final IdentityManager value) throws InjectionException {
-                binderService.getManagedObjectInjector().inject(
-                        new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
-            }
-
-            @Override
-            public void uninject() {
-                binderService.getManagedObjectInjector().uninject();
-            }
-        });
-
-        builder.addListener(verificationHandler);
-
-        controllers.add(builder.install());
     }
 
 }

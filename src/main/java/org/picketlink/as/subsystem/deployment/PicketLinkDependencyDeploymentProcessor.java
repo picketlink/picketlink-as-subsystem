@@ -22,10 +22,10 @@
 package org.picketlink.as.subsystem.deployment;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
-import static org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor.isCoreDeployment;
-import static org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor.isFederationDeployment;
-import static org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor.isIDMDeployment;
-import static org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor.isPicketLinkDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isFederationDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isIDMDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isPicketLinkDeployment;
 
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;

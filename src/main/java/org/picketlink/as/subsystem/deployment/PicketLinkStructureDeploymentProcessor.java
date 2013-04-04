@@ -42,7 +42,7 @@ import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
-public class PicketLinkMarkerDeploymentProcessor implements DeploymentUnitProcessor {
+public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitProcessor {
 
     public static final AttachmentKey<Boolean> PICKETLINK_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
     

@@ -22,7 +22,7 @@
 package org.picketlink.as.subsystem.idm.deployment;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
-import static org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor.isCoreDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
 
 import javax.enterprise.inject.spi.Extension;
 

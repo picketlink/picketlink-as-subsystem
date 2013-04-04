@@ -28,10 +28,21 @@ import java.util.List;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.naming.ManagedReferenceFactory;
+import org.jboss.as.naming.ServiceBasedNamingStore;
+import org.jboss.as.naming.ValueManagedReferenceFactory;
+import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.naming.service.BinderService;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.inject.InjectionException;
+import org.jboss.msc.inject.Injector;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
+import org.jboss.msc.value.ImmediateValue;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
+import org.picketlink.idm.IdentityManager;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -54,6 +65,27 @@ public class IDMAddHandler extends AbstractResourceAddStepHandler {
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
+        final BinderService binderService = new BinderService("IdentityService");
+        final ServiceBuilder<ManagedReferenceFactory> builder = context.getServiceTarget().addService(
+                IdentityManagerService.JNDI_SERVICE_NAME, binderService);
+        builder.addDependency(ContextNames.JBOSS_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
+                binderService.getNamingStoreInjector());
+        builder.addDependency(IdentityManagerService.SERVICE_NAME, IdentityManager.class, new Injector<IdentityManager>() {
+            @Override
+            public void inject(final IdentityManager value) throws InjectionException {
+                binderService.getManagedObjectInjector().inject(
+                        new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
+            }
+
+            @Override
+            public void uninject() {
+                binderService.getManagedObjectInjector().uninject();
+            }
+        });
+        
+        builder.addListener(verificationHandler);
+
+        newControllers.add(builder.install());
     }
 
 }
