@@ -56,9 +56,12 @@ public class IdentityDependenciesProcessor implements DeploymentUnitProcessor {
         }
 
         final ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
-        final ModuleLoader moduleLoader = Module.getBootModuleLoader();
+        final ModuleLoader moduleLoader = deploymentUnit.getAttachment(Attachments.SERVICE_MODULE_LOADER);
 
         moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, PICKETLINK, false, true, false, false));
+        moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, ModuleIdentifier.create("org.picketlink.idm"), false, true, false, false));
+        moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, ModuleIdentifier.create("org.picketlink.core"), false, true, false, false));
+        moduleSpecification.addSystemDependency(new ModuleDependency(moduleLoader, ModuleIdentifier.create("org.picketlink.federation"), false, false, true, false));
 
         ROOT_LOGGER.infov("Added picketlink dependencies to {0}", deploymentUnit.getName());
     }

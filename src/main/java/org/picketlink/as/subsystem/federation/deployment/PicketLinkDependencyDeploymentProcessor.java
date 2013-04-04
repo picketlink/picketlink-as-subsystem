@@ -66,6 +66,7 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
         final ModuleLoader moduleLoader = deploymentUnit.getAttachment(Attachments.SERVICE_MODULE_LOADER);
         
         moduleSpec.addSystemDependency(new ModuleDependency(moduleLoader, PICKETLINK_MODULE_IDENTIFIER, false, false, false, false));
+        moduleSpec.addSystemDependency(new ModuleDependency(moduleLoader, ModuleIdentifier.create("org.picketlink.federation"), false, true, false, false));
     }
 
     /* (non-Javadoc)

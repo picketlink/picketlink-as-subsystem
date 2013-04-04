@@ -358,41 +358,6 @@
 					</compilerArgument>
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-antrun-plugin</artifactId>
-				<inherited>false</inherited>
-				<version>1.6</version>
-				<!-- This execution prepares a distribution package for the subsystem. -->
-				<executions>
-					<execution>
-						<id>build-dist</id>
-						<goals>
-							<goal>run</goal>
-						</goals>
-						<phase>package</phase>
-						<configuration>
-							<target>
-								<!-- Replace the '.' in ${module.name} with '/' to get its path -->
-								<tempfile property="temp.file" />
-								<echo message="${module.name}" file="${temp.file}" />
-								<replace file="${temp.file}" token="." value="/" />
-								<loadfile srcfile="${temp.file}" property="module.path" />
-								<delete file="${temp.file}" />
-								<delete dir="target/module" />
-								<property name="module.dir" value="target/module/${module.path}/main" />
-								<copy file="src/main/resources/module/main/module.xml"
-									tofile="${module.dir}/module.xml" />
-								<copy file="target/${project.artifactId}-${project.version}.jar"
-									todir="${module.dir}" />
-								<echo>Module ${module.name} has been created in the
-									target/module directory. Copy to your JBoss AS 7
-									installation.</echo>
-							</target>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
 		</plugins>
 	</build>
 
@@ -486,84 +451,6 @@
 									</artifactItems>
 								</configuration>
 							</execution>
-							<execution>
-								<id>copy</id>
-								<phase>package</phase>
-								<goals>
-									<goal>copy</goal>
-								</goals>
-								<configuration>
-									<artifactItems>
-										<!-- PicketLink v2 Federation Dependencies -->
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-core</artifactId>
-											<version>${version.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.picketlink.distribution</groupId>
-											<artifactId>picketlink-jbas7</artifactId>
-											<version>${version.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-
-										<!-- PicketLink v3 Dependencies -->
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-core-api</artifactId>
-											<version>${version.org.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-core-impl</artifactId>
-											<version>${version.org.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-idm-api</artifactId>
-											<version>${version.org.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-idm-impl</artifactId>
-											<version>${version.org.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-idm-schema</artifactId>
-											<version>${version.org.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-										<artifactItem>
-											<groupId>org.picketlink</groupId>
-											<artifactId>picketlink-common</artifactId>
-											<version>${version.org.picketlink}</version>
-											<type>jar</type>
-											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
-										</artifactItem>
-									</artifactItems>
-								</configuration>
-							</execution>
 						</executions>
 					</plugin>
 					<!-- This plugin execute some transformations in the standalone.xml 
@@ -617,43 +504,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-antrun-plugin</artifactId>
-						<inherited>false</inherited>
-						<version>1.6</version>
-						<!-- This execution prepares a distribution package for the subsystem. -->
-						<executions>
-							<!-- Update the JBoss AS 7 installation with the necessary files for 
-								testing. -->
-							<execution>
-								<id>update-jboss-as-module</id>
-								<goals>
-									<goal>run</goal>
-								</goals>
-								<phase>integration-test</phase>
-								<configuration>
-									<target>
-										<property name="module.dir" value="target/module/org/picketlink/main" />
-										<property name="jboss.as.module.dir"
-											value="${jboss.as.home}/modules/system/layers/base/org/picketlink/main/" />
-
-										<delete
-											file="${jboss.as.module.dir}/${project.artifactId}-${project.version}.jar" />
-
-										<copy
-											file="${module.dir}/${project.artifactId}-${project.version}.jar"
-											todir="${jboss.as.module.dir}" />
-
-										<copy file="${module.dir}/module.xml" todir="${jboss.as.module.dir}" />
-
-										<echo>JBoss AS7 Integration Test Server configurations update
-											for testing.</echo>
-									</target>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
 					<!-- The testes are organized in Unit Tests and Integration Tests. -->
 					<plugin>
 						<artifactId>maven-surefire-plugin</artifactId>
@@ -691,7 +541,7 @@
 		<!-- This profiles is intended to install the subsysten in a JBoss AS7 
 			installation. -->
 		<profile>
-			<id>install-as7</id>
+			<id>install-modules</id>
 			<build>
 				<plugins>
 					<plugin>
@@ -721,7 +571,7 @@
 											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/federation/main</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.picketlink.distribution</groupId>
@@ -729,7 +579,7 @@
 											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/federation/main</outputDirectory>
 										</artifactItem>
 
 										<!-- PicketLink v3 Dependencies -->
@@ -739,7 +589,7 @@
 											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/core/main</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
@@ -747,7 +597,7 @@
 											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/core/main</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
@@ -755,7 +605,7 @@
 											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/idm/main</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
@@ -763,7 +613,7 @@
 											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/idm/main</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
@@ -771,7 +621,7 @@
 											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/idm/main</outputDirectory>
 										</artifactItem>
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
@@ -779,7 +629,7 @@
 											<version>${version.org.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
-											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/main</outputDirectory>
+											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/common/main</outputDirectory>
 										</artifactItem>
 									</artifactItems>
 								</configuration>
@@ -792,14 +642,58 @@
 						<version>1.6</version>
 						<executions>
 							<execution>
-								<id>update-jboss-as-module</id>
+								<id>copy-modules-definition</id>
+								<phase>package</phase>
 								<goals>
 									<goal>run</goal>
 								</goals>
-								<phase>integration-test</phase>
 								<configuration>
 									<target>
-										<property name="module.dir" value="target/module/org/picketlink/main" />
+										<property name="jboss.as.module.dir"
+											value="${jboss.as.home}/modules/system/layers/base/org/picketlink" />
+
+										<property name="module.base.dir" value="target/classes/module" />
+										
+										<copy file="${module.base.dir}/main/module.xml" todir="${jboss.as.module.dir}/main" />
+										<copy file="${module.base.dir}/common/main/module.xml" todir="${jboss.as.module.dir}/common/main" />
+										<copy file="${module.base.dir}/core/main/module.xml" todir="${jboss.as.module.dir}/core/main" />
+										<copy file="${module.base.dir}/idm/main/module.xml" todir="${jboss.as.module.dir}/idm/main" />
+										<copy file="${module.base.dir}/federation/main/module.xml" todir="${jboss.as.module.dir}/federation/main" />
+
+										<echo>PicketLink Modules installation complete.</echo>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>install-subsystem</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.12</version>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>update-subsystem</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<property name="module.dir" value="target/classes/module" />
 										<property name="jboss.as.module.dir"
 											value="${jboss.as.home}/modules/system/layers/base/org/picketlink/main/" />
 
@@ -807,10 +701,10 @@
 											file="${jboss.as.module.dir}/${project.artifactId}-${project.version}.jar" />
 
 										<copy
-											file="${module.dir}/${project.artifactId}-${project.version}.jar"
+											file="target/${project.artifactId}-${project.version}.jar"
 											todir="${jboss.as.module.dir}" />
 
-										<copy file="${module.dir}/module.xml" todir="${jboss.as.module.dir}" />
+										<copy file="${module.dir}/main/module.xml" todir="${jboss.as.module.dir}" />
 
 										<echo>PicketLink subsystem installation complete.</echo>
 									</target>

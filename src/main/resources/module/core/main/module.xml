@@ -15,33 +15,17 @@
 	Franklin St, Fifth Floor, Boston, MA ~ 02110-1301 USA, or see the FSF site: 
 	http://www.fsf.org. -->
 
-<module xmlns="urn:jboss:module:1.1" name="org.picketlink">
+<module xmlns="urn:jboss:module:1.1" name="org.picketlink.core">
 	<resources>
-		<resource-root path="picketlink-as7-extension-1.0.2-SNAPSHOT.jar" />
+		<resource-root path="picketlink-core-api-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-core-impl-3.0.0.Alpha1.jar" />
 	</resources>
 	
 	<dependencies>
-			<module name="org.jboss.as.server" />
-			<module name="org.jboss.as.controller" />
-			<module name="org.jboss.as.naming"/>
-			<module name="org.jboss.as.jpa.hibernate" slot="4" />
-			<module name="org.jboss.as.jpa"/>
-			<module name="org.jboss.as.weld" />
-			<module name="org.jboss.as.web" />
-			<module name="org.jboss.staxmapper" />
-			<module name="org.jboss.msc" />
-			<module name="org.jboss.logging" />
-			<module name="javax.persistence.api"/>
-			<module name="org.hibernate" services="import"/>
-			<module name="org.jboss.modules" />
-			<module name="org.jboss.metadata"/>
-			<module name="org.picketbox" />
-
-			<module name="org.picketlink.core" />
-        	<module name="org.picketlink.idm" />
-        	<module name="org.picketlink.federation" />
-
-        	<module name="org.jboss.weld.core" services="import"/>
-        	<module name="javax.enterprise.api"/>
+		<module name="javax.api"/>
+		<module name="javax.enterprise.api"/>
+		<module name="javax.servlet.api"/>
+		<module name="javax.persistence.api"/>
+		<module name="org.picketlink.idm"/>
 	</dependencies>
 </module>
