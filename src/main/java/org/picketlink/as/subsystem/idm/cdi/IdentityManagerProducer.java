@@ -21,10 +21,10 @@
  */
 package org.picketlink.as.subsystem.idm.cdi;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
+import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.picketlink.idm.IdentityManager;
@@ -34,14 +34,11 @@ import org.picketlink.idm.IdentityManager;
  */
 public class IdentityManagerProducer {
 
-    @Resource(mappedName = "java:jboss/IdentityManager")
-    private IdentityManager idm;
-
     @Default
     @Produces
     @RequestScoped
     public IdentityManager createIdentityManager() throws NamingException {
-        return idm;
+        return (IdentityManager) new InitialContext().lookup("java:jboss/IdentityManager");
     }
 
 }
