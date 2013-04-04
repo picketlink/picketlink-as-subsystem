@@ -22,12 +22,11 @@ import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceTarget;
 import org.jboss.msc.value.ImmediateValue;
-import org.picketlink.as.subsystem.deployment.IdentityMarkerProcessor;
+import org.picketlink.as.subsystem.deployment.PicketLinkDependencyDeploymentProcessor;
+import org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.IdentityProviderDeploymentProcessor;
-import org.picketlink.as.subsystem.federation.deployment.PicketLinkDependencyDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.ServiceProviderDeploymentProcessor;
 import org.picketlink.as.subsystem.idm.deployment.IdentityCdiExtensionInstallerProcessor;
-import org.picketlink.as.subsystem.idm.deployment.IdentityDependenciesProcessor;
 import org.picketlink.as.subsystem.idm.service.IdentityService;
 
 /**
@@ -80,10 +79,7 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
                         ServiceProviderDeploymentProcessor.PRIORITY, new ServiceProviderDeploymentProcessor());
                 
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
-                        IdentityMarkerProcessor.PHASE, IdentityMarkerProcessor.PRIORITY, new IdentityMarkerProcessor());
-                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
-                        IdentityDependenciesProcessor.PHASE, IdentityDependenciesProcessor.PRIORITY,
-                        new IdentityDependenciesProcessor());
+                        PicketLinkMarkerDeploymentProcessor.PHASE, PicketLinkMarkerDeploymentProcessor.PRIORITY, new PicketLinkMarkerDeploymentProcessor());
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
                         IdentityCdiExtensionInstallerProcessor.PHASE, IdentityCdiExtensionInstallerProcessor.PRIORITY,
                         new IdentityCdiExtensionInstallerProcessor());

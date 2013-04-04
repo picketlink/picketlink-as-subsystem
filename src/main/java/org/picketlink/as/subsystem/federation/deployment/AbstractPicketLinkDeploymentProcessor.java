@@ -39,7 +39,7 @@ import org.picketlink.as.subsystem.federation.service.PicketLinkService;
  * 
  */
 public abstract class AbstractPicketLinkDeploymentProcessor<T extends PicketLinkService<T>> implements DeploymentUnitProcessor {
-
+    
     public static final Phase PHASE = Phase.INSTALL;
 
     public static final int PRIORITY = 1;

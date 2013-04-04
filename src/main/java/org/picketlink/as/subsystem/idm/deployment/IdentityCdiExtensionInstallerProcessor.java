@@ -22,6 +22,7 @@
 package org.picketlink.as.subsystem.idm.deployment;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.deployment.PicketLinkMarkerDeploymentProcessor.isCoreDeployment;
 
 import javax.enterprise.inject.spi.Extension;
 
@@ -34,7 +35,6 @@ import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
-import org.picketlink.as.subsystem.deployment.IdentityMarkerProcessor;
 import org.picketlink.as.subsystem.idm.cdi.PicketLinkCdiExtension;
 import org.picketlink.deltaspike.core.api.provider.BeanManagerProvider;
 import org.picketlink.deltaspike.security.impl.extension.SecurityExtension;
@@ -53,29 +53,28 @@ public class IdentityCdiExtensionInstallerProcessor implements DeploymentUnitPro
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        if (deploymentUnit.getAttachment(IdentityMarkerProcessor.ENABLE_IDENTITY_KEY) == null) {
-            return;
-        }
+        if (isCoreDeployment(deploymentUnit)) {
+            if (deploymentUnit.getParent() != null) {
+                deploymentUnit = deploymentUnit.getParent();
+            }
 
-        if (deploymentUnit.getParent() != null) {
-            deploymentUnit = deploymentUnit.getParent();
-        }
-
-        AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
-        if (extensions != null) {
-            for (Metadata<Extension> e : extensions) {
-                if (e.getValue() instanceof PicketLinkCdiExtension) {
-                    return;
+            AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
+            
+            if (extensions != null) {
+                for (Metadata<Extension> e : extensions) {
+                    if (e.getValue() instanceof PicketLinkCdiExtension) {
+                        return;
+                    }
                 }
             }
+
+            ROOT_LOGGER.infov("Enabling identity extension for {0}", deploymentUnit.getName());
+
+            addExtensions(deploymentUnit, new PicketLinkCdiExtension(), new JPAPermissionStoreConfig(),
+                    new SecurityExtension(), new BeanManagerProvider());
+
+            // Don't install JPAIdentityStoreAutoConfig as it doesn't work from a module
         }
-
-        ROOT_LOGGER.infov("Enabling identity extension for {0}", deploymentUnit.getName());
-
-        addExtensions(deploymentUnit, new PicketLinkCdiExtension(), new JPAPermissionStoreConfig(), new SecurityExtension(),
-                new BeanManagerProvider());
-
-        // Don't install JPAIdentityStoreAutoConfig as it doesn't work from a module
     }
 
     private void addExtensions(DeploymentUnit du, Extension... extensions) {
