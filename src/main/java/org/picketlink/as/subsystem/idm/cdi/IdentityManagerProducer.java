@@ -21,32 +21,27 @@
  */
 package org.picketlink.as.subsystem.idm.cdi;
 
+import javax.annotation.Resource;
 import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Produces;
-import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.persistence.EntityManager;
 
-import org.picketlink.annotations.PicketLink;
-import org.picketlink.as.subsystem.idm.service.IdentityService;
+import org.picketlink.idm.IdentityManager;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
-public class IdentityEntityManagerProducer {
+public class IdentityManagerProducer {
 
+    @Resource(mappedName = "java:jboss/IdentityManager")
+    private IdentityManager idm;
+
+    @Default
     @Produces
-    @PicketLink
     @RequestScoped
-    public EntityManager createEntityManager() {
-        try {
-            IdentityService identityService = (IdentityService) new InitialContext().lookup("java:jboss/IdentityService");
-            EntityManager em = identityService.getEmf().createEntityManager();
-            em.joinTransaction();
-            return em;
-        } catch (NamingException e) {
-            throw new RuntimeException(e);
-        }
+    public IdentityManager createIdentityManager() throws NamingException {
+        return idm;
     }
 
 }

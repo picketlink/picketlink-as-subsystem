@@ -21,15 +21,11 @@
  */
 package org.picketlink.as.subsystem.idm.cdi;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
-
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
-import org.picketlink.IdentityConfigurationEvent;
 import org.picketlink.authentication.internal.DefaultAuthenticatorSelector;
 import org.picketlink.authentication.internal.IdmAuthenticator;
 import org.picketlink.authentication.web.AuthenticationFilter;
@@ -39,8 +35,6 @@ import org.picketlink.deltaspike.security.api.authorization.AccessDecisionVoter;
 import org.picketlink.deltaspike.security.impl.authorization.DefaultAccessDecisionVoterContext;
 import org.picketlink.deltaspike.security.impl.extension.DefaultSecurityStrategy;
 import org.picketlink.deltaspike.security.impl.extension.SecurityInterceptor;
-import org.picketlink.idm.config.FeatureSet;
-import org.picketlink.idm.jpa.internal.JPAIdentityStoreConfiguration;
 import org.picketlink.idm.jpa.schema.CredentialObject;
 import org.picketlink.idm.jpa.schema.CredentialObjectAttribute;
 import org.picketlink.idm.jpa.schema.IdentityObject;
@@ -57,7 +51,6 @@ import org.picketlink.permission.internal.DefaultPermissionManager;
 import org.picketlink.permission.internal.JPAPermissionStore;
 import org.picketlink.permission.internal.JPAPermissionStoreConfig;
 import org.picketlink.permission.internal.PermissionHandlerPolicy;
-import org.picketlink.producer.IdentityManagerProducer;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -69,7 +62,7 @@ public class PicketLinkCdiExtension implements Extension {
         Util u = new Util(bbd, bm);
 
         // Identity
-        u.add(IdentityEntityManagerProducer.class);
+        u.add(org.picketlink.as.subsystem.idm.cdi.IdentityManagerProducer.class);
 
         // IDM Schema
         u.add(CredentialObjectAttribute.class, CredentialObject.class, IdentityObjectAttribute.class, IdentityObject.class,
@@ -95,7 +88,6 @@ public class PicketLinkCdiExtension implements Extension {
         u.add(JPAPermissionStore.class);
         u.add(JPAPermissionStoreConfig.class);
         u.add(PermissionHandlerPolicy.class);
-        u.add(IdentityManagerProducer.class);
         u.add(IdmAuthenticator.class);
     }
 
@@ -112,33 +104,6 @@ public class PicketLinkCdiExtension implements Extension {
             for (Class<?> c : classes) {
                 bbd.addAnnotatedType(bm.createAnnotatedType(c));
             }
-        }
-    }
-
-    public void configJPAIdentityStoreAutoConfig(@Observes IdentityConfigurationEvent event) {
-        JPAIdentityStoreConfiguration config = new JPAIdentityStoreConfiguration();
-        config.setIdentityClass(IdentityObject.class);
-        config.setCredentialClass(CredentialObject.class);
-        config.setCredentialAttributeClass(CredentialObjectAttribute.class);
-        config.setAttributeClass(IdentityObjectAttribute.class);
-        config.setRelationshipClass(RelationshipObject.class);
-        config.setRelationshipIdentityClass(RelationshipIdentityObject.class);
-        config.setRelationshipAttributeClass(RelationshipObjectAttribute.class);
-        config.setPartitionClass(PartitionObject.class);
-
-        FeatureSet.addFeatureSupport(config.getFeatureSet());
-        FeatureSet.addRelationshipSupport(config.getFeatureSet());
-        config.getFeatureSet().setSupportsCustomRelationships(true);
-        config.getFeatureSet().setSupportsMultiRealm(true);
-        event.getConfig().addStoreConfiguration(config);
-
-        ROOT_LOGGER.info("Config PicketLink JPA identity store config");
-    }
-
-    public <X> void vetoJPAIdentityStoreAutoConfig(@Observes ProcessAnnotatedType<X> event) {
-        if (event.getAnnotatedType().getJavaClass().equals(JPAIdentityStoreAutoConfig.class)) {
-            ROOT_LOGGER.info("Veto bundled PicketLink JPA identity store config");
-            event.veto();
         }
     }
 
