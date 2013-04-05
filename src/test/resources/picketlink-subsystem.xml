@@ -1,7 +1,38 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
-	
-	<identity-management store="jpa"/>
-	
+
+	<identity-management jndi-url="picketlink/DevIdentityManager"
+		alias="development">
+		<jpa-store data-source="jboss/datasources/ExampleDS" realms="default,staging,production"
+			tiers="web,service,data">
+			<features supportsAll="true">
+				<feature group="user" group-operation="read,create,delete,update" />
+				<feature group="role" group-operation="read,create,delete,update" />
+				<feature group="agent" group-operation="read,create,delete,update" />
+				<feature group="group" group-operation="read,create,delete,update" />
+				<feature group="credential" group-operation="validate,update" />
+			</features>
+			<relationships supportsAll="true">
+				<relationship class="org.picketlink.idm.model.Authorization" />
+			</relationships>
+		</jpa-store>
+	</identity-management>
+	<identity-management jndi-url="picketlink/StagingIdentityManager"
+		alias="staging">
+		<jpa-store entity-manager-factory="jboss/TestingIDMEMF"
+			realms="default,staging,production" tiers="web,service,data">
+			<features supportsAll="true">
+				<feature group="user" group-operation="read,create,delete,update" />
+				<feature group="role" group-operation="read,create,delete,update" />
+				<feature group="agent" group-operation="read,create,delete,update" />
+				<feature group="group" group-operation="read,create,delete,update" />
+				<feature group="credential" group-operation="validate,update" />
+			</features>
+			<relationships supportsAll="true">
+				<relationship class="org.picketlink.idm.model.Authorization" />
+			</relationships>
+		</jpa-store>
+	</identity-management>
+
 	<federation alias="federation-ws-trust-enabled">
 		<security-token-service alias="PicketLinkSTS"
 			endpoint="http://localhost:8080/picketlink-sts2" security-domain="picketlink-sts" />
@@ -106,9 +137,9 @@
 			url="http://localhost:8080/idp-sig/" strict-post-binding="false">
 			<handlers>
 				<handler class="org.picketlink.NonExistentHandler">
-					<handler-parameter name="param1" value="paramValue1"/>
-					<handler-parameter name="param2" value="paramValue2"/>
-					<handler-parameter name="param3" value="paramValue3"/>
+					<handler-parameter name="param1" value="paramValue1" />
+					<handler-parameter name="param2" value="paramValue2" />
+					<handler-parameter name="param3" value="paramValue3" />
 				</handler>
 			</handlers>
 		</identity-provider>

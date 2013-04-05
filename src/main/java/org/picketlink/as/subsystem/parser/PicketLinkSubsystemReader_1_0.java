@@ -51,7 +51,12 @@ import org.picketlink.as.subsystem.federation.model.idp.IdentityProviderResource
 import org.picketlink.as.subsystem.federation.model.idp.TrustDomainResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
-import org.picketlink.as.subsystem.idm.model.IDMResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.FeatureResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.FeatureSetResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.JPAStoreResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.RelationshipResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.RelationshipSetResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.as.subsystem.model.XMLElement;
 
@@ -105,6 +110,11 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
         ModelNode federationNode = null;
         ModelNode lastProviderNode = null;
         ModelNode lastHandlerNode = null;
+        
+        ModelNode identityManagementNode = null;
+        ModelNode lastIdentityStoreNode = null;
+        ModelNode lastFeatures = null;
+        ModelNode lastRelationships = null;
 
         while (reader.hasNext() && reader.nextTag() != END_DOCUMENT) {
             if (!reader.isStartElement()) {
@@ -148,7 +158,22 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                     parseSAMLConfig(reader, list, federationNode);
                     break;
                 case IDENTITY_MANAGEMENT:
-                    parseIdentityManagement(reader, list, parentNode);
+                    identityManagementNode = parseIdentityManagementConfig(reader, list, parentNode);
+                    break;
+                case JPA_STORE:
+                    lastIdentityStoreNode = parseJPAStoreConfig(reader, list, identityManagementNode);
+                    break;
+                case FEATURES:
+                    lastFeatures = parseFeaturesConfig(reader, list, lastIdentityStoreNode);
+                    break;
+                case RELATIONSHIPS:
+                    lastRelationships = parseRelationshipsConfig(reader, list, lastIdentityStoreNode);
+                    break;
+                case FEATURE:
+                    parseFeatureConfig(reader, list, lastFeatures);
+                    break;
+                case RELATIONSHIP:
+                    parseRelationshipConfig(reader, list, lastRelationships);
                     break;
                 default:
                     unexpectedElement(reader);
@@ -230,9 +255,34 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                 FederationResourceDefinition.INSTANCE.getAttributes());
     }
     
-    private void parseIdentityManagement(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode parentNode)
+    private ModelNode parseIdentityManagementConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode parentNode)
             throws XMLStreamException {
-        parseConfig(reader, ModelElement.IDENTITY_MANAGEMENT, null, list, parentNode, IDMResourceDefinition.INSTANCE.getAttributes());
+        return parseConfig(reader, ModelElement.IDENTITY_MANAGEMENT, IdentityManagementResourceDefinition.ALIAS.getName(), list, parentNode, IdentityManagementResourceDefinition.INSTANCE.getAttributes());
+    }
+    
+    private ModelNode parseJPAStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.JPA_STORE, null, list, identityManagementNode, JPAStoreResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseFeaturesConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.FEATURES, null, list, identityStoreNode, FeatureSetResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseRelationshipsConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.RELATIONSHIPS, null, list, identityStoreNode, RelationshipSetResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private void parseFeatureConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        parseConfig(reader, ModelElement.FEATURE, FeatureResourceDefinition.FEATURE_GROUP.getName(), list, identityStoreNode, FeatureResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private void parseRelationshipConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        parseConfig(reader, ModelElement.RELATIONSHIP, RelationshipResourceDefinition.CLASS.getName(), list, identityStoreNode, RelationshipResourceDefinition.INSTANCE.getAttributes());
     }
 
     /**

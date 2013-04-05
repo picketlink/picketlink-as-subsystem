@@ -19,4 +19,9 @@
 	<resources>
 		<resource-root path="picketlink-common-3.0.0.Alpha1.jar" />
 	</resources>
+
+	<dependencies>
+		<module name="org.jboss.logging" />
+	</dependencies>
+
 </module>

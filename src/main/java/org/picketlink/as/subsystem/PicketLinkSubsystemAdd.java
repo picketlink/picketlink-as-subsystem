@@ -12,13 +12,9 @@ import org.jboss.as.server.AbstractDeploymentChainStep;
 import org.jboss.as.server.DeploymentProcessorTarget;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
-import org.jboss.msc.service.ServiceTarget;
 import org.picketlink.as.subsystem.deployment.PicketLinkDependencyDeploymentProcessor;
 import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.FederationDeploymentProcessor;
-import org.picketlink.as.subsystem.idm.deployment.IdentityCdiExtensionInstallerProcessor;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
-import org.picketlink.idm.IdentityManager;
 
 /**
  * <p>
@@ -51,12 +47,6 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
 
         PicketLinkLogger.ROOT_LOGGER.activatingSubsystem();
         
-        final ServiceTarget target = context.getServiceTarget();
-        
-        final ServiceController<IdentityManager> controller = IdentityManagerService.addService(target, verificationHandler);
-        
-        controllers.add(controller);
-        
         context.addStep(new AbstractDeploymentChainStep() {
             public void execute(DeploymentProcessorTarget processorTarget) {
                 ROOT_LOGGER.trace("Installing the PicketLink Marker deployment processor.");
@@ -68,10 +58,10 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 ROOT_LOGGER.trace("Installing the PicketLink Identity Provider deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, FederationDeploymentProcessor.PHASE,
                         FederationDeploymentProcessor.PRIORITY, new FederationDeploymentProcessor());
-                ROOT_LOGGER.trace("Installing the PicketLink Core deployment processor.");
-                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
-                        IdentityCdiExtensionInstallerProcessor.PHASE, IdentityCdiExtensionInstallerProcessor.PRIORITY,
-                        new IdentityCdiExtensionInstallerProcessor());
+//                ROOT_LOGGER.trace("Installing the PicketLink Core deployment processor.");
+//                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
+//                        IdentityCdiExtensionInstallerProcessor.PHASE, IdentityCdiExtensionInstallerProcessor.PRIORITY,
+//                        new IdentityCdiExtensionInstallerProcessor());
             }
         }, OperationContext.Stage.RUNTIME);
     }

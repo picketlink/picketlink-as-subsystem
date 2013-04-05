@@ -44,17 +44,30 @@ public enum ModelElement {
     COMMON_VALUE ("value"),
     COMMON_STRICT_POST_BINDING ("strict-post-binding"),
     COMMON_SUPPORTS_SIGNATURES("supportsSignatures"),
-
+    
     COMMON_HANDLER ("handler"),
-    COMMON_HANDLER_CLASS ("class"), 
+    COMMON_CLASS ("class"), 
     COMMON_HANDLER_PARAMETER ("handler-parameter"),
 
+    COMMON_SUPPORTS_ALL ("supportsAll"),
+    
     /*
      * Identity Management model elements
      */
-    IDENTITY_MANAGEMENT("identity-management"),
-    IDENTITY_STORE ("store"),
-    
+    IDENTITY_MANAGEMENT ("identity-management"),
+    IDENTITY_MANAGEMENT_JNDI_URL ("jndi-url"),
+    JPA_STORE ("jpa-store"),
+    JPA_STORE_DATASOURCE ("data-source"),
+    JPA_STORE_ENTITY_MANAGER_FACTORY ("entity-manager-factory"),
+    REALMS ("realms"),
+    TIERS ("tiers"),
+    FEATURES ("features"),
+    FEATURE ("feature"),
+    FEATURE_GROUP ("group"),
+    FEATURE_OPERATION ("group-operation"),
+    RELATIONSHIPS ("relationships"),
+    RELATIONSHIP ("relationship"),
+
     /*
      * Federation model elements
      */

@@ -19,38 +19,33 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.AbstractWriteAttributeHandler;
+import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.dmr.ModelNode;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
  */
-public class IDMWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
+public class JPAStoreRemoveHandler extends AbstractRemoveStepHandler {
 
-    public static final IDMWriteAttributeHandler INSTANCE = new IDMWriteAttributeHandler();
+    public static final JPAStoreRemoveHandler INSTANCE = new JPAStoreRemoveHandler();
 
-    private IDMWriteAttributeHandler() {
-        super(IDMResourceDefinition.IDENTITY_STORE);
+    private JPAStoreRemoveHandler() {
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
+     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
+     */
     @Override
-    protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-            ModelNode resolvedValue, ModelNode currentValue,
-            org.jboss.as.controller.AbstractWriteAttributeHandler.HandbackHolder<Void> handbackHolder)
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
             throws OperationFailedException {
-        
-        return false;
-    }
-
-    @Override
-    protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
-            ModelNode valueToRestore, ModelNode valueToRevert, Void handback) throws OperationFailedException {
-
     }
 
 }

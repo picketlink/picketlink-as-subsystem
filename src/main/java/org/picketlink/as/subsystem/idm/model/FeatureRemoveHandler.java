@@ -22,36 +22,30 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.OperationStepHandler;
-import org.jboss.as.controller.SimpleAttributeDefinition;
-import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
+import org.jboss.as.controller.AbstractRemoveStepHandler;
+import org.jboss.as.controller.OperationContext;
+import org.jboss.as.controller.OperationFailedException;
 import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.ModelType;
-import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
-import org.picketlink.as.subsystem.model.ModelElement;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * @since Mar 16, 2012
  */
-public class IDMResourceDefinition extends AbstractResourceDefinition {
+public class FeatureRemoveHandler extends AbstractRemoveStepHandler {
 
-    public static final IDMResourceDefinition INSTANCE = new IDMResourceDefinition();
+    public static final FeatureRemoveHandler INSTANCE = new FeatureRemoveHandler();
 
-    public static final SimpleAttributeDefinition IDENTITY_STORE = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_STORE.getName(), ModelType.STRING, true).setDefaultValue(new ModelNode().set("jpa"))
-            .setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(IDENTITY_STORE);
+    private FeatureRemoveHandler() {
     }
-    
-    private IDMResourceDefinition() {
-        super(ModelElement.IDENTITY_MANAGEMENT, IDMAddHandler.INSTANCE, IDMRemoveHandler.INSTANCE);
-    }
-    
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
+     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
+     */
     @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return IDMWriteAttributeHandler.INSTANCE;
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
+            throws OperationFailedException {
     }
+
 }

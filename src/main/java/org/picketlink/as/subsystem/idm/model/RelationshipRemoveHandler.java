@@ -19,26 +19,33 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.picketlink.as.subsystem.idm.cdi;
 
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Produces;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+package org.picketlink.as.subsystem.idm.model;
 
-import org.picketlink.idm.IdentityManager;
+import org.jboss.as.controller.AbstractRemoveStepHandler;
+import org.jboss.as.controller.OperationContext;
+import org.jboss.as.controller.OperationFailedException;
+import org.jboss.dmr.ModelNode;
 
 /**
- * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
+ * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class IdentityManagerProducer {
+public class RelationshipRemoveHandler extends AbstractRemoveStepHandler {
 
-    @Default
-    @Produces
-    @RequestScoped
-    public IdentityManager createIdentityManager() throws NamingException {
-        return (IdentityManager) new InitialContext().lookup("java:jboss/picketlink/IdentityManager");
+    public static final RelationshipRemoveHandler INSTANCE = new RelationshipRemoveHandler();
+
+    private RelationshipRemoveHandler() {
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
+     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
+     */
+    @Override
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
+            throws OperationFailedException {
     }
 
 }

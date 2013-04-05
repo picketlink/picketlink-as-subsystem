@@ -59,7 +59,7 @@ public class IdentityCdiExtensionInstallerProcessor implements DeploymentUnitPro
             }
 
             AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
-            
+
             if (extensions != null) {
                 for (Metadata<Extension> e : extensions) {
                     if (e.getValue() instanceof PicketLinkCdiExtension) {

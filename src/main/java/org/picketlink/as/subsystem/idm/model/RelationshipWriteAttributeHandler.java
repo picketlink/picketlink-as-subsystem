@@ -19,33 +19,38 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.AbstractRemoveStepHandler;
+import org.jboss.as.controller.AbstractWriteAttributeHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.dmr.ModelNode;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
+ * 
  */
-public class IDMRemoveHandler extends AbstractRemoveStepHandler {
+public class RelationshipWriteAttributeHandler extends AbstractWriteAttributeHandler<Void> {
 
-    public static final IDMRemoveHandler INSTANCE = new IDMRemoveHandler();
+    public static final RelationshipWriteAttributeHandler INSTANCE = new RelationshipWriteAttributeHandler();
 
-    private IDMRemoveHandler() {
+    private RelationshipWriteAttributeHandler() {
+        super(RelationshipResourceDefinition.CLASS);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
+    protected boolean applyUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
+            ModelNode resolvedValue, ModelNode currentValue,
+            org.jboss.as.controller.AbstractWriteAttributeHandler.HandbackHolder<Void> handbackHolder)
             throws OperationFailedException {
+        
+        return false;
+    }
+
+    @Override
+    protected void revertUpdateToRuntime(OperationContext context, ModelNode operation, String attributeName,
+            ModelNode valueToRestore, ModelNode valueToRevert, Void handback) throws OperationFailedException {
+
     }
 
 }

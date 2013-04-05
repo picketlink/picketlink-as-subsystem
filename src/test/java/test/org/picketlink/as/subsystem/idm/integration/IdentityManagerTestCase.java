@@ -22,21 +22,16 @@
 
 package test.org.picketlink.as.subsystem.idm.integration;
 
-import javax.inject.Inject;
-import javax.transaction.UserTransaction;
+import javax.annotation.Resource;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.picketlink.Identity;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Credentials.Status;
 import org.picketlink.idm.credential.Password;
@@ -48,55 +43,59 @@ import org.picketlink.idm.model.SimpleUser;
  *
  */
 @RunWith(Arquillian.class)
-@Ignore
-public class IAMTestCase {
+public class IdentityManagerTestCase {
     
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(IAMTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
-                .addPackage(IAMTestCase.class.getPackage());
+                .addAsManifestResource(IdentityManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
+                .addClass(IdentityManagerTestCase.class);
 
         System.out.println(deployment.toString(true));
         
         return deployment;
     }
     
-    @Inject
-    protected Identity identity;
-
-    @Inject
-    protected IdentityManager identityManager;
+    @Resource (mappedName="picketlink/DevIdentityManager")
+    private IdentityManager devIdentityManager;
     
-    @Inject
-    protected UserTransaction userTransaction;
-    
-    @Before
-    public void onInit() throws Exception {
-        this.userTransaction.begin();
-    }
-
-    @After
-    public void onFinish() throws Exception {
-        this.userTransaction.commit();
-    }
+    @Resource (mappedName="picketlink/StagingIdentityManager")
+    private IdentityManager stagingIdentityManager;
     
     @Test
-    public void testWorks() throws Exception {
+    public void testDevIdentityManager() throws Exception {
         SimpleUser user = new SimpleUser("john");
         
-        this.identityManager.add(user);
+        this.devIdentityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.identityManager.updateCredential(user, password);
+        this.devIdentityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.identityManager.validateCredentials(credentials);
+        this.devIdentityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }
+    
+    @Test
+    public void testStagingIdentityManager() throws Exception {
+        SimpleUser user = new SimpleUser("john");
+        
+        this.stagingIdentityManager.add(user);
+        
+        Password password = new Password("mypassWd");
+        
+        this.stagingIdentityManager.updateCredential(user, password);
+        
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
+        
+        this.stagingIdentityManager.validateCredentials(credentials);
+        
+        Assert.assertEquals(Status.VALID, credentials.getStatus());
+    }
+
 }

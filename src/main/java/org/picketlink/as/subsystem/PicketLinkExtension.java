@@ -29,7 +29,7 @@ import org.jboss.as.controller.descriptions.StandardResourceDescriptionResolver;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
-import org.picketlink.as.subsystem.idm.model.IDMResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 
 /**
  * <p>An extension to the JBoss Application Server to enable PicketLink configurations.</p>
@@ -78,7 +78,7 @@ public class PicketLinkExtension implements Extension {
         ManagementResourceRegistration picketlink = subsystem.registerSubsystemModel(PicketLinkSubsystemRootResourceDefinition.INSTANCE);
         
         picketlink.registerSubModel(FederationResourceDefinition.INSTANCE);
-        picketlink.registerSubModel(IDMResourceDefinition.INSTANCE);
+        picketlink.registerSubModel(IdentityManagementResourceDefinition.INSTANCE);
         
         subsystem.registerXMLElementWriter(Namespace.CURRENT.getXMLWriter());
     }
