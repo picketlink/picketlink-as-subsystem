@@ -37,6 +37,7 @@ import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
+import org.jboss.modules.filter.PathFilters;
 
 /**
  * <p>
@@ -120,7 +121,11 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
         final ModuleSpecification moduleSpec = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
         final ModuleLoader moduleLoader = deploymentUnit.getAttachment(Attachments.SERVICE_MODULE_LOADER);
 
-        moduleSpec.addSystemDependency(new ModuleDependency(moduleLoader, moduleIdentifier, false, true, false, false));
+        ModuleDependency dependency = new ModuleDependency(moduleLoader, moduleIdentifier, false, true, false, false);
+        
+        dependency.addImportFilter(PathFilters.getMetaInfFilter(), true);
+        
+        moduleSpec.addSystemDependency(dependency);
     }
 
     /*

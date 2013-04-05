@@ -22,6 +22,8 @@
 
 package test.org.picketlink.as.subsystem.idm.integration;
 
+import static org.junit.Assert.assertEquals;
+
 import javax.inject.Inject;
 import javax.transaction.UserTransaction;
 
@@ -31,7 +33,6 @@ import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,15 +48,16 @@ import org.picketlink.idm.model.SimpleUser;
  *
  */
 @RunWith(Arquillian.class)
-public class IAMTestCase {
+public class PicketLinkCoreDeploymentManagedIdentityManagerTestCase {
     
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(IAMTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
-                .addPackage(IAMTestCase.class.getPackage());
+                .addAsWebInfResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/web.xml"), "web.xml")
+                .addAsManifestResource(PicketLinkCoreDeploymentManagedIdentityManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
+                .addPackage(PicketLinkCoreDeploymentManagedIdentityManagerTestCase.class.getPackage());
 
         System.out.println(deployment.toString(true));
         
@@ -82,8 +84,8 @@ public class IAMTestCase {
     }
     
     @Test
-    public void testWorks() throws Exception {
-        SimpleUser user = new SimpleUser("john");
+    public void testAuthentication() throws Exception {
+        SimpleUser user = new SimpleUser("paul");
         
         this.identityManager.add(user);
         
@@ -95,6 +97,6 @@ public class IAMTestCase {
         
         this.identityManager.validateCredentials(credentials);
         
-        Assert.assertEquals(Status.VALID, credentials.getStatus());
+        assertEquals(Status.VALID, credentials.getStatus());
     }
 }

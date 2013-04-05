@@ -19,7 +19,7 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.picketlink.as.subsystem.idm.cdi;
+package org.picketlink.as.subsystem.core;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.inject.Default;
@@ -38,7 +38,7 @@ public class IdentityManagerProducer {
     @Produces
     @RequestScoped
     public IdentityManager createIdentityManager() throws NamingException {
-        return (IdentityManager) new InitialContext().lookup("java:jboss/picketlink/IdentityManager");
+        return (IdentityManager) new InitialContext().lookup("picketlink/DevIdentityManager");
     }
 
 }

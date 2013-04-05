@@ -22,16 +22,21 @@
 
 package test.org.picketlink.as.subsystem.idm.integration;
 
-import javax.annotation.Resource;
+import static org.junit.Assert.assertEquals;
+
+import javax.inject.Inject;
+import javax.transaction.UserTransaction;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.picketlink.Identity;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.credential.Credentials.Status;
 import org.picketlink.idm.credential.Password;
@@ -43,60 +48,56 @@ import org.picketlink.idm.model.SimpleUser;
  *
  */
 @RunWith(Arquillian.class)
-public class IdentityManagerTestCase {
+public class PicketLinkCoreDeploymentEmbeddedIdentityManagerTestCase {
     
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(IdentityManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                .addAsManifestResource(IdentityManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
-                .addClass(IdentityManagerTestCase.class);
+                .addAsManifestResource(PicketLinkCoreDeploymentEmbeddedIdentityManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
+                .addAsResource(PicketLinkCoreDeploymentEmbeddedIdentityManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                .addClass(PicketLinkCoreDeploymentEmbeddedIdentityManagerTestCase.class)
+                .addClass(Resources.class);
 
         System.out.println(deployment.toString(true));
         
         return deployment;
     }
     
-    @Resource (mappedName="picketlink/DevIdentityManager")
-    private IdentityManager devIdentityManager;
+    @Inject
+    protected Identity identity;
+
+    @Inject
+    protected IdentityManager identityManager;
     
-    @Resource (mappedName="picketlink/StagingIdentityManager")
-    private IdentityManager stagingIdentityManager;
+    @Inject
+    protected UserTransaction userTransaction;
     
-    @Test
-    public void testDevIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("john");
-        
-        this.devIdentityManager.add(user);
-        
-        Password password = new Password("mypassWd");
-        
-        this.devIdentityManager.updateCredential(user, password);
-        
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
-        
-        this.devIdentityManager.validateCredentials(credentials);
-        
-        Assert.assertEquals(Status.VALID, credentials.getStatus());
-    }
-    
-    @Test
-    public void testStagingIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("john");
-        
-        this.stagingIdentityManager.add(user);
-        
-        Password password = new Password("mypassWd");
-        
-        this.stagingIdentityManager.updateCredential(user, password);
-        
-        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
-        
-        this.stagingIdentityManager.validateCredentials(credentials);
-        
-        Assert.assertEquals(Status.VALID, credentials.getStatus());
+    @Before
+    public void onInit() throws Exception {
+        this.userTransaction.begin();
     }
 
+    @After
+    public void onFinish() throws Exception {
+        this.userTransaction.commit();
+    }
+    
+    @Test
+    public void testAuthentication() throws Exception {
+        SimpleUser user = new SimpleUser("paul");
+        
+        this.identityManager.add(user);
+        
+        Password password = new Password("mypassWd");
+        
+        this.identityManager.updateCredential(user, password);
+        
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
+        
+        this.identityManager.validateCredentials(credentials);
+        
+        assertEquals(Status.VALID, credentials.getStatus());
+    }
 }
