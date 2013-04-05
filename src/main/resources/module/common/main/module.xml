@@ -17,7 +17,7 @@
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.common">
 	<resources>
-		<resource-root path="picketlink-common-3.0.0.Alpha1.jar" />
+		<resource-root path="picketlink-common-3.0.0-SNAPSHOT.jar" />
 	</resources>
 
 	<dependencies>

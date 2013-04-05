@@ -74,7 +74,7 @@
 
 		<!-- Current version of PicketLink supported by this subsystem. -->
 		<version.picketlink>2.1.5.Final</version.picketlink>
-		<version.org.picketlink>3.0.0.Alpha1</version.org.picketlink>
+		<version.org.picketlink>3.0.0-SNAPSHOT</version.org.picketlink>
 
 		<version.arquillian_drone>1.1.1.Final</version.arquillian_drone>
 	</properties>
@@ -498,6 +498,14 @@
 												<include>standalone.xml</include>
 											</includes>
 											<stylesheet>src/test/resources/xslt/addSecurityDomain.xslt</stylesheet>
+										</transformationSet>
+										<transformationSet>
+											<dir>${jboss.as.home}/standalone/configuration/</dir>
+											<outputDir>${jboss.as.home}/standalone/configuration</outputDir>
+											<includes>
+												<include>standalone.xml</include>
+											</includes>
+											<stylesheet>src/test/resources/xslt/addDataSources.xslt</stylesheet>
 										</transformationSet>
 									</transformationSets>
 								</configuration>

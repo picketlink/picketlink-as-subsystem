@@ -15,6 +15,7 @@ import org.jboss.msc.service.ServiceController;
 import org.picketlink.as.subsystem.deployment.PicketLinkDependencyDeploymentProcessor;
 import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.FederationDeploymentProcessor;
+import org.picketlink.as.subsystem.idm.deployment.IdentityCdiExtensionInstallerProcessor;
 
 /**
  * <p>
@@ -58,10 +59,10 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 ROOT_LOGGER.trace("Installing the PicketLink Identity Provider deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, FederationDeploymentProcessor.PHASE,
                         FederationDeploymentProcessor.PRIORITY, new FederationDeploymentProcessor());
-//                ROOT_LOGGER.trace("Installing the PicketLink Core deployment processor.");
-//                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
-//                        IdentityCdiExtensionInstallerProcessor.PHASE, IdentityCdiExtensionInstallerProcessor.PRIORITY,
-//                        new IdentityCdiExtensionInstallerProcessor());
+                ROOT_LOGGER.trace("Installing the PicketLink Core deployment processor.");
+                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
+                        IdentityCdiExtensionInstallerProcessor.PHASE, IdentityCdiExtensionInstallerProcessor.PRIORITY,
+                        new IdentityCdiExtensionInstallerProcessor());
             }
         }, OperationContext.Stage.RUNTIME);
     }

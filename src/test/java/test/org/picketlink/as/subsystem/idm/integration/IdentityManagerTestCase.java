@@ -50,6 +50,7 @@ public class IdentityManagerTestCase {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                .addAsResource(IdentityManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
                 .addAsManifestResource(IdentityManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
                 .addClass(IdentityManagerTestCase.class);
 

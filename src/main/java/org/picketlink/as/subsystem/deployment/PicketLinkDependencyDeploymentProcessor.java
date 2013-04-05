@@ -63,8 +63,8 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
 
         if (isPicketLinkDeployment(deploymentUnit)) {
             configureFederationDependencies(deploymentUnit);
-            configureCoreDependencies(deploymentUnit);
-            configureIDMDependencies(deploymentUnit);
+//            configureCoreDependencies(deploymentUnit);
+//            configureIDMDependencies(deploymentUnit);
         } else {
             if (isFederationDeployment(deploymentUnit)) {
                 configureFederationDependencies(deploymentUnit);

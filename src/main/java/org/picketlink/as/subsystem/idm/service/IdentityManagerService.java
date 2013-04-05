@@ -49,23 +49,23 @@ import org.jboss.msc.inject.InjectionException;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
-import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.value.ImmediateValue;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.common.util.StringUtil;
 import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.config.FeatureSet;
 import org.picketlink.idm.config.FeatureSet.FeatureGroup;
 import org.picketlink.idm.config.FeatureSet.FeatureOperation;
 import org.picketlink.idm.config.IdentityConfiguration;
 import org.picketlink.idm.config.IdentityStoreConfiguration;
-import org.picketlink.idm.internal.DefaultIdentityManager;
-import org.picketlink.idm.internal.DefaultIdentityStoreInvocationContextFactory;
-import org.picketlink.idm.jpa.internal.JPAIdentityStoreConfiguration;
+import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
+import org.picketlink.idm.jpa.internal.JPAContextInitializer;
 import org.picketlink.idm.jpa.schema.CredentialObject;
 import org.picketlink.idm.jpa.schema.CredentialObjectAttribute;
 import org.picketlink.idm.jpa.schema.IdentityObject;
@@ -149,24 +149,15 @@ public class IdentityManagerService implements Service<IdentityManager> {
     }
 
     private IdentityManager createIdentityManager() {
-        IdentityManager identityManager = new DefaultIdentityManager();
-
-        DefaultIdentityStoreInvocationContextFactory icf = new DefaultIdentityStoreInvocationContextFactory();
-
-        EntityManager em = (EntityManager) Proxy.newProxyInstance(getClass().getClassLoader(),
-                new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager()));
-
-        icf.setEntityManager(em);
-
         Collection<IdentityStoreConfiguration> storeConfigs = this.storeConfigs.values();
         
         for (IdentityStoreConfiguration identityStoreConfiguration : storeConfigs) {
-            this.identityConfiguration.addStoreConfiguration(identityStoreConfiguration);
+            this.identityConfiguration.addConfig(identityStoreConfiguration);
         }
         
-        identityManager.bootstrap(this.identityConfiguration, icf);
-
-        return identityManager;
+        IdentityManagerFactory entityManager = this.identityConfiguration.buildIdentityManagerFactory();
+        
+        return entityManager.createIdentityManager();
     }
 
     private void configureJPAIdentityStore(ModelNode modelNode) {
@@ -193,6 +184,16 @@ public class IdentityManagerService implements Service<IdentityManager> {
         jpaConfig.setRelationshipAttributeClass(RelationshipObjectAttribute.class);
         jpaConfig.setPartitionClass(PartitionObject.class);
 
+        jpaConfig.addContextInitializer(new JPAContextInitializer(this.emf) {
+            @Override
+            public EntityManager getEntityManager() {
+                EntityManager em = (EntityManager) Proxy.newProxyInstance(getClass().getClassLoader(),
+                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager()));
+
+                return em;
+            }
+        });
+        
         this.storeConfigs.put(ModelElement.JPA_STORE, jpaConfig);
     }
 

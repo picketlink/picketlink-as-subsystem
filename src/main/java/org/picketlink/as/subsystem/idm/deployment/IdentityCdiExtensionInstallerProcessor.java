@@ -35,10 +35,9 @@ import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
-import org.picketlink.as.subsystem.idm.cdi.PicketLinkCdiExtension;
 import org.picketlink.deltaspike.core.api.provider.BeanManagerProvider;
 import org.picketlink.deltaspike.security.impl.extension.SecurityExtension;
-import org.picketlink.permission.internal.JPAPermissionStoreConfig;
+import org.picketlink.internal.IdentityStoreAutoConfiguration;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -62,18 +61,15 @@ public class IdentityCdiExtensionInstallerProcessor implements DeploymentUnitPro
 
             if (extensions != null) {
                 for (Metadata<Extension> e : extensions) {
-                    if (e.getValue() instanceof PicketLinkCdiExtension) {
+                    if ((e.getValue() instanceof SecurityExtension) || (e.getValue() instanceof IdentityStoreAutoConfiguration) || (e.getValue() instanceof BeanManagerProvider)) {
                         return;
                     }
                 }
             }
 
-            ROOT_LOGGER.infov("Enabling identity extension for {0}", deploymentUnit.getName());
+            ROOT_LOGGER.infov("Enabling PicketLink Core extension for {0}", deploymentUnit.getName());
 
-            addExtensions(deploymentUnit, new PicketLinkCdiExtension(), new JPAPermissionStoreConfig(),
-                    new SecurityExtension(), new BeanManagerProvider());
-
-            // Don't install JPAIdentityStoreAutoConfig as it doesn't work from a module
+            addExtensions(deploymentUnit, new SecurityExtension(), new IdentityStoreAutoConfiguration(), new BeanManagerProvider());
         }
     }
 
