@@ -64,7 +64,13 @@ public class IdentityManagementConfigurationTestCase {
     
     @Resource (mappedName="picketlink/StagingIdentityManager")
     private IdentityManager stagingIdentityManager;
-    
+
+    @Resource (mappedName="picketlink/FileBasedCompleteIdentityManager")
+    private IdentityManager fileCompleteIdentityManager;
+
+    @Resource (mappedName="picketlink/FileBasedSimpleIdentityManager")
+    private IdentityManager fileSimpleIdentityManager;
+
     @Test
     public void testDevIdentityManager() throws Exception {
         SimpleUser user = new SimpleUser("john");
@@ -95,6 +101,40 @@ public class IdentityManagementConfigurationTestCase {
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
         this.stagingIdentityManager.validateCredentials(credentials);
+        
+        Assert.assertEquals(Status.VALID, credentials.getStatus());
+    }
+    
+    @Test
+    public void testFileSimpleIdentityManager() throws Exception {
+        SimpleUser user = new SimpleUser("mary");
+        
+        this.fileSimpleIdentityManager.add(user);
+        
+        Password password = new Password("mypassWd");
+        
+        this.fileSimpleIdentityManager.updateCredential(user, password);
+        
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
+        
+        this.fileSimpleIdentityManager.validateCredentials(credentials);
+        
+        Assert.assertEquals(Status.VALID, credentials.getStatus());
+    }
+    
+    @Test
+    public void testFileCompleteIdentityManager() throws Exception {
+        SimpleUser user = new SimpleUser("mary");
+        
+        this.fileCompleteIdentityManager.add(user);
+        
+        Password password = new Password("mypassWd");
+        
+        this.fileCompleteIdentityManager.updateCredential(user, password);
+        
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
+        
+        this.fileCompleteIdentityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }

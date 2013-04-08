@@ -35,16 +35,24 @@ import org.picketlink.as.subsystem.model.ModelElement;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 16, 2012
  */
-public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
+public class FileStoreResourceDefinition extends AbstractResourceDefinition {
 
-    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition();
+    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition();
 
-    public static final SimpleAttributeDefinition DATA_SOURCE = new SimpleAttributeDefinitionBuilder(
-            ModelElement.JPA_STORE_DATASOURCE.getName(), ModelType.STRING, true)
+    public static final SimpleAttributeDefinition WORKING_DIR = new SimpleAttributeDefinitionBuilder(
+            ModelElement.FILE_STORE_WORKING_DIR.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition ENTITY_MANAGER_FACTORY = new SimpleAttributeDefinitionBuilder(
-            ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName(), ModelType.STRING, true)
+    public static final SimpleAttributeDefinition ALWAYS_CREATE_FILE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.FILE_STORE_ALWAYS_CREATE_FILE.getName(), ModelType.BOOLEAN, true)
+            .setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition ASYNC_WRITE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.FILE_STORE_ASYNC_WRITE.getName(), ModelType.BOOLEAN, true)
+            .setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition ASYNC_WRITE_THREAD_POOL = new SimpleAttributeDefinitionBuilder(
+            ModelElement.FILE_STORE_ASYNC_THREAD_POOL.getName(), ModelType.INT, true)
             .setAllowExpression(false).build();
 
     public static final SimpleAttributeDefinition REALMS = new SimpleAttributeDefinitionBuilder(
@@ -56,14 +64,16 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
             .setAllowExpression(false).build();
 
     static {
-        INSTANCE.addAttribute(DATA_SOURCE);
-        INSTANCE.addAttribute(ENTITY_MANAGER_FACTORY);
+        INSTANCE.addAttribute(WORKING_DIR);
+        INSTANCE.addAttribute(ALWAYS_CREATE_FILE);
+        INSTANCE.addAttribute(ASYNC_WRITE);
+        INSTANCE.addAttribute(ASYNC_WRITE_THREAD_POOL);
         INSTANCE.addAttribute(REALMS);
         INSTANCE.addAttribute(TIERS);
     }
     
-    private JPAStoreResourceDefinition() {
-        super(ModelElement.JPA_STORE, JPAStoreAddHandler.INSTANCE, JPAStoreRemoveHandler.INSTANCE);
+    private FileStoreResourceDefinition() {
+        super(ModelElement.FILE_STORE, FileStoreAddHandler.INSTANCE, FileStoreRemoveHandler.INSTANCE);
     }
     
     @Override
@@ -74,6 +84,6 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
     
     @Override
     protected OperationStepHandler doGetAttributeWriterHandler() {
-        return JPAStoreWriteAttributeHandler.INSTANCE;
+        return FileStoreWriteAttributeHandler.INSTANCE;
     }
 }

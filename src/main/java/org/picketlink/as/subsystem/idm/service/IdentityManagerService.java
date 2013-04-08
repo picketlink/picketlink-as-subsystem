@@ -64,6 +64,7 @@ import org.picketlink.idm.config.BaseAbstractStoreConfiguration;
 import org.picketlink.idm.config.FeatureSet;
 import org.picketlink.idm.config.FeatureSet.FeatureGroup;
 import org.picketlink.idm.config.FeatureSet.FeatureOperation;
+import org.picketlink.idm.config.FileIdentityStoreConfiguration;
 import org.picketlink.idm.config.IdentityConfiguration;
 import org.picketlink.idm.config.IdentityStoreConfiguration;
 import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
@@ -116,7 +117,7 @@ public class IdentityManagerService implements Service<IdentityManager> {
             } catch (NamingException e) {
                 throw new RuntimeException(e);
             }
-        } else {
+        } else if (!StringUtil.isNullOrEmpty(this.jpaStoreDataSource)) {
             Map<Object, Object> properties = new HashMap<Object, Object>();
 
             properties.put("javax.persistence.jtaDataSource", this.jpaStoreDataSource);
@@ -149,6 +150,8 @@ public class IdentityManagerService implements Service<IdentityManager> {
 
         if (storeType.equals(ModelElement.JPA_STORE.getName())) {
             configureJPAIdentityStore(operation);
+        } else if (storeType.equals(ModelElement.FILE_STORE.getName())) {
+            configureFileIdentityStore(operation);
         }
     }
 
@@ -207,6 +210,33 @@ public class IdentityManagerService implements Service<IdentityManager> {
         return entityManager.createIdentityManager();
     }
 
+    private void configureFileIdentityStore(ModelNode modelNode) {
+        FileIdentityStoreConfiguration storeConfig = new FileIdentityStoreConfiguration();
+        
+        ModelNode workingDir = modelNode.get(ModelElement.FILE_STORE_WORKING_DIR.getName());
+        ModelNode alwaysCreateFiles = modelNode.get(ModelElement.FILE_STORE_ALWAYS_CREATE_FILE.getName());
+        ModelNode asyncWrite = modelNode.get(ModelElement.FILE_STORE_ASYNC_WRITE.getName());
+        ModelNode asyncWriteThreadPool = modelNode.get(ModelElement.FILE_STORE_ASYNC_THREAD_POOL.getName());
+        
+        if (workingDir.isDefined()) {
+            storeConfig.setWorkingDir(workingDir.asString());
+        }
+        
+        if (alwaysCreateFiles.isDefined()) {
+            storeConfig.setAlwaysCreateFiles(alwaysCreateFiles.asBoolean());
+        }
+        
+        if (asyncWrite.isDefined()) {
+            storeConfig.setAsyncWrite(asyncWrite.asBoolean());
+        }
+        
+        if (asyncWriteThreadPool.isDefined()) {
+            storeConfig.setAsyncThreadPool(asyncWriteThreadPool.asInt());
+        }
+        
+        this.storeConfigs.put(ModelElement.FILE_STORE, storeConfig);
+    }
+    
     private void configureJPAIdentityStore(ModelNode modelNode) {
         JPAIdentityStoreConfiguration jpaConfig = new JPAIdentityStoreConfiguration();
 

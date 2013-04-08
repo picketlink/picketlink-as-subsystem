@@ -27,28 +27,23 @@ import java.util.List;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
-import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.as.controller.registry.Resource;
-import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
-import org.jboss.msc.service.ServiceController.Mode;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.idm.IdentityManager;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler {
+public class FileStoreAddHandler extends AbstractResourceAddStepHandler {
 
-    public static final IdentityManagementAddHandler INSTANCE = new IdentityManagementAddHandler();
+    public static final FileStoreAddHandler INSTANCE = new FileStoreAddHandler();
 
-    private IdentityManagementAddHandler() {
-        super(ModelElement.IDENTITY_MANAGEMENT);
+    private FileStoreAddHandler() {
+        super(ModelElement.FILE_STORE);
     }
 
     /*
@@ -61,34 +56,14 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
-        String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
+        String identityManagementAlias = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(1).getValue();
 
-        ServiceBuilder<IdentityManager> serviceBuilder = context.getServiceTarget().addService(
-                IdentityManagerService.createServiceName(alias), new IdentityManagerService(operation));
-        Resource resource = context.readResource(PathAddress.EMPTY_ADDRESS);
+        ServiceController<?> container = (ServiceController<IdentityManagerService>) context
+                .getServiceRegistry(false).getService(IdentityManagerService.createServiceName(identityManagementAlias));
 
-        Resource jpaStoreResource = resource.getChild(PathElement.pathElement(ModelElement.JPA_STORE.getName(),
-                ModelElement.JPA_STORE.getName()));
-
-        if (jpaStoreResource != null) {
-            ModelNode dataSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
-            ModelNode emfSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
-
-            if (dataSourceNode.isDefined()) {
-                serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME
-                        .append(dataSourceNode.asString().split("/")));
-            }
-
-            if (emfSourceNode.isDefined()) {
-                serviceBuilder
-                        .addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(emfSourceNode.asString().split("/")));
-            }
-        }
-
-        ServiceController<IdentityManager> controller = serviceBuilder.addListener(verificationHandler)
-                .setInitialMode(Mode.PASSIVE).install();
-
-        newControllers.add(controller);
+        IdentityManagerService identityManagerService = (IdentityManagerService) container.getService();
+        
+        identityManagerService.configureStore(operation);
     }
 
 }

@@ -58,6 +58,7 @@ public class IdentityManagementResourceDefinition extends AbstractResourceDefini
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(JPAStoreResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(FileStoreResourceDefinition.INSTANCE, resourceRegistration);
     }
     
     @Override

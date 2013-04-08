@@ -53,6 +53,7 @@ import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.FeatureResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.FeatureSetResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.FileStoreResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.JPAStoreResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.RelationshipResourceDefinition;
@@ -161,6 +162,9 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                 case JPA_STORE:
                     lastIdentityStoreNode = parseJPAStoreConfig(reader, list, identityManagementNode);
                     break;
+                case FILE_STORE:
+                    lastIdentityStoreNode = parseFileStoreConfig(reader, list, identityManagementNode);
+                    break;
                 case FEATURES:
                     lastFeatures = parseFeaturesConfig(reader, list, lastIdentityStoreNode);
                     break;
@@ -258,6 +262,11 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
     private ModelNode parseJPAStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
             throws XMLStreamException {
         return parseConfig(reader, ModelElement.JPA_STORE, null, list, identityManagementNode, JPAStoreResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseFileStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.FILE_STORE, null, list, identityManagementNode, FileStoreResourceDefinition.INSTANCE.getAttributes());
     }
 
     private ModelNode parseFeaturesConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
