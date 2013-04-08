@@ -1,8 +1,19 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
-	
+
+	<!-- identity-management jndi-url="picketlink/LDAPIdentityManager"
+		alias="ldap">
+		<ldap-store realms="default" url="asdas" bind-dn="asdd"
+			bind-credential="asdas" base-dn-suffix="asdas" agent-dn-suffix="asdas" user-dn-suffix="asdas"
+			group-dn-suffix="asdas" role-dn-suffix="asdas">
+			<features supportsAll="true" />
+		</ldap-store>
+	</identity-management -->
+
 	<identity-management jndi-url="picketlink/FileBasedCompleteIdentityManager"
 		alias="file-based-complete">
-		<file-store realms="default" working-dir="/tmp/pl-idm-complete" always-create-files="true" async-write="true" async-write-thread-pool="10">
+		<file-store realms="default" working-dir="/tmp/pl-idm-complete"
+			always-create-files="true" async-write="true"
+			async-write-thread-pool="10">
 			<features supportsAll="true" />
 		</file-store>
 	</identity-management>

@@ -68,6 +68,7 @@ import org.picketlink.idm.config.FileIdentityStoreConfiguration;
 import org.picketlink.idm.config.IdentityConfiguration;
 import org.picketlink.idm.config.IdentityStoreConfiguration;
 import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
+import org.picketlink.idm.config.LDAPIdentityStoreConfiguration;
 import org.picketlink.idm.jpa.internal.JPAContextInitializer;
 import org.picketlink.idm.jpa.schema.CredentialObject;
 import org.picketlink.idm.jpa.schema.CredentialObjectAttribute;
@@ -152,7 +153,9 @@ public class IdentityManagerService implements Service<IdentityManager> {
             configureJPAIdentityStore(operation);
         } else if (storeType.equals(ModelElement.FILE_STORE.getName())) {
             configureFileIdentityStore(operation);
-        }
+        } else if (storeType.equals(ModelElement.LDAP_STORE.getName())) {
+            configureLDAPIdentityStore(operation);
+        } 
     }
 
     public void configureFeatures(ModelNode operation) {
@@ -236,7 +239,54 @@ public class IdentityManagerService implements Service<IdentityManager> {
         
         this.storeConfigs.put(ModelElement.FILE_STORE, storeConfig);
     }
-    
+
+    private void configureLDAPIdentityStore(ModelNode modelNode) {
+        LDAPIdentityStoreConfiguration storeConfig = new LDAPIdentityStoreConfiguration();
+        
+        ModelNode url = modelNode.get(ModelElement.LDAP_STORE_URL.getName());
+        ModelNode bindDn = modelNode.get(ModelElement.LDAP_STORE_BIND_DN.getName());
+        ModelNode bindCredential = modelNode.get(ModelElement.LDAP_STORE_BIND_CREDENTIAL.getName());
+        ModelNode baseDn = modelNode.get(ModelElement.LDAP_STORE_BASE_DN_SUFFIX.getName());
+        ModelNode userDn = modelNode.get(ModelElement.LDAP_STORE_USER_DN_SUFFIX.getName());
+        ModelNode agentDn = modelNode.get(ModelElement.LDAP_STORE_AGENT_DN_SUFFIX.getName());
+        ModelNode groupDn = modelNode.get(ModelElement.LDAP_STORE_GROUP_DN_SUFFIX.getName());
+        ModelNode roleDn = modelNode.get(ModelElement.LDAP_STORE_ROLE_DN_SUFFIX.getName());
+        
+        if (url.isDefined()) {
+            storeConfig.setLdapURL(url.asString());
+        }
+        
+        if (bindDn.isDefined()) {
+            storeConfig.setBindDN(bindDn.asString());
+        }
+        
+        if (bindCredential.isDefined()) {
+            storeConfig.setBindCredential(bindCredential.asString());
+        }
+        
+        if (baseDn.isDefined()) {
+            storeConfig.setBaseDN(baseDn.asString());
+        }
+
+        if (userDn.isDefined()) {
+            storeConfig.setUserDNSuffix(userDn.asString());
+        }
+
+        if (agentDn.isDefined()) {
+            storeConfig.setAgentDNSuffix(agentDn.asString());
+        }
+
+        if (roleDn.isDefined()) {
+            storeConfig.setRoleDNSuffix(roleDn.asString());
+        }
+
+        if (groupDn.isDefined()) {
+            storeConfig.setGroupDNSuffix(groupDn.asString());
+        }
+
+        this.storeConfigs.put(ModelElement.LDAP_STORE, storeConfig);
+    }
+
     private void configureJPAIdentityStore(ModelNode modelNode) {
         JPAIdentityStoreConfiguration jpaConfig = new JPAIdentityStoreConfiguration();
 

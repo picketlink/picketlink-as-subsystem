@@ -54,6 +54,7 @@ public class PicketLinkSubsystemWriter_1_0 implements XMLStreamConstants, XMLEle
         writers.put(ModelElement.IDENTITY_MANAGEMENT.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_MANAGEMENT, writers));
         writers.put(ModelElement.JPA_STORE.getName(), new GenericModelElementWriter(ModelElement.JPA_STORE, writers));
         writers.put(ModelElement.FILE_STORE.getName(), new GenericModelElementWriter(ModelElement.FILE_STORE, writers));
+        writers.put(ModelElement.LDAP_STORE.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE, writers));
         writers.put(ModelElement.FEATURES.getName(), new GenericModelElementWriter(ModelElement.FEATURES, writers));
         writers.put(ModelElement.FEATURE.getName(), new GenericModelElementWriter(ModelElement.FEATURE, writers));
         writers.put(ModelElement.RELATIONSHIPS.getName(), new GenericModelElementWriter(ModelElement.RELATIONSHIPS, writers));
