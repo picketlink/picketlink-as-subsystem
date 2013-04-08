@@ -39,9 +39,12 @@ import org.jboss.as.weld.WeldDeploymentMarker;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
+import org.jboss.modules.Module;
+import org.jboss.modules.ModuleLoadException;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
 import org.picketlink.as.subsystem.core.PicketLinkCoreSubsystemExtension;
+import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
 import org.picketlink.deltaspike.core.api.provider.BeanManagerProvider;
 import org.picketlink.deltaspike.security.impl.extension.SecurityExtension;
 import org.picketlink.idm.IdentityManager;
@@ -99,17 +102,23 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
             }
 
             ROOT_LOGGER.infov("Enabling PicketLink Core extension for {0}", deploymentUnit.getName());
+            addExtension(deploymentUnit, coreExtension);
 
-            addExtensions(deploymentUnit, coreExtension, new SecurityExtension(), new IdentityStoreAutoConfiguration(),
-                    new BeanManagerProvider());
+            try {
+                Module module = Module.getBootModuleLoader().loadModule(
+                        PicketLinkStructureDeploymentProcessor.CORE_MODULE_IDENTIFIER);
+                for (Extension e : module.loadService(Extension.class)) {
+                    addExtension(deploymentUnit, e);
+                }
+            } catch (ModuleLoadException e) {
+                throw new DeploymentUnitProcessingException("Failed to load PicketLink Core extension", e);
+            }
         }
     }
 
-    private void addExtensions(DeploymentUnit du, Extension... extensions) {
-        for (Extension e : extensions) {
-            Metadata<Extension> metadata = new MetadataImpl(e, du.getName());
-            du.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
-        }
+    private void addExtension(DeploymentUnit du, Extension extension) {
+        Metadata<Extension> metadata = new MetadataImpl<Extension>(extension, du.getName());
+        du.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
     }
 
     @Override
