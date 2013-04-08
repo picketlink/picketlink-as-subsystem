@@ -20,32 +20,23 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.picketlink.as.subsystem.idm.model;
+package test.org.picketlink.as.subsystem.core.integration;
 
-import org.jboss.as.controller.AbstractRemoveStepHandler;
-import org.jboss.as.controller.OperationContext;
-import org.jboss.as.controller.OperationFailedException;
-import org.jboss.dmr.ModelNode;
+import javax.enterprise.inject.Produces;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+
+import org.picketlink.annotations.PicketLink;
 
 /**
- * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
+ * @author Pedro Silva
+ *
  */
-public class RelationshipSetRemoveHandler extends AbstractRemoveStepHandler {
+public class Resources {
 
-    public static final RelationshipSetRemoveHandler INSTANCE = new RelationshipSetRemoveHandler();
-
-    private RelationshipSetRemoveHandler() {
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
-    @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
-            throws OperationFailedException {
-    }
-
+    @Produces
+    @PicketLink
+    @PersistenceContext
+    private EntityManager picketLinkEntityManager;
+    
 }

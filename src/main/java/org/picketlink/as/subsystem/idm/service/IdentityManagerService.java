@@ -49,6 +49,7 @@ import org.jboss.msc.inject.InjectionException;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
@@ -59,6 +60,7 @@ import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.common.util.StringUtil;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.IdentityManagerFactory;
+import org.picketlink.idm.config.BaseAbstractStoreConfiguration;
 import org.picketlink.idm.config.FeatureSet;
 import org.picketlink.idm.config.FeatureSet.FeatureGroup;
 import org.picketlink.idm.config.FeatureSet.FeatureOperation;
@@ -83,17 +85,16 @@ public class IdentityManagerService implements Service<IdentityManager> {
 
     private static String SERVICE_NAME_PREFIX = "IdentityManagementService";
 
-    private EntityManagerFactory emf;
-    private IdentityConfiguration identityConfiguration = new IdentityConfiguration();
+    private EntityManagerFactory embeddedEMF;
+    private EntityManagerFactory providedEMF;
+
     private String jndiUrl;
     private Map<ModelElement, IdentityStoreConfiguration> storeConfigs = new HashMap<ModelElement, IdentityStoreConfiguration>();
 
     private String jpaStoreDataSource;
-
     private String jpaStoreEntityManagerFactory;
-
     private String alias;
-
+    
     public IdentityManagerService(ModelNode modelNode) {
         this.alias = modelNode.get(ModelElement.COMMON_ALIAS.getName()).asString();
         this.jndiUrl = modelNode.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_URL.getName()).asString();
@@ -111,7 +112,7 @@ public class IdentityManagerService implements Service<IdentityManager> {
 
         if (!StringUtil.isNullOrEmpty(this.jpaStoreEntityManagerFactory)) {
             try {
-                this.emf = (EntityManagerFactory) new InitialContext().lookup(this.jpaStoreEntityManagerFactory);
+                this.providedEMF = (EntityManagerFactory) new InitialContext().lookup(this.jpaStoreEntityManagerFactory);
             } catch (NamingException e) {
                 throw new RuntimeException(e);
             }
@@ -122,41 +123,87 @@ public class IdentityManagerService implements Service<IdentityManager> {
 
             properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
 
-            this.emf = Persistence.createEntityManagerFactory("identity", properties);
+            this.embeddedEMF = Persistence.createEntityManagerFactory("identity", properties);
         }
 
-        final BinderService binderService = new BinderService("IdentityService-" + this.alias);
-        final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
-                .addService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiUrl), binderService);
+        publishIdentityManager(context);
+    }
 
-        builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
-                binderService.getNamingStoreInjector());
+    @Override
+    public void stop(StopContext context) {
+        ROOT_LOGGER.info("Stopping Identity Service");
 
-        builder.addDependency(createServiceName(this.alias), IdentityManager.class, new Injector<IdentityManager>() {
-            @Override
-            public void inject(final IdentityManager value) throws InjectionException {
-                binderService.getManagedObjectInjector().inject(
-                        new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
-            }
+        if (this.embeddedEMF != null) {
+            ROOT_LOGGER.info("Closing entity manager factory");
+            embeddedEMF.close();
+        }
 
-            @Override
-            public void uninject() {
-                binderService.getManagedObjectInjector().uninject();
-            }
-        });
+        this.providedEMF = null;
+        
+        unpublishIdentityManager(context);
+    }
 
-        builder.setInitialMode(Mode.ACTIVE).install();
+    public void configureStore(ModelNode operation) {
+        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement()
+                .getValue();
+
+        if (storeType.equals(ModelElement.JPA_STORE.getName())) {
+            configureJPAIdentityStore(operation);
+        }
+    }
+
+    public void configureFeatures(ModelNode operation) {
+        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(2).getValue();
+        String featureGroup = operation.get(ModelElement.FEATURE_GROUP.getName()).asString();
+        String featureOperations = operation.get(ModelElement.FEATURE_OPERATION.getName()).asString();
+
+        IdentityStoreConfiguration storeConfig = this.storeConfigs.get(ModelElement.forName(storeType));
+
+        for (String featureOperation : featureOperations.split(",")) {
+            storeConfig.getFeatureSet().addFeature(FeatureGroup.valueOf(featureGroup),
+                    FeatureOperation.valueOf(featureOperation));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public void configureRelationships(ModelNode operation) {
+        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(2).getValue();
+        String relationshipClass = operation.get(ModelElement.COMMON_CLASS.getName()).asString();
+
+        IdentityStoreConfiguration storeConfig = this.storeConfigs.get(ModelElement.forName(storeType));
+
+        try {
+            FeatureSet.addRelationshipSupport(storeConfig.getFeatureSet(),
+                    (Class<? extends Relationship>) Class.forName(relationshipClass));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void configureAllFeatures(ModelNode operation) {
+        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(2).getValue();
+
+        BaseAbstractStoreConfiguration<?> storeConfig = (BaseAbstractStoreConfiguration<?>) this.storeConfigs.get(ModelElement
+                .forName(storeType));
+
+        storeConfig.supportAllFeatures();
+    }
+    
+    public static ServiceName createServiceName(String alias) {
+        return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
     }
 
     private IdentityManager createIdentityManager() {
         Collection<IdentityStoreConfiguration> storeConfigs = this.storeConfigs.values();
+
+        IdentityConfiguration configuration = new IdentityConfiguration();
         
         for (IdentityStoreConfiguration identityStoreConfiguration : storeConfigs) {
-            this.identityConfiguration.addConfig(identityStoreConfiguration);
+            configuration.addConfig(identityStoreConfiguration);
         }
-        
-        IdentityManagerFactory entityManager = this.identityConfiguration.buildIdentityManagerFactory();
-        
+
+        IdentityManagerFactory entityManager = configuration.buildIdentityManagerFactory();
+
         return entityManager.createIdentityManager();
     }
 
@@ -184,68 +231,59 @@ public class IdentityManagerService implements Service<IdentityManager> {
         jpaConfig.setRelationshipAttributeClass(RelationshipObjectAttribute.class);
         jpaConfig.setPartitionClass(PartitionObject.class);
 
-        jpaConfig.addContextInitializer(new JPAContextInitializer(this.emf) {
+        jpaConfig.addContextInitializer(new JPAContextInitializer(this.embeddedEMF) {
             @Override
             public EntityManager getEntityManager() {
+                EntityManagerFactory emf = null;
+
+                if (embeddedEMF != null) {
+                    emf = embeddedEMF;
+                } else if (providedEMF != null) {
+                    emf = providedEMF;
+                } else {
+                    throw new RuntimeException(
+                            "No EntityManagerFactory configured. Can not obtain EntityManager for the JPA store.");
+                }
+
                 EntityManager em = (EntityManager) Proxy.newProxyInstance(getClass().getClassLoader(),
                         new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager()));
 
                 return em;
             }
         });
-        
+
         this.storeConfigs.put(ModelElement.JPA_STORE, jpaConfig);
     }
+ 
+    private void publishIdentityManager(StartContext context) {
+        final BinderService binderService = new BinderService("IdentityService-" + this.alias);
+        final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
+                .addService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiUrl), binderService);
 
-    @Override
-    public void stop(StopContext context) {
-        ROOT_LOGGER.info("Stopping Identity Service");
+        builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
+                binderService.getNamingStoreInjector());
 
-        ROOT_LOGGER.info("Closing entity manager factory");
-        emf.close();
+        builder.addDependency(createServiceName(this.alias), IdentityManager.class, new Injector<IdentityManager>() {
+            @Override
+            public void inject(final IdentityManager value) throws InjectionException {
+                binderService.getManagedObjectInjector().inject(
+                        new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
+            }
+
+            @Override
+            public void uninject() {
+                binderService.getManagedObjectInjector().uninject();
+            }
+        });
+
+        builder.setInitialMode(Mode.ACTIVE).install();
     }
 
-    public IdentityConfiguration getIdentityConfiguration() {
-        return this.identityConfiguration;
+    private void unpublishIdentityManager(StopContext context) {
+        ServiceController<?> service = context.getController().getServiceContainer()
+                .getService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiUrl));
+
+        service.setMode(Mode.REMOVE);
     }
 
-    public void configureStore(ModelNode operation) {
-        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement()
-                .getValue();
-
-        if (storeType.equals(ModelElement.JPA_STORE.getName())) {
-            configureJPAIdentityStore(operation);
-        }
-    }
-
-    public void configureFeatures(ModelNode operation) {
-        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(2).getValue();
-        String featureGroup = operation.get(ModelElement.FEATURE_GROUP.getName()).asString();
-        String featureOperations = operation.get(ModelElement.FEATURE_OPERATION.getName()).asString();
-
-        IdentityStoreConfiguration storeConfig = this.storeConfigs.get(ModelElement.forName(storeType));
-
-        for (String featureOperation : featureOperations.split(",")) {
-            storeConfig.getFeatureSet().addFeature(FeatureGroup.valueOf(featureGroup),
-                    FeatureOperation.valueOf(featureOperation));
-        }
-    }
-
-    public void configureRelationships(ModelNode operation) {
-        String storeType = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(2).getValue();
-        String relationshipClass = operation.get(ModelElement.COMMON_CLASS.getName()).asString();
-
-        IdentityStoreConfiguration storeConfig = this.storeConfigs.get(ModelElement.forName(storeType));
-
-        try {
-            FeatureSet.addRelationshipSupport(storeConfig.getFeatureSet(),
-                    (Class<? extends Relationship>) Class.forName(relationshipClass));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static ServiceName createServiceName(String alias) {
-        return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
-    }
 }

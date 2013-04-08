@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package test.org.picketlink.as.subsystem.idm.integration;
+package test.org.picketlink.as.subsystem.core.integration;
 
 import static org.junit.Assert.assertEquals;
 
@@ -43,36 +43,42 @@ import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.credential.UsernamePasswordCredentials;
 import org.picketlink.idm.model.SimpleUser;
 
+import test.org.picketlink.as.subsystem.idm.integration.IdentityManagementConfigurationTestCase;
+
 /**
  * @author Pedro Silva
- *
+ * 
  */
 @RunWith(Arquillian.class)
 public class PicketLinkCoreDeploymentManagedIdentityManagerTestCase {
-    
+
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsWebInfResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/web.xml"), "web.xml")
-                .addAsManifestResource(PicketLinkCoreDeploymentManagedIdentityManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
+                .addAsWebInfResource(
+                        IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/web.xml"),
+                        "web.xml")
+                .addAsManifestResource(
+                        PicketLinkCoreDeploymentManagedIdentityManagerTestCase.class.getClassLoader().getResource(
+                                "deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
                 .addPackage(PicketLinkCoreDeploymentManagedIdentityManagerTestCase.class.getPackage());
 
         System.out.println(deployment.toString(true));
-        
+
         return deployment;
     }
-    
+
     @Inject
     protected Identity identity;
 
     @Inject
     protected IdentityManager identityManager;
-    
+
     @Inject
     protected UserTransaction userTransaction;
-    
+
     @Before
     public void onInit() throws Exception {
         this.userTransaction.begin();
@@ -82,21 +88,21 @@ public class PicketLinkCoreDeploymentManagedIdentityManagerTestCase {
     public void onFinish() throws Exception {
         this.userTransaction.commit();
     }
-    
+
     @Test
     public void testAuthentication() throws Exception {
         SimpleUser user = new SimpleUser("paul");
-        
+
         this.identityManager.add(user);
-        
+
         Password password = new Password("mypassWd");
-        
+
         this.identityManager.updateCredential(user, password);
-        
+
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
-        
+
         this.identityManager.validateCredentials(credentials);
-        
+
         assertEquals(Status.VALID, credentials.getStatus());
     }
 }

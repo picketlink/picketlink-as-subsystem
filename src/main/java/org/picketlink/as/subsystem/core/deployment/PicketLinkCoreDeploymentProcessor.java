@@ -21,6 +21,7 @@
  */
 package org.picketlink.as.subsystem.core.deployment;
 
+import static org.jboss.as.weld.WeldDeploymentMarker.isWeldDeployment;
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
 
@@ -35,7 +36,6 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.web.deployment.WarMetaData;
-import org.jboss.as.weld.WeldDeploymentMarker;
 import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
@@ -63,55 +63,46 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        if (isCoreDeployment(deploymentUnit) && WeldDeploymentMarker.isWeldDeployment(deploymentUnit)) {
+        if (isCoreDeployment(deploymentUnit) && isWeldDeployment(deploymentUnit)) {
             if (deploymentUnit.getParent() != null) {
                 deploymentUnit = deploymentUnit.getParent();
             }
 
-            AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
+            if (!hasCoreCDIExtensions(deploymentUnit)) {
+                WarMetaData warMetadata = deploymentUnit.getAttachment(WarMetaData.ATTACHMENT_KEY);
 
-            if (extensions != null) {
-                for (Metadata<Extension> e : extensions) {
-                    if ((e.getValue() instanceof SecurityExtension) || (e.getValue() instanceof IdentityStoreAutoConfiguration)
-                            || (e.getValue() instanceof BeanManagerProvider)) {
-                        return;
+                PicketLinkCoreSubsystemExtension coreExtension = null;
+
+                if (warMetadata.getWebMetaData() != null && warMetadata.getWebMetaData().getResourceReferences() != null) {
+                    ResourceReferencesMetaData resourceReferences = warMetadata.getWebMetaData().getResourceReferences();
+
+                    Iterator<ResourceReferenceMetaData> iterator = resourceReferences.iterator();
+
+                    while (iterator.hasNext()) {
+                        ResourceReferenceMetaData resourceReferenceMetaData = (ResourceReferenceMetaData) iterator.next();
+
+                        if (resourceReferenceMetaData.getType().equals(IdentityManager.class.getName())) {
+                            coreExtension = new PicketLinkCoreSubsystemExtension(resourceReferenceMetaData.getName());
+                        }
                     }
                 }
-            }
-            
-            WarMetaData warMetadata = deploymentUnit.getAttachment(WarMetaData.ATTACHMENT_KEY);
 
-            PicketLinkCoreSubsystemExtension coreExtension = null;
+                if (coreExtension == null) {
+                    coreExtension = new PicketLinkCoreSubsystemExtension();
+                }
 
-            if (warMetadata.getWebMetaData() != null && warMetadata.getWebMetaData().getResourceReferences() != null) {
-                ResourceReferencesMetaData resourceReferences = warMetadata.getWebMetaData().getResourceReferences();
+                ROOT_LOGGER.infov("Enabling PicketLink Core extension for {0}", deploymentUnit.getName());
+                addExtension(deploymentUnit, coreExtension);
 
-                Iterator<ResourceReferenceMetaData> iterator = resourceReferences.iterator();
-
-                while (iterator.hasNext()) {
-                    ResourceReferenceMetaData resourceReferenceMetaData = (ResourceReferenceMetaData) iterator.next();
-
-                    if (resourceReferenceMetaData.getType().equals(IdentityManager.class.getName())) {
-                        coreExtension = new PicketLinkCoreSubsystemExtension(resourceReferenceMetaData.getName());
+                try {
+                    Module module = Module.getBootModuleLoader().loadModule(
+                            PicketLinkStructureDeploymentProcessor.CORE_MODULE_IDENTIFIER);
+                    for (Extension e : module.loadService(Extension.class)) {
+                        addExtension(deploymentUnit, e);
                     }
+                } catch (ModuleLoadException e) {
+                    throw new DeploymentUnitProcessingException("Failed to load PicketLink Core extension", e);
                 }
-            }
-
-            if (coreExtension == null) {
-                coreExtension = new PicketLinkCoreSubsystemExtension();
-            }
-
-            ROOT_LOGGER.infov("Enabling PicketLink Core extension for {0}", deploymentUnit.getName());
-            addExtension(deploymentUnit, coreExtension);
-
-            try {
-                Module module = Module.getBootModuleLoader().loadModule(
-                        PicketLinkStructureDeploymentProcessor.CORE_MODULE_IDENTIFIER);
-                for (Extension e : module.loadService(Extension.class)) {
-                    addExtension(deploymentUnit, e);
-                }
-            } catch (ModuleLoadException e) {
-                throw new DeploymentUnitProcessingException("Failed to load PicketLink Core extension", e);
             }
         }
     }
@@ -124,5 +115,19 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
     @Override
     public void undeploy(DeploymentUnit context) {
     }
+    
+    private boolean hasCoreCDIExtensions(DeploymentUnit deploymentUnit) {
+        AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
 
+        if (extensions != null) {
+            for (Metadata<Extension> e : extensions) {
+                if ((e.getValue() instanceof SecurityExtension) || (e.getValue() instanceof IdentityStoreAutoConfiguration)
+                        || (e.getValue() instanceof BeanManagerProvider)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }

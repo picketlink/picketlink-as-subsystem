@@ -27,9 +27,14 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
+import org.picketlink.idm.IdentityManager;
 import org.picketlink.producer.IdentityManagerProducer;
 
 /**
+ * <p>
+ * {@link Extension} implementation to enable PicketLink Core when deploying the application using the subsystem.
+ * </p>
+ * 
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class PicketLinkCoreSubsystemExtension implements Extension {
@@ -37,20 +42,37 @@ public class PicketLinkCoreSubsystemExtension implements Extension {
     private String identityManagerJNDIName;
 
     public PicketLinkCoreSubsystemExtension() {
-        
+
     }
-    
+
     public PicketLinkCoreSubsystemExtension(String identityManagerJNDIName) {
         this.identityManagerJNDIName = identityManagerJNDIName;
     }
 
+    /**
+     * <p>
+     * We should veto the {@link IdentityManagerProducer} when the {@link IdentityManager} must be used obtained from the JNDI,
+     * instead of internally produced. In this case, the {@link IdentityManager} will be properly produced by the
+     * {@link IdentityManagerBeanDefinition}.
+     * </p>
+     * 
+     * @param event
+     */
     public void vetoIdentityManagerProducer(@Observes ProcessAnnotatedType<IdentityManagerProducer> event) {
         if (this.identityManagerJNDIName != null) {
             event.veto();
         }
     }
 
-    public void register(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
+    /**
+     * <p>
+     * Register the {@link IdentityManagerBeanDefinition}.
+     * </p>
+     * 
+     * @param event
+     * @param beanManager
+     */
+    public void registerIdentityManagerBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
         if (this.identityManagerJNDIName != null) {
             event.addBean(new IdentityManagerBeanDefinition(beanManager, this.identityManagerJNDIName));
         }

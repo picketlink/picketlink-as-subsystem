@@ -22,14 +22,16 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-
 import java.util.List;
 
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 
@@ -54,6 +56,18 @@ public class FeatureSetAddHandler extends AbstractResourceAddStepHandler {
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
+        String identityManagementAlias = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS))
+                .getElement(1).getValue();
+        ModelNode supportAllFeatures = operation.get(ModelElement.COMMON_SUPPORTS_ALL.getName());
+
+        if (supportAllFeatures.isDefined() && supportAllFeatures.asBoolean()) {
+            ServiceController<?> container = (ServiceController<IdentityManagerService>) context.getServiceRegistry(false)
+                    .getService(IdentityManagerService.createServiceName(identityManagementAlias));
+
+            IdentityManagerService identityManagerService = (IdentityManagerService) container.getService();
+
+            identityManagerService.configureAllFeatures(operation);
+        }
     }
 
 }

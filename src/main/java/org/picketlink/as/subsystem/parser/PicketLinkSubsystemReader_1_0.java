@@ -56,7 +56,6 @@ import org.picketlink.as.subsystem.idm.model.FeatureSetResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.JPAStoreResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.RelationshipResourceDefinition;
-import org.picketlink.as.subsystem.idm.model.RelationshipSetResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.as.subsystem.model.XMLElement;
 
@@ -114,7 +113,6 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
         ModelNode identityManagementNode = null;
         ModelNode lastIdentityStoreNode = null;
         ModelNode lastFeatures = null;
-        ModelNode lastRelationships = null;
 
         while (reader.hasNext() && reader.nextTag() != END_DOCUMENT) {
             if (!reader.isStartElement()) {
@@ -166,14 +164,11 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                 case FEATURES:
                     lastFeatures = parseFeaturesConfig(reader, list, lastIdentityStoreNode);
                     break;
-                case RELATIONSHIPS:
-                    lastRelationships = parseRelationshipsConfig(reader, list, lastIdentityStoreNode);
-                    break;
                 case FEATURE:
                     parseFeatureConfig(reader, list, lastFeatures);
                     break;
                 case RELATIONSHIP:
-                    parseRelationshipConfig(reader, list, lastRelationships);
+                    parseRelationshipConfig(reader, list, lastIdentityStoreNode);
                     break;
                 default:
                     unexpectedElement(reader);
@@ -268,11 +263,6 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
     private ModelNode parseFeaturesConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
             throws XMLStreamException {
         return parseConfig(reader, ModelElement.FEATURES, null, list, identityStoreNode, FeatureSetResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    private ModelNode parseRelationshipsConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
-            throws XMLStreamException {
-        return parseConfig(reader, ModelElement.RELATIONSHIPS, null, list, identityStoreNode, RelationshipSetResourceDefinition.INSTANCE.getAttributes());
     }
 
     private void parseFeatureConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)

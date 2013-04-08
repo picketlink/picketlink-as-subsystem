@@ -69,7 +69,7 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(FeatureSetResourceDefinition.INSTANCE, resourceRegistration);
-        addChildResourceDefinition(RelationshipSetResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(RelationshipResourceDefinition.INSTANCE, resourceRegistration);
     }
     
     @Override

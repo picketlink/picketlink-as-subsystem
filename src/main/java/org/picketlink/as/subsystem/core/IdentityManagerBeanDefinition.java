@@ -48,7 +48,7 @@ import org.picketlink.idm.internal.DefaultIdentityManager;
 
 /**
  * <p>
- * {@link Bean} implementation to define/customize the behaviour for {@link DefaultPicketBoxIdentity} instances.
+ * {@link Bean} implementation to define/customize the behaviour for {@link IdentityManager} instances.
  * </p>
  * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

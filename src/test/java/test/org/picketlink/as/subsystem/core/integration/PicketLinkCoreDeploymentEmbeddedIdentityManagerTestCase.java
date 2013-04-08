@@ -20,7 +20,7 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package test.org.picketlink.as.subsystem.idm.integration;
+package test.org.picketlink.as.subsystem.core.integration;
 
 import static org.junit.Assert.assertEquals;
 
@@ -42,6 +42,7 @@ import org.picketlink.idm.credential.Credentials.Status;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.credential.UsernamePasswordCredentials;
 import org.picketlink.idm.model.SimpleUser;
+
 
 /**
  * @author Pedro Silva
