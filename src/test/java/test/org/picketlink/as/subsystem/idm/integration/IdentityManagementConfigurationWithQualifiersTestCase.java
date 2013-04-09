@@ -22,7 +22,7 @@
 
 package test.org.picketlink.as.subsystem.idm.integration;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
 
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.junit.Arquillian;
@@ -43,37 +43,43 @@ import org.picketlink.idm.model.SimpleUser;
  *
  */
 @RunWith(Arquillian.class)
-public class IdentityManagementConfigurationTestCase {
+public class IdentityManagementConfigurationWithQualifiersTestCase {
     
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                .addAsManifestResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure.xml"), "jboss-deployment-structure.xml")
-                .addClass(IdentityManagementConfigurationTestCase.class);
+                .addAsResource(IdentityManagementConfigurationWithQualifiersTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                .addAsManifestResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                .addClass(IdentityManagementConfigurationWithQualifiersTestCase.class)
+                .addClass(MyIdentityManagerProducer.class)
+                .addClass(IdentityManagerConfig.class);;
 
         System.out.println(deployment.toString(true));
         
         return deployment;
     }
     
-    @Resource (mappedName="picketlink/DevIdentityManager")
+    @Inject
+    @IdentityManagerConfig ("dev")
     private IdentityManager devIdentityManager;
     
-    @Resource (mappedName="picketlink/StagingIdentityManager")
+    @Inject
+    @IdentityManagerConfig ("staging")
     private IdentityManager stagingIdentityManager;
 
-    @Resource (mappedName="picketlink/FileBasedCompleteIdentityManager")
-    private IdentityManager fileCompleteIdentityManager;
+    @Inject
+    @IdentityManagerConfig ("production")
+    private IdentityManager productionIdentityManager;
 
-    @Resource (mappedName="picketlink/FileBasedSimpleIdentityManager")
-    private IdentityManager fileSimpleIdentityManager;
+    @Inject
+    @IdentityManagerConfig ("test")
+    private IdentityManager testIdentityManager;
 
     @Test
     public void testDevIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("jonhy");
+        SimpleUser user = new SimpleUser("john");
         
         this.devIdentityManager.add(user);
         
@@ -90,7 +96,7 @@ public class IdentityManagementConfigurationTestCase {
     
     @Test
     public void testStagingIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("anne");
+        SimpleUser user = new SimpleUser("mary");
         
         this.stagingIdentityManager.add(user);
         
@@ -106,35 +112,35 @@ public class IdentityManagementConfigurationTestCase {
     }
     
     @Test
-    public void testFileSimpleIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("peter");
+    public void testTestIdentityManager() throws Exception {
+        SimpleUser user = new SimpleUser("mary");
         
-        this.fileSimpleIdentityManager.add(user);
+        this.testIdentityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.fileSimpleIdentityManager.updateCredential(user, password);
+        this.testIdentityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.fileSimpleIdentityManager.validateCredentials(credentials);
+        this.testIdentityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }
     
     @Test
-    public void testFileCompleteIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("mark");
+    public void testProductionIdentityManager() throws Exception {
+        SimpleUser user = new SimpleUser("mary");
         
-        this.fileCompleteIdentityManager.add(user);
+        this.productionIdentityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.fileCompleteIdentityManager.updateCredential(user, password);
+        this.productionIdentityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.fileCompleteIdentityManager.validateCredentials(credentials);
+        this.productionIdentityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }
