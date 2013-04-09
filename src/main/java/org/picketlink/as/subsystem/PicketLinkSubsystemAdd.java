@@ -16,6 +16,7 @@ import org.picketlink.as.subsystem.core.deployment.PicketLinkCoreDeploymentProce
 import org.picketlink.as.subsystem.deployment.PicketLinkDependencyDeploymentProcessor;
 import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.deployment.FederationDeploymentProcessor;
+import org.picketlink.as.subsystem.idm.deployment.PicketLinkIDMDeploymentProcessor;
 
 /**
  * <p>
@@ -59,6 +60,10 @@ public class PicketLinkSubsystemAdd extends AbstractBoottimeAddStepHandler {
                 ROOT_LOGGER.trace("Installing the PicketLink Identity Provider deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME, FederationDeploymentProcessor.PHASE,
                         FederationDeploymentProcessor.PRIORITY, new FederationDeploymentProcessor());
+                ROOT_LOGGER.trace("Installing the PicketLink IDM deployment processor.");
+                processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
+                        PicketLinkIDMDeploymentProcessor.PHASE, PicketLinkIDMDeploymentProcessor.PRIORITY,
+                        new PicketLinkIDMDeploymentProcessor());
                 ROOT_LOGGER.trace("Installing the PicketLink Core deployment processor.");
                 processorTarget.addDeploymentProcessor(PicketLinkExtension.SUBSYSTEM_NAME,
                         PicketLinkCoreDeploymentProcessor.PHASE, PicketLinkCoreDeploymentProcessor.PRIORITY,
