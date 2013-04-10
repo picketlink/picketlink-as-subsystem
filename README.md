@@ -8,7 +8,7 @@ The extension provides a set of services and deployment behaviours for most of t
 * [PicketLink Core](https://github.com/picketlink/picketlink/tree/master/core "PicketLink Core on Github"), for Authentication and Authorization services for CDI applications
 + [PicketLink Federation](https://github.com/picketlink/picketlink2/federation "PicketLink Federation on Github"), for Single Sign-On, SAML and WS-Trust services for JEE applications
 
-# System Requirements #
+## System Requirements ##
 
 The extension is currently designed and implemented considering the following requirements:
 
@@ -33,7 +33,7 @@ If you want to perform a full build, running also the integration tests you need
 
     mvn -Dall-tests -Parquillian-managed clean install
     
-## <a id="asInstallation">JBoss Application Server Configuration</a> ##
+## JBoss Application Server Configuration ##
 
 ### Using a Pre-configured JBoss AS Installation
 The most simple and fast way to get the subsystem up and running is using the JBoss Application Server installation used during the integration tests. After executing the following command:
@@ -76,3 +76,15 @@ Please, follow the documentation at https://community.jboss.org/wiki/PicketLink3
 ### Federation Services ###
 
 Please, follow the documentation at https://docs.jboss.org/author/display/PLINK/PicketLink+AS7+Subsystem.
+
+## Running the Integration Tests in Eclipse ##
+
+First, import the project into your Eclipse.
+
+Follow the instructions at [Using a Pre-configured JBoss AS Installation] (#) to get a pre-configured JBoss AS installation with all configuration required to run the integration tests.
+
+Go to the Maven configurations for your Eclipse project and activate the following profile:
+
+	arquillian-remote
+	
+Now, start your server and run one of the integration tests.
