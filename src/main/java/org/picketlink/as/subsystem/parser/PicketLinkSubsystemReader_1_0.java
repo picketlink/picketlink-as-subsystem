@@ -27,8 +27,8 @@ import static org.jboss.as.controller.parsing.ParseUtils.requireNoAttributes;
 import static org.jboss.as.controller.parsing.ParseUtils.unexpectedElement;
 import static org.picketlink.as.subsystem.model.ModelElement.FEDERATION;
 import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER;
-import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER;
 import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN;
+import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER;
 
 import java.util.List;
 
@@ -43,16 +43,23 @@ import org.jboss.staxmapper.XMLElementReader;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.picketlink.as.subsystem.Namespace;
 import org.picketlink.as.subsystem.PicketLinkExtension;
+import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.KeyProviderResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.handlers.HandlerParameterResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.handlers.HandlerResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.idp.IdentityProviderResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.idp.TrustDomainResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
+import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.FeatureResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.FeatureSetResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.FileStoreResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.JPAStoreResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.LDAPStoreResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.RelationshipResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.as.subsystem.model.XMLElement;
-import org.picketlink.as.subsystem.model.federation.FederationResourceDefinition;
-import org.picketlink.as.subsystem.model.federation.KeyProviderResourceDefinition;
-import org.picketlink.as.subsystem.model.handlers.HandlerParameterResourceDefinition;
-import org.picketlink.as.subsystem.model.handlers.HandlerResourceDefinition;
-import org.picketlink.as.subsystem.model.idp.IdentityProviderResourceDefinition;
-import org.picketlink.as.subsystem.model.idp.TrustDomainResourceDefinition;
-import org.picketlink.as.subsystem.model.saml.SAMLResourceDefinition;
-import org.picketlink.as.subsystem.model.sp.ServiceProviderResourceDefinition;
 
 /**
  * <p>
@@ -104,6 +111,10 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
         ModelNode federationNode = null;
         ModelNode lastProviderNode = null;
         ModelNode lastHandlerNode = null;
+        
+        ModelNode identityManagementNode = null;
+        ModelNode lastIdentityStoreNode = null;
+        ModelNode lastFeatures = null;
 
         while (reader.hasNext() && reader.nextTag() != END_DOCUMENT) {
             if (!reader.isStartElement()) {
@@ -145,6 +156,27 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                     break;
                 case SAML:
                     parseSAMLConfig(reader, list, federationNode);
+                    break;
+                case IDENTITY_MANAGEMENT:
+                    identityManagementNode = parseIdentityManagementConfig(reader, list, parentNode);
+                    break;
+                case JPA_STORE:
+                    lastIdentityStoreNode = parseJPAStoreConfig(reader, list, identityManagementNode);
+                    break;
+                case FILE_STORE:
+                    lastIdentityStoreNode = parseFileStoreConfig(reader, list, identityManagementNode);
+                    break;
+                case LDAP_STORE:
+                    lastIdentityStoreNode = parseLDAPStoreConfig(reader, list, identityManagementNode);
+                    break;
+                case FEATURES:
+                    lastFeatures = parseFeaturesConfig(reader, list, lastIdentityStoreNode);
+                    break;
+                case FEATURE:
+                    parseFeatureConfig(reader, list, lastFeatures);
+                    break;
+                case RELATIONSHIP:
+                    parseRelationshipConfig(reader, list, lastIdentityStoreNode);
                     break;
                 default:
                     unexpectedElement(reader);
@@ -224,6 +256,41 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
             throws XMLStreamException {
         return parseConfig(reader, FEDERATION, FederationResourceDefinition.ALIAS.getName(), list, parentNode,
                 FederationResourceDefinition.INSTANCE.getAttributes());
+    }
+    
+    private ModelNode parseIdentityManagementConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode parentNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.IDENTITY_MANAGEMENT, IdentityManagementResourceDefinition.ALIAS.getName(), list, parentNode, IdentityManagementResourceDefinition.INSTANCE.getAttributes());
+    }
+    
+    private ModelNode parseJPAStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.JPA_STORE, null, list, identityManagementNode, JPAStoreResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseFileStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.FILE_STORE, null, list, identityManagementNode, FileStoreResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseLDAPStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.LDAP_STORE, null, list, identityManagementNode, LDAPStoreResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseFeaturesConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.FEATURES, null, list, identityStoreNode, FeatureSetResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private void parseFeatureConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        parseConfig(reader, ModelElement.FEATURE, FeatureResourceDefinition.FEATURE_GROUP.getName(), list, identityStoreNode, FeatureResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private void parseRelationshipConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)
+            throws XMLStreamException {
+        parseConfig(reader, ModelElement.RELATIONSHIP, RelationshipResourceDefinition.CLASS.getName(), list, identityStoreNode, RelationshipResourceDefinition.INSTANCE.getAttributes());
     }
 
     /**

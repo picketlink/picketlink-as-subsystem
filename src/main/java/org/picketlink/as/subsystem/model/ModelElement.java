@@ -44,10 +44,43 @@ public enum ModelElement {
     COMMON_VALUE ("value"),
     COMMON_STRICT_POST_BINDING ("strict-post-binding"),
     COMMON_SUPPORTS_SIGNATURES("supportsSignatures"),
-
+    
     COMMON_HANDLER ("handler"),
-    COMMON_HANDLER_CLASS ("class"), 
+    COMMON_CLASS ("class"), 
     COMMON_HANDLER_PARAMETER ("handler-parameter"),
+
+    COMMON_SUPPORTS_ALL ("supportsAll"),
+    
+    /*
+     * Identity Management model elements
+     */
+    IDENTITY_MANAGEMENT ("identity-management"),
+    IDENTITY_MANAGEMENT_JNDI_URL ("jndi-url"),
+    JPA_STORE ("jpa-store"),
+    JPA_STORE_DATASOURCE ("data-source"),
+    JPA_STORE_ENTITY_MANAGER_FACTORY ("entity-manager-factory"),
+    FILE_STORE ("file-store"),
+    FILE_STORE_WORKING_DIR ("working-dir"),
+    FILE_STORE_ALWAYS_CREATE_FILE ("always-create-files"),
+    FILE_STORE_ASYNC_WRITE ("async-write"),
+    FILE_STORE_ASYNC_THREAD_POOL ("async-write-thread-pool"),
+    LDAP_STORE ("ldap-store"),
+    LDAP_STORE_URL (COMMON_URL.getName()),
+    LDAP_STORE_BIND_DN ("bind-dn"),
+    LDAP_STORE_BIND_CREDENTIAL ("bind-credential"),
+    LDAP_STORE_BASE_DN_SUFFIX ("base-dn-suffix"),
+    LDAP_STORE_USER_DN_SUFFIX ("user-dn-suffix"),
+    LDAP_STORE_AGENT_DN_SUFFIX ("agent-dn-suffix"),
+    LDAP_STORE_ROLE_DN_SUFFIX ("role-dn-suffix"),
+    LDAP_STORE_GROUP_DN_SUFFIX ("group-dn-suffix"),
+    REALMS ("realms"),
+    TIERS ("tiers"),
+    FEATURES ("features"),
+    FEATURE ("feature"),
+    FEATURE_GROUP ("group"),
+    FEATURE_OPERATION ("group-operation"),
+    RELATIONSHIPS ("relationships"),
+    RELATIONSHIP ("relationship"),
 
     /*
      * Federation model elements
