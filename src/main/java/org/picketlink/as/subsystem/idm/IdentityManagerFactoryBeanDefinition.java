@@ -28,7 +28,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Default;
@@ -39,31 +39,29 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.AnnotationLiteral;
 
-import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.config.IdentityConfiguration;
-import org.picketlink.idm.internal.DefaultIdentityManager;
+import org.picketlink.idm.internal.DefaultIdentityManagerFactory;
 
 /**
  * <p>
- * {@link Bean} implementation to define/customize the behaviour for {@link IdentityManager} instances.
+ * {@link Bean} implementation to define/customize the behaviour for {@link IdentityManagerFactory} instances.
  * </p>
  * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * 
  */
-public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
+public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManagerFactory> {
 
     private BeanManager beanManager;
-    private InjectionTarget<IdentityManager> injectionTarget;
+    private InjectionTarget<IdentityManagerFactory> injectionTarget;
     private IdentityConfiguration configuration;
-    private IdentityManagerFactory identityManagerFactory;
 
     @SuppressWarnings("unchecked")
-    public IdentityManagerBeanDefinition(BeanManager beanManager) {
+    public IdentityManagerFactoryBeanDefinition(BeanManager beanManager) {
         this.beanManager = beanManager;
-        AnnotatedType<? extends IdentityManager> at = this.beanManager.createAnnotatedType(DefaultIdentityManager.class);
-        this.injectionTarget = (InjectionTarget<IdentityManager>) beanManager.createInjectionTarget(at);
+        AnnotatedType<? extends IdentityManagerFactory> at = this.beanManager.createAnnotatedType(DefaultIdentityManagerFactory.class);
+        this.injectionTarget = (InjectionTarget<IdentityManagerFactory>) beanManager.createInjectionTarget(at);
     }
 
     /*
@@ -72,13 +70,10 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      * @see javax.enterprise.context.spi.Contextual#create(javax.enterprise.context.spi.CreationalContext)
      */
     @Override
-    public IdentityManager create(CreationalContext<IdentityManager> creationalContext) {
-        if (this.configuration == null) {
-            this.configuration = resolveIdentityConfiguration();
-            this.identityManagerFactory = this.configuration.buildIdentityManagerFactory();
-        }
+    public IdentityManagerFactory create(CreationalContext<IdentityManagerFactory> creationalContext) {
+        this.configuration = resolveIdentityConfiguration();
         
-        IdentityManager identity = this.identityManagerFactory.createIdentityManager();
+        IdentityManagerFactory identity = this.configuration.buildIdentityManagerFactory();
         
         this.injectionTarget.inject(identity, creationalContext);
         this.injectionTarget.postConstruct(identity);
@@ -92,7 +87,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      * @see javax.enterprise.context.spi.Contextual#destroy(java.lang.Object, javax.enterprise.context.spi.CreationalContext)
      */
     @Override
-    public void destroy(IdentityManager instance, CreationalContext<IdentityManager> creationalContext) {
+    public void destroy(IdentityManagerFactory instance, CreationalContext<IdentityManagerFactory> creationalContext) {
         this.injectionTarget.preDestroy(instance);
         this.injectionTarget.dispose(instance);
     }
@@ -106,7 +101,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
     public Set<Type> getTypes() {
         Set<Type> types = new HashSet<Type>();
 
-        types.add(IdentityManager.class);
+        types.add(IdentityManagerFactory.class);
 
         return types;
     }
@@ -136,7 +131,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      */
     @Override
     public Class<? extends Annotation> getScope() {
-        return RequestScoped.class;
+        return ApplicationScoped.class;
     }
 
     /*
@@ -146,7 +141,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      */
     @Override
     public String getName() {
-        return "IdentityManager";
+        return "IdentityManagerFactory";
     }
 
     /*
@@ -166,7 +161,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      */
     @Override
     public Class<?> getBeanClass() {
-        return DefaultIdentityManager.class;
+        return DefaultIdentityManagerFactory.class;
     }
 
     /*

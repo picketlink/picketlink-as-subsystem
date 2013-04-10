@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.credential.Credentials.Status;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.credential.UsernamePasswordCredentials;
@@ -60,81 +61,89 @@ public class IdentityManagementConfigurationTestCase {
     }
     
     @Resource (mappedName="picketlink/DevIdentityManager")
-    private IdentityManager devIdentityManager;
+    private IdentityManagerFactory devIdentityManagerFactory;
     
     @Resource (mappedName="picketlink/StagingIdentityManager")
-    private IdentityManager stagingIdentityManager;
+    private IdentityManagerFactory stagingIdentityManagerFactory;
 
     @Resource (mappedName="picketlink/FileBasedCompleteIdentityManager")
-    private IdentityManager fileCompleteIdentityManager;
+    private IdentityManagerFactory fileCompleteIdentityManagerFactory;
 
     @Resource (mappedName="picketlink/FileBasedSimpleIdentityManager")
-    private IdentityManager fileSimpleIdentityManager;
+    private IdentityManagerFactory fileSimpleIdentityManagerFactory;
 
     @Test
     public void testDevIdentityManager() throws Exception {
+        IdentityManager identityManager = this.devIdentityManagerFactory.createIdentityManager();
+        
         SimpleUser user = new SimpleUser("jonhy");
         
-        this.devIdentityManager.add(user);
+        identityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.devIdentityManager.updateCredential(user, password);
+        identityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.devIdentityManager.validateCredentials(credentials);
+        identityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }
     
     @Test
     public void testStagingIdentityManager() throws Exception {
+        IdentityManager identityManager = this.stagingIdentityManagerFactory.createIdentityManager();
+        
         SimpleUser user = new SimpleUser("anne");
         
-        this.stagingIdentityManager.add(user);
+        identityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.stagingIdentityManager.updateCredential(user, password);
+        identityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.stagingIdentityManager.validateCredentials(credentials);
+        identityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }
     
     @Test
     public void testFileSimpleIdentityManager() throws Exception {
+        IdentityManager identityManager = this.fileSimpleIdentityManagerFactory.createIdentityManager();
+        
         SimpleUser user = new SimpleUser("peter");
         
-        this.fileSimpleIdentityManager.add(user);
+        identityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.fileSimpleIdentityManager.updateCredential(user, password);
+        identityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.fileSimpleIdentityManager.validateCredentials(credentials);
+        identityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }
     
     @Test
     public void testFileCompleteIdentityManager() throws Exception {
+        IdentityManager identityManager = this.fileCompleteIdentityManagerFactory.createIdentityManager();
+        
         SimpleUser user = new SimpleUser("mark");
         
-        this.fileCompleteIdentityManager.add(user);
+        identityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.fileCompleteIdentityManager.updateCredential(user, password);
+        identityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.fileCompleteIdentityManager.validateCredentials(credentials);
+        identityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }

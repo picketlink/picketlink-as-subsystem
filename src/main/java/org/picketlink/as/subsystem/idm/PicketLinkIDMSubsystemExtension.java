@@ -28,23 +28,15 @@ import javax.enterprise.inject.spi.Extension;
 
 /**
  * <p>
- * {@link Extension} implementation to enable PicketLink Core when deploying the application using the subsystem.
+ * {@link Extension} implementation to enable PicketLink IDM when deploying the application using the subsystem.
  * </p>
  * 
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class PicketLinkIDMSubsystemExtension implements Extension {
 
-    /**
-     * <p>
-     * Register the {@link IdentityManagerBeanDefinition}.
-     * </p>
-     * 
-     * @param event
-     * @param beanManager
-     */
-    public void registerIdentityManagerBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
-        event.addBean(new IdentityManagerBeanDefinition(beanManager));
+    public void registerIdentityManagerFactoryBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
+        event.addBean(new IdentityManagerFactoryBeanDefinition(beanManager));
     }
 
 }

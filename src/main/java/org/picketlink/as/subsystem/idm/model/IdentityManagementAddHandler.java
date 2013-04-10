@@ -38,7 +38,7 @@ import org.jboss.msc.service.ServiceController.Mode;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -63,7 +63,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             throws OperationFailedException {
         String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
-        ServiceBuilder<IdentityManager> serviceBuilder = context.getServiceTarget().addService(
+        ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
                 IdentityManagerService.createServiceName(alias), new IdentityManagerService(operation));
         Resource resource = context.readResource(PathAddress.EMPTY_ADDRESS);
 
@@ -85,7 +85,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             }
         }
 
-        ServiceController<IdentityManager> controller = serviceBuilder.addListener(verificationHandler)
+        ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
                 .setInitialMode(Mode.PASSIVE).install();
 
         newControllers.add(controller);

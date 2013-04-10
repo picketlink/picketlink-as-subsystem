@@ -26,7 +26,7 @@ import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Produces;
 
-import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 
 /**
  * @author Pedro Silva
@@ -38,21 +38,21 @@ public class MyIdentityManagerProducer {
     @Resource (mappedName="picketlink/DevIdentityManager")
     @Produces
     @IdentityManagerConfig ("dev")
-    private IdentityManager devIdentityManager;
+    private IdentityManagerFactory devIdentityManager;
     
     @Resource (mappedName="picketlink/StagingIdentityManager")
     @Produces
     @IdentityManagerConfig ("staging")
-    private IdentityManager stagingIdentityManager;
+    private IdentityManagerFactory stagingIdentityManager;
 
     @Resource (mappedName="picketlink/FileBasedCompleteIdentityManager")
     @Produces
     @IdentityManagerConfig ("production")
-    private IdentityManager fileCompleteIdentityManager;
+    private IdentityManagerFactory fileCompleteIdentityManager;
 
     @Resource (mappedName="picketlink/FileBasedSimpleIdentityManager")
     @Produces
     @IdentityManagerConfig ("test")
-    private IdentityManager fileSimpleIdentityManager;
+    private IdentityManagerFactory fileSimpleIdentityManager;
     
 }

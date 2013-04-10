@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.credential.Credentials.Status;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.credential.UsernamePasswordCredentials;
@@ -60,21 +61,23 @@ public class PicketLinkIDMCDIExtensionTestCase {
     }
     
     @Inject
-    private IdentityManager identityManager;
+    private IdentityManagerFactory identityManagerFactory;
 
     @Test
     public void testDevIdentityManager() throws Exception {
+        IdentityManager identityManager = this.identityManagerFactory.createIdentityManager();
+        
         SimpleUser user = new SimpleUser("jonhy");
         
-        this.identityManager.add(user);
+        identityManager.add(user);
         
         Password password = new Password("mypassWd");
         
-        this.identityManager.updateCredential(user, password);
+        identityManager.updateCredential(user, password);
         
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
         
-        this.identityManager.validateCredentials(credentials);
+        identityManager.validateCredentials(credentials);
         
         Assert.assertEquals(Status.VALID, credentials.getStatus());
     }

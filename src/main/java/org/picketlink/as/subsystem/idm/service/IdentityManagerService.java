@@ -58,7 +58,6 @@ import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.ImmediateValue;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.common.util.StringUtil;
-import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.config.BaseAbstractStoreConfiguration;
 import org.picketlink.idm.config.FeatureSet;
@@ -83,7 +82,7 @@ import org.picketlink.idm.model.Relationship;
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
-public class IdentityManagerService implements Service<IdentityManager> {
+public class IdentityManagerService implements Service<IdentityManagerFactory> {
 
     private static String SERVICE_NAME_PREFIX = "IdentityManagementService";
 
@@ -103,8 +102,8 @@ public class IdentityManagerService implements Service<IdentityManager> {
     }
 
     @Override
-    public IdentityManager getValue() throws IllegalStateException, IllegalArgumentException {
-        return createIdentityManager();
+    public IdentityManagerFactory getValue() throws IllegalStateException, IllegalArgumentException {
+        return createIdentityManagerFactory();
     }
 
     @Override
@@ -128,7 +127,7 @@ public class IdentityManagerService implements Service<IdentityManager> {
             this.embeddedEMF = Persistence.createEntityManagerFactory("identity", properties);
         }
 
-        publishIdentityManager(context);
+        publishIdentityManagerFactory(context);
     }
 
     @Override
@@ -199,7 +198,7 @@ public class IdentityManagerService implements Service<IdentityManager> {
         return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
     }
 
-    private IdentityManager createIdentityManager() {
+    private IdentityManagerFactory createIdentityManagerFactory() {
         Collection<IdentityStoreConfiguration> storeConfigs = this.storeConfigs.values();
 
         IdentityConfiguration configuration = new IdentityConfiguration();
@@ -208,9 +207,7 @@ public class IdentityManagerService implements Service<IdentityManager> {
             configuration.addConfig(identityStoreConfiguration);
         }
 
-        IdentityManagerFactory entityManager = configuration.buildIdentityManagerFactory();
-
-        return entityManager.createIdentityManager();
+        return configuration.buildIdentityManagerFactory();
     }
 
     private void configureFileIdentityStore(ModelNode modelNode) {
@@ -335,7 +332,7 @@ public class IdentityManagerService implements Service<IdentityManager> {
         this.storeConfigs.put(ModelElement.JPA_STORE, jpaConfig);
     }
  
-    private void publishIdentityManager(StartContext context) {
+    private void publishIdentityManagerFactory(StartContext context) {
         final BinderService binderService = new BinderService("IdentityService-" + this.alias);
         final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
                 .addService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiUrl), binderService);
@@ -343,9 +340,9 @@ public class IdentityManagerService implements Service<IdentityManager> {
         builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                 binderService.getNamingStoreInjector());
 
-        builder.addDependency(createServiceName(this.alias), IdentityManager.class, new Injector<IdentityManager>() {
+        builder.addDependency(createServiceName(this.alias), IdentityManagerFactory.class, new Injector<IdentityManagerFactory>() {
             @Override
-            public void inject(final IdentityManager value) throws InjectionException {
+            public void inject(final IdentityManagerFactory value) throws InjectionException {
                 binderService.getManagedObjectInjector().inject(
                         new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
             }

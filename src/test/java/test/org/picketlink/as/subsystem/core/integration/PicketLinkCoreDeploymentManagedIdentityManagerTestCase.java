@@ -91,7 +91,7 @@ public class PicketLinkCoreDeploymentManagedIdentityManagerTestCase {
 
     @Test
     public void testAuthentication() throws Exception {
-        SimpleUser user = new SimpleUser("paul");
+        SimpleUser user = new SimpleUser("raul");
 
         this.identityManager.add(user);
 
