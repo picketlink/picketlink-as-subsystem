@@ -3,6 +3,9 @@
 	<deployment>
 		<dependencies>
             <module name="org.picketlink.idm" />
+            
+            <!-- We only need this dependency because we want to use the built-in schema -->
+            <module name="org.picketlink.idm.schema" />
 		</dependencies>
 	</deployment>
 </jboss-deployment-structure>

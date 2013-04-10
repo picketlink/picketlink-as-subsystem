@@ -9,12 +9,12 @@
 	<xsl:output method="xml" indent="yes" />
 	
 	<!-- If the extension is already defined, remove it to configure it again. -->
-	<xsl:template match="//as:extensions/as:extension[@module='org.picketlink']"/>
+	<xsl:template match="//as:extensions/as:extension[@module='org.picketlink.as.extension']"/>
 	
 	<xsl:template match="as:extensions">
 		<extensions>
 			<xsl:apply-templates select="@* | *"/>
-			<extension module="org.picketlink"/>
+			<extension module="org.picketlink.as.extension"/>
 		</extensions>
 	</xsl:template>
 

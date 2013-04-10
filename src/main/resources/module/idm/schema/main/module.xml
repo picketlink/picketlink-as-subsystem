@@ -15,31 +15,18 @@
 	Franklin St, Fifth Floor, Boston, MA ~ 02110-1301 USA, or see the FSF site: 
 	http://www.fsf.org. -->
 
-<module xmlns="urn:jboss:module:1.1" name="org.picketlink">
+<module xmlns="urn:jboss:module:1.1" name="org.picketlink.idm.schema">
+	
 	<resources>
-		<resource-root path="picketlink-jbas7-2.1.5.Final.jar" />
-		<resource-root path="picketlink-core-2.1.5.Final.jar" />
+		<resource-root path="picketlink-idm-schema-3.0.0-SNAPSHOT.jar" />
 	</resources>
 
 	<dependencies>
-		<module name="javax.security.auth.message.api"/>
-        <module name="javax.security.jacc.api"/>
-        <module name="javax.transaction.api"/>
-        <module name="javax.xml.bind.api"/>
-        <module name="javax.xml.stream.api"/>
-        <module name="javax.servlet.api"/>
-        <module name="org.jboss.common-core"/>
-        <module name="org.jboss.logging"/>
-        <module name="org.jboss.as.web"/>
-        <module name="org.jboss.security.xacml"/>
-        <module name="org.picketbox"/>
-        <module name="javax.xml.ws.api"/>
-        <module name="org.apache.log4j"/>
-        <module name="org.apache.santuario.xmlsec"/>
-        <module name="javax.api"/>
-        <module name="org.jboss.ws.api" />
-        <module name="org.jboss.ws.spi" />
-        <module name="org.apache.cxf" />
+		<module name="javax.api" />
+		<module name="javax.persistence.api"/>
+		<module name="org.hibernate" services="import"/>
+		<module name="org.javassist"/>
+		<module name="org.picketlink.idm"/>
 	</dependencies>
 
 </module>

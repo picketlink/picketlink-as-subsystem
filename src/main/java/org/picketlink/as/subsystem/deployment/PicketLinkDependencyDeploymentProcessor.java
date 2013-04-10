@@ -89,7 +89,7 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
      * @param deploymentUnit
      */
     private void configureFederationDependencies(DeploymentUnit deploymentUnit) {
-        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.federation"));
+        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink"));
         ROOT_LOGGER.infov("Added PicketLink Federation dependencies to {0}", deploymentUnit.getName());
     }
 

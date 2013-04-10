@@ -55,7 +55,6 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
     public static final AttachmentKey<Boolean> PICKETLINK_CORE_ATTACHMENT_KEY = AttachmentKey
             .create(Boolean.class);
 
-    public static final ModuleIdentifier PICKETLINK_MODULE_IDENTIFIER = ModuleIdentifier.create("org.picketlink");
     public static final ModuleIdentifier IDM_MODULE_IDENTIFIER = ModuleIdentifier.create("org.picketlink.idm");
     public static final ModuleIdentifier CORE_MODULE_IDENTIFIER = ModuleIdentifier.create("org.picketlink.core");
 
@@ -67,7 +66,6 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        markPicketLinkDeployment(deploymentUnit);
         markFederationDeployment(phaseContext);
         markCoreDeployment(deploymentUnit);
         markIDMDeployment(deploymentUnit);
@@ -91,47 +89,28 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
         }
     }
 
-    private boolean markPicketLinkDeployment(DeploymentUnit deploymentUnit) {
-        ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
-
-        for (ModuleDependency d : moduleSpecification.getUserDependencies()) {
-            if (d.getIdentifier().equals(PICKETLINK_MODULE_IDENTIFIER)) {
-                deploymentUnit.putAttachment(PICKETLINK_IDM_ATTACHMENT_KEY, Boolean.TRUE);
-                deploymentUnit.putAttachment(PICKETLINK_CORE_ATTACHMENT_KEY, Boolean.TRUE);
-                ROOT_LOGGER.infov("Enabling PicketLink IDM and Core for {0}", deploymentUnit.getName());
-                return true;
-            }
-        }
-
-        return false;
-    }
-    
-    private boolean markIDMDeployment(DeploymentUnit deploymentUnit) {
+    private void markIDMDeployment(DeploymentUnit deploymentUnit) {
         ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
 
         for (ModuleDependency d : moduleSpecification.getUserDependencies()) {
             if (d.getIdentifier().equals(IDM_MODULE_IDENTIFIER)) {
                 deploymentUnit.putAttachment(PICKETLINK_IDM_ATTACHMENT_KEY, Boolean.TRUE);
                 ROOT_LOGGER.infov("Enabling PicketLink IDM for {0}", deploymentUnit.getName());
-                return true;
+                return;
             }
         }
-
-        return false;
     }
     
-    private boolean markCoreDeployment(DeploymentUnit deploymentUnit) {
+    private void markCoreDeployment(DeploymentUnit deploymentUnit) {
         ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
 
         for (ModuleDependency d : moduleSpecification.getUserDependencies()) {
             if (d.getIdentifier().equals(CORE_MODULE_IDENTIFIER)) {
                 deploymentUnit.putAttachment(PICKETLINK_CORE_ATTACHMENT_KEY, Boolean.TRUE);
                 ROOT_LOGGER.infov("Enabling PicketLink Core for {0}", deploymentUnit.getName());
-                return true;
+                return;
             }
         }
-
-        return false;
     }
 
     @Override

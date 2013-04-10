@@ -20,7 +20,6 @@
 	<resources>
 		<resource-root path="picketlink-idm-api-3.0.0-SNAPSHOT.jar" />
 		<resource-root path="picketlink-idm-impl-3.0.0-SNAPSHOT.jar" />
-		<resource-root path="picketlink-idm-schema-3.0.0-SNAPSHOT.jar" />
 	</resources>
 
 	<dependencies>
