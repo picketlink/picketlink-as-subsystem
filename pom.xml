@@ -44,27 +44,29 @@
 
 	<developers>
 		<developer>
+			<name>Anil Saldhana</name>
+		</developer>
+		<developer>
 			<name>Pedro Silva</name>
-			<roles>
-				<role>Project Lead</role>
-			</roles>
+		</developer>
+		<developer>
+			<name>Stian Thorgersen</name>
 		</developer>
 	</developers>
 
 	<licenses>
 		<license>
-			<name>lgpl</name>
-			<url>http://repository.jboss.org/licenses/lgpl-2.1.txt</url>
+			<name>Apache License, Version 2.0</name>
 			<distribution>repo</distribution>
+			<url>http://www.apache.org/licenses/LICENSE-2.0</url>
 		</license>
 	</licenses>
 
 	<properties>
-		<picketlink.extrension.scm.url>https://github.com/picketlink/as-subsystem</picketlink.extrension.scm.url>
-		<picketlink.extrension.scm.connection>git@github.com:picketlink/as-subsystem.git</picketlink.extrension.scm.connection>
+		<picketlink.extrension.scm.url>https://github.com/picketlink/picketlink-as-subsystem</picketlink.extrension.scm.url>
+		<picketlink.extrension.scm.connection>git@github.com:picketlink/picketlink-as-subsystem.git</picketlink.extrension.scm.connection>
 
 		<!-- Build configuration -->
-		<module.name>org.picketlink</module.name>
 		<maven.compiler.source>1.6</maven.compiler.source>
 		<maven.compiler.target>1.6</maven.compiler.target>
 
@@ -72,9 +74,12 @@
 		<version.jboss_as>7.2.0.Final</version.jboss_as>
 		<version.jboss_as.distribution>jboss-eap-6.1</version.jboss_as.distribution>
 
-		<!-- Current version of PicketLink supported by this subsystem. -->
-		<version.picketlink>2.1.5.Final</version.picketlink>
-		<version.org.picketlink>3.0.0-SNAPSHOT</version.org.picketlink>
+		<!-- We still need to use the PicketLink 2 Federation libraries. This is 
+			temporary while the PicketLink Federation v3 is not ready. -->
+		<version.picketlink2>2.1.5.Final</version.picketlink2>
+
+		<!-- Current version of PicketLink libraries -->
+		<version.picketlink>3.0.0-SNAPSHOT</version.picketlink>
 
 		<version.arquillian_drone>1.1.1.Final</version.arquillian_drone>
 	</properties>
@@ -85,37 +90,37 @@
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-common</artifactId>
-				<version>${version.org.picketlink}</version>
+				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-core-api</artifactId>
-				<version>${version.org.picketlink}</version>
+				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-core-impl</artifactId>
-				<version>${version.org.picketlink}</version>
+				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-idm-api</artifactId>
-				<version>${version.org.picketlink}</version>
+				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-idm-impl</artifactId>
-				<version>${version.org.picketlink}</version>
+				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-idm-schema</artifactId>
-				<version>${version.org.picketlink}</version>
+				<version>${version.picketlink}</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -123,19 +128,19 @@
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-core</artifactId>
-				<version>${version.picketlink}</version>
+				<version>${version.picketlink2}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink.distribution</groupId>
 				<artifactId>picketlink-jbas7</artifactId>
-				<version>${version.picketlink}</version>
+				<version>${version.picketlink2}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.picketlink</groupId>
 				<artifactId>picketlink-tomcat7-single</artifactId>
-				<version>${version.picketlink}</version>
+				<version>${version.picketlink2}</version>
 				<scope>provided</scope>
 			</dependency>
 
@@ -200,6 +205,7 @@
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
 
+		<!-- JBoss Logging -->
 		<dependency>
 			<groupId>org.jboss.logging</groupId>
 			<artifactId>jboss-logging-processor</artifactId>
@@ -358,68 +364,42 @@
 					</compilerArgument>
 				</configuration>
 			</plugin>
+			<!-- Do not run the integration tests by default. -->
+			<plugin>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.12</version>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+				<!-- Test execution for unit tests. -->
+				<executions>
+					<execution>
+						<id>unit-test</id>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<skip>false</skip>
+							<excludes>
+								<exclude>test/**/integration/*TestCase.java</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
 	<profiles>
-		<!-- This profiles executes all unit tests during the build process. -->
 		<profile>
-			<id>unit-tests</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<build>
-				<plugins>
-					<!-- The testes are organized in Unit Tests and Integration Tests. -->
-					<plugin>
-						<artifactId>maven-surefire-plugin</artifactId>
-						<version>2.12</version>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
-						<!-- Test execution for unit tests. -->
-						<executions>
-							<execution>
-								<id>unit-test</id>
-								<phase>test</phase>
-								<goals>
-									<goal>test</goal>
-								</goals>
-								<configuration>
-									<skip>false</skip>
-									<excludes>
-										<exclude>test/**/integration/*TestCase.java</exclude>
-									</excludes>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-		<profile>
-			<id>arquillian-managed</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-arquillian-container-managed</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<profile>
-			<id>arquillian-remote</id>
-			<dependencies>
-				<dependency>
-					<groupId>org.jboss.as</groupId>
-					<artifactId>jboss-as-arquillian-container-remote</artifactId>
-					<scope>test</scope>
-				</dependency>
-			</dependencies>
-		</profile>
-		<!-- This profiles executes all integration tests during the build process. -->
-		<profile>
+			<!-- This profiles executes all integration tests during the build process. -->
 			<id>integration-tests</id>
+			<activation>
+				<property>
+					<name>all-tests</name>
+				</property>
+			</activation>
 			<properties>
 				<integration.tests.dir>${basedir}/target/integration-tests</integration.tests.dir>
 				<integration.tests.containers.dir>${integration.tests.dir}/containers</integration.tests.containers.dir>
@@ -453,9 +433,9 @@
 							</execution>
 						</executions>
 					</plugin>
-					<!-- This plugin execute some transformations in the standalone.xml 
-						fo the JBoss AS7 installation in order to run the integration tests. -->
 					<plugin>
+						<!-- This plugin execute some transformations in the standalone.xml 
+							in order to run the integration tests. -->
 						<groupId>org.codehaus.mojo</groupId>
 						<artifactId>xml-maven-plugin</artifactId>
 						<version>1.0</version>
@@ -542,6 +522,26 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>arquillian-managed</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-managed</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
+		<profile>
+			<id>arquillian-remote</id>
+			<dependencies>
+				<dependency>
+					<groupId>org.jboss.as</groupId>
+					<artifactId>jboss-as-arquillian-container-remote</artifactId>
+					<scope>test</scope>
+				</dependency>
+			</dependencies>
+		</profile>
 		<!-- This profiles is intended to be used during the release process. -->
 		<profile>
 			<id>release</id>
@@ -550,6 +550,11 @@
 			installation. -->
 		<profile>
 			<id>install-modules</id>
+			<activation>
+				<property>
+					<name>all-tests</name>
+				</property>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -576,7 +581,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-core</artifactId>
-											<version>${version.picketlink}</version>
+											<version>${version.picketlink2}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/federation/main</outputDirectory>
@@ -584,7 +589,7 @@
 										<artifactItem>
 											<groupId>org.picketlink.distribution</groupId>
 											<artifactId>picketlink-jbas7</artifactId>
-											<version>${version.picketlink}</version>
+											<version>${version.picketlink2}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/federation/main</outputDirectory>
@@ -594,7 +599,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-core-api</artifactId>
-											<version>${version.org.picketlink}</version>
+											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/core/main</outputDirectory>
@@ -602,7 +607,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-core-impl</artifactId>
-											<version>${version.org.picketlink}</version>
+											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/core/main</outputDirectory>
@@ -610,7 +615,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-idm-api</artifactId>
-											<version>${version.org.picketlink}</version>
+											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/idm/main</outputDirectory>
@@ -618,7 +623,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-idm-impl</artifactId>
-											<version>${version.org.picketlink}</version>
+											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/idm/main</outputDirectory>
@@ -626,7 +631,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-idm-schema</artifactId>
-											<version>${version.org.picketlink}</version>
+											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/idm/main</outputDirectory>
@@ -634,7 +639,7 @@
 										<artifactItem>
 											<groupId>org.picketlink</groupId>
 											<artifactId>picketlink-common</artifactId>
-											<version>${version.org.picketlink}</version>
+											<version>${version.picketlink}</version>
 											<type>jar</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${jboss.as.home}/modules/system/layers/base/org/picketlink/common/main</outputDirectory>
@@ -661,12 +666,16 @@
 											value="${jboss.as.home}/modules/system/layers/base/org/picketlink" />
 
 										<property name="module.base.dir" value="target/classes/module" />
-										
+
 										<copy file="${module.base.dir}/main/module.xml" todir="${jboss.as.module.dir}/main" />
-										<copy file="${module.base.dir}/common/main/module.xml" todir="${jboss.as.module.dir}/common/main" />
-										<copy file="${module.base.dir}/core/main/module.xml" todir="${jboss.as.module.dir}/core/main" />
-										<copy file="${module.base.dir}/idm/main/module.xml" todir="${jboss.as.module.dir}/idm/main" />
-										<copy file="${module.base.dir}/federation/main/module.xml" todir="${jboss.as.module.dir}/federation/main" />
+										<copy file="${module.base.dir}/common/main/module.xml"
+											todir="${jboss.as.module.dir}/common/main" />
+										<copy file="${module.base.dir}/core/main/module.xml"
+											todir="${jboss.as.module.dir}/core/main" />
+										<copy file="${module.base.dir}/idm/main/module.xml"
+											todir="${jboss.as.module.dir}/idm/main" />
+										<copy file="${module.base.dir}/federation/main/module.xml"
+											todir="${jboss.as.module.dir}/federation/main" />
 
 										<echo>PicketLink Modules installation complete.</echo>
 									</target>
@@ -679,6 +688,11 @@
 		</profile>
 		<profile>
 			<id>install-subsystem</id>
+			<activation>
+				<property>
+					<name>all-tests</name>
+				</property>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
@@ -708,8 +722,7 @@
 										<delete
 											file="${jboss.as.module.dir}/${project.artifactId}-${project.version}.jar" />
 
-										<copy
-											file="target/${project.artifactId}-${project.version}.jar"
+										<copy file="target/${project.artifactId}-${project.version}.jar"
 											todir="${jboss.as.module.dir}" />
 
 										<copy file="${module.dir}/main/module.xml" todir="${jboss.as.module.dir}" />
