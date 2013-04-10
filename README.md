@@ -54,7 +54,7 @@ After downloading and extracting the file, execute the following comand to insta
 
 The command above should reconfigure the PicketLink modules shipped with your JBoss AS installation with the latest configuration and libraries. Including the extension.
 
-#### Configuring the PicketLink Extension ####
+#### Configuring your JBoss AS installation with the PicketLink Extension and Subsystem ####
 
 Change your standalone.xml to add an extension for the PicketLink module:
 
@@ -62,6 +62,19 @@ Change your standalone.xml to add an extension for the PicketLink module:
                     ...
                   <extension module="org.picketlink"/>
           </extensions>
+          
+Now, you can configure the PicketLink Subsystem using the subsystem's domain model:
+
+	<profile>
+        <subsystem xmlns="urn:jboss:picketlink:1.0">
+        	
+        	<!-- Use the domain model schema to configure the subsystem -->
+        	
+        </subsystem>
+
+You can get some examples about how to configure the PicketLink Subsystem from the following file:
+
+	https://github.com/picketlink/picketlink-as-subsystem/blob/master/src/test/resources/picketlink-subsystem.xml
 
 ## How to use ##
 
@@ -77,7 +90,7 @@ Please, follow the documentation at https://community.jboss.org/wiki/PicketLink3
 
 Please, follow the documentation at https://docs.jboss.org/author/display/PLINK/PicketLink+AS7+Subsystem.
 
-## Running the Integration Tests in Eclipse ##
+## Running and Debugging the Integration Tests in Eclipse ##
 
 First, import the project into your Eclipse.
 
