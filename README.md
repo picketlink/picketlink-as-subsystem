@@ -60,7 +60,7 @@ Change your standalone.xml to add an extension for the PicketLink module:
 
           <extensions>
                     ...
-                  <extension module="org.picketlink"/>
+                  <extension module="org.picketlink.as.extension"/>
           </extensions>
           
 Now, you can configure the PicketLink Subsystem using the subsystem's domain model:
