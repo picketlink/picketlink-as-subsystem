@@ -17,7 +17,7 @@ The extension is currently designed and implemented considering the following re
 * Maven 3.0.3 or newer, to build and install the extension
 
     <b>Important note</b>
-    The extension requires a specific organization for the PicketLink libraries inside the JBoss EAP modules directory. While the application server is not update, you must configure your installation in order to use the extension. See the [JBoss Application Server Configuration](#) section for more details.
+    The extension requires a specific organization for the PicketLink libraries inside the JBoss EAP modules directory. While the application server is not update, you must configure your installation in order to use the extension. See the [JBoss Application Server Configuration](#asInstallation) section for more details.
 
 ## How to build ##
 
@@ -33,7 +33,7 @@ If you want to perform a full build, running also the integration tests you need
 
     mvn -Dall-tests -Parquillian-managed clean install
     
-## JBoss Application Server Configuration ##
+## <a id="asInstallation">JBoss Application Server Configuration</a> ##
 
 ### Using a Pre-configured JBoss AS Installation
 The most simple and fast way to get the subsystem up and running is using the JBoss Application Server installation used during the integration tests. After executing the following command:
@@ -46,11 +46,15 @@ Navigate to the <i>target/integration-tests/containers/jboss-eap-6.1/</i> direct
 
 Download and install [JBoss EAP 6.1.Alpha1](http://www.jboss.org/jbossas/downloads/ "JBoss AS Downloads").
 
+#### Installing the PicketLink Modules and Extension ####
+
 After downloading and extracting the file, execute the following comand to install/configure the PicketLink modules and extension:
 
     mvn -Djboss.as.home=[JBOSS_HOME] -Pinstall-modules,install-subsystem clean install
 
 The command above should reconfigure the PicketLink modules shipped with your JBoss AS installation with the latest configuration and libraries. Including the extension.
+
+#### Configuring the PicketLink Extension ####
 
 Change your standalone.xml to add an extension for the PicketLink module:
 
