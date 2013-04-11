@@ -55,7 +55,7 @@ public enum ModelElement {
      * Identity Management model elements
      */
     IDENTITY_MANAGEMENT ("identity-management"),
-    IDENTITY_MANAGEMENT_JNDI_URL ("jndi-url"),
+    IDENTITY_MANAGEMENT_JNDI_NAME ("jndi-name"),
     JPA_STORE ("jpa-store"),
     JPA_STORE_DATASOURCE ("data-source"),
     JPA_STORE_ENTITY_MANAGER_FACTORY ("entity-manager-factory"),

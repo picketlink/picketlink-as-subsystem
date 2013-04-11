@@ -43,7 +43,7 @@ public class IdentityManagementResourceDefinition extends AbstractResourceDefini
             .setAllowExpression(false).build();
 
     public static final SimpleAttributeDefinition IDENTITY_MANAGEMENT_JNDI_URL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_MANAGEMENT_JNDI_URL.getName(), ModelType.STRING, false)
+            ModelElement.IDENTITY_MANAGEMENT_JNDI_NAME.getName(), ModelType.STRING, false)
             .setAllowExpression(false).build();
 
     static {

@@ -1,6 +1,6 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
 
-	<!-- identity-management jndi-url="picketlink/LDAPIdentityManager"
+	<!-- identity-management jndi-name="picketlink/LDAPIdentityManager"
 		alias="ldap">
 		<ldap-store realms="default" url="asdas" bind-dn="asdd"
 			bind-credential="asdas" base-dn-suffix="asdas" agent-dn-suffix="asdas" user-dn-suffix="asdas"
@@ -9,7 +9,7 @@
 		</ldap-store>
 	</identity-management -->
 
-	<identity-management jndi-url="picketlink/FileBasedCompleteIdentityManager"
+	<identity-management jndi-name="picketlink/FileBasedCompleteIdentityManager"
 		alias="file-based-complete">
 		<file-store realms="default" working-dir="/tmp/pl-idm-complete"
 			always-create-files="true" async-write="true"
@@ -18,14 +18,14 @@
 		</file-store>
 	</identity-management>
 
-	<identity-management jndi-url="picketlink/FileBasedSimpleIdentityManager"
+	<identity-management jndi-name="picketlink/FileBasedSimpleIdentityManager"
 		alias="file-based-simple">
 		<file-store realms="default">
 			<features supportsAll="true" />
 		</file-store>
 	</identity-management>
 
-	<identity-management jndi-url="picketlink/DevIdentityManager"
+	<identity-management jndi-name="picketlink/DevIdentityManager"
 		alias="development">
 		<jpa-store data-source="jboss/datasources/ExampleDS" realms="default,staging,production"
 			tiers="web,service,data">
@@ -41,9 +41,18 @@
 			</relationships>
 		</jpa-store>
 	</identity-management>
-	<identity-management jndi-url="picketlink/StagingIdentityManager"
+
+	<identity-management jndi-name="picketlink/StagingIdentityManager"
 		alias="staging">
 		<jpa-store entity-manager-factory="jboss/TestingIDMEMF"
+			realms="default,staging,production" tiers="web,service,data">
+			<features supportsAll="true" />
+		</jpa-store>
+	</identity-management>
+	
+	<identity-management jndi-name="picketlink/JPAWithCustomEntitiesIMF"
+		alias="jpa-custom-entities">
+		<jpa-store entity-manager-factory="jboss/CustomJPAEntitiesEMF"
 			realms="default,staging,production" tiers="web,service,data">
 			<features supportsAll="true" />
 		</jpa-store>

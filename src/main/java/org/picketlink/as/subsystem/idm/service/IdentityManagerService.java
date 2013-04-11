@@ -98,7 +98,7 @@ public class IdentityManagerService implements Service<IdentityManagerFactory> {
     
     public IdentityManagerService(ModelNode modelNode) {
         this.alias = modelNode.get(ModelElement.COMMON_ALIAS.getName()).asString();
-        this.jndiUrl = modelNode.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_URL.getName()).asString();
+        this.jndiUrl = modelNode.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_NAME.getName()).asString();
     }
 
     @Override
