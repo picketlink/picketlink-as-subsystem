@@ -21,32 +21,24 @@
  */
 package test.org.picketlink.as.subsystem;
 
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.DESCRIBE;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
-
-import java.util.List;
-
 import junit.framework.Assert;
 
-import org.jboss.as.controller.PathAddress;
-import org.jboss.as.controller.PathElement;
+import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.KernelServices;
+import org.jboss.as.subsystem.test.KernelServicesBuilder;
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
-import org.picketlink.as.subsystem.PicketLinkExtension;
 
 
 /**
  * <p>
- * Tests that the PicketLink Subsystem parsing mechanism is functional.
+ * Parses a subsystem configuration considering all domain model elements.
  * </p>
  * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 9, 2012
  */
-public class PicketLinkSubsystemParsingTestCase extends AbstractPicketLinkSubsystemTestCase {
+public class ParseCompleteDomainModelTestCase extends AbstractPicketLinkSubsystemTestCase {
 
     /**
      * Tests that the xml is parsed into the correct operations.
@@ -78,37 +70,31 @@ public class PicketLinkSubsystemParsingTestCase extends AbstractPicketLinkSubsys
     public void testParseAndMarshalModel() throws Exception {
         String subsystemXml = getValidSubsystemXML();
 
-        KernelServices servicesA = super.installInController(subsystemXml);
+        KernelServicesBuilder createKernelServicesBuilder = super.createKernelServicesBuilder(new AdditionalInitialization());
+        
+        createKernelServicesBuilder.setSubsystemXml(subsystemXml);
+        
+        KernelServices servicesA = createKernelServicesBuilder.build();
 
         ModelNode modelA = servicesA.readWholeModel();
         String marshalled = servicesA.getPersistedSubsystemXml();
 
         System.out.println(marshalled);
 
-        KernelServices servicesB = super.installInController(marshalled);
+        KernelServicesBuilder createKernelServicesBuilderB = super.createKernelServicesBuilder(new AdditionalInitialization());
+        
+        createKernelServicesBuilderB.setSubsystemXml(marshalled);
+        
+        KernelServices servicesB = createKernelServicesBuilderB.build();
 
         ModelNode modelB = servicesB.readWholeModel();
 
         super.compare(modelA, modelB);
     }
 
-//    @Test
-    public void testDescribeHandler() throws Exception {
-        String subsystemXml = getValidSubsystemXML();
-        KernelServices servicesA = super.installInController(subsystemXml);
-
-        ModelNode modelA = servicesA.readWholeModel();
-        ModelNode describeOp = new ModelNode();
-        describeOp.get(OP).set(DESCRIBE);
-        describeOp.get(OP_ADDR).set(
-                PathAddress.pathAddress(PathElement.pathElement(SUBSYSTEM, PicketLinkExtension.SUBSYSTEM_NAME)).toModelNode());
-        List<ModelNode> operations = super.checkResultAndGetContents(servicesA.executeOperation(describeOp)).asList();
-
-        KernelServices servicesB = super.installInController(operations);
-
-        ModelNode modelB = servicesB.readWholeModel();
-
-        super.compare(modelA, modelB);
+    @Override
+    protected String getSubsystemXmlFileName() {
+        return "picketlink-subsystem.xml";
     }
 
 }

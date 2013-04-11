@@ -44,15 +44,15 @@ import org.picketlink.idm.model.SimpleUser;
  *
  */
 @RunWith(Arquillian.class)
-public class PicketLinkIDMCDIExtensionTestCase {
+public class IdentityManagerFactoryProducerTestCase {
     
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(PicketLinkIDMCDIExtensionTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(PicketLinkIDMCDIExtensionTestCase.class)
+                .addAsManifestResource(IdentityManagerFactoryProducerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                .addClass(IdentityManagerFactoryProducerTestCase.class)
                 .addClass(MyIdentityConfigurationProducer.class);;
 
         System.out.println(deployment.toString(true));

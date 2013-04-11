@@ -32,7 +32,7 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 
@@ -59,10 +59,10 @@ public class RelationshipAddHandler extends AbstractResourceAddStepHandler {
             throws OperationFailedException {
         String identityManagementAlias = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(1).getValue();
         
-        ServiceController<?> container = (ServiceController<IdentityManagerService>) context
-                .getServiceRegistry(false).getService(IdentityManagerService.createServiceName(identityManagementAlias));
+        ServiceController<?> container = (ServiceController<IdentityManagerFactoryService>) context
+                .getServiceRegistry(false).getService(IdentityManagerFactoryService.createServiceName(identityManagementAlias));
         
-        IdentityManagerService identityManagerService = (IdentityManagerService) container.getService();
+        IdentityManagerFactoryService identityManagerService = (IdentityManagerFactoryService) container.getService();
         
         identityManagerService.configureRelationships(operation);
     }

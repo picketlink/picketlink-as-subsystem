@@ -52,7 +52,7 @@ public class IdentityManagementConfigurationWithQualifiersTestCase {
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsResource(IdentityManagementConfigurationWithQualifiersTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                .addAsManifestResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                .addAsManifestResource(JNDILookupIdentityManagerFactoryTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                 .addClass(IdentityManagementConfigurationWithQualifiersTestCase.class)
                 .addClass(MyIdentityManagerProducer.class)
                 .addClass(IdentityManagerConfig.class);;

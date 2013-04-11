@@ -28,7 +28,9 @@ import junit.framework.Assert;
 
 import org.apache.commons.io.FileUtils;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
+import org.jboss.as.subsystem.test.AdditionalInitialization;
 import org.jboss.as.subsystem.test.KernelServices;
+import org.jboss.as.subsystem.test.KernelServicesBuilder;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceName;
@@ -39,7 +41,7 @@ import org.picketlink.as.subsystem.PicketLinkExtension;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * 
  */
-public class AbstractPicketLinkSubsystemTestCase extends AbstractSubsystemTest {
+public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsystemTest {
 
     protected static final String FAKE_AS7_INSTALLATION_DIR = "target/jboss-as7-fake";
     protected static final String FAKE_AS7_DEPLOYMENTS = FAKE_AS7_INSTALLATION_DIR + "/deployments";
@@ -88,7 +90,11 @@ public class AbstractPicketLinkSubsystemTestCase extends AbstractSubsystemTest {
     private ModelNode installModelIntoController() {
         if (this.resultingModelNode == null) {
             try {
-                this.kernelServices = super.installInController(getValidSubsystemXML());
+                KernelServicesBuilder createKernelServicesBuilder = super.createKernelServicesBuilder(new AdditionalInitialization());
+                
+                createKernelServicesBuilder.setSubsystemXml(getValidSubsystemXML());
+                
+                this.kernelServices = createKernelServicesBuilder.build();
                 this.resultingModelNode = this.kernelServices.readWholeModel();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -109,7 +115,7 @@ public class AbstractPicketLinkSubsystemTestCase extends AbstractSubsystemTest {
 
         try {
             content = FileUtils.readFileToString(new File(Thread.currentThread().getContextClassLoader()
-                    .getResource("picketlink-subsystem.xml").getFile()));
+                    .getResource(getSubsystemXmlFileName()).getFile()));
         } catch (IOException e) {
             Assert.fail("Error while reading the subsystem configuration file.");
         }
@@ -117,6 +123,7 @@ public class AbstractPicketLinkSubsystemTestCase extends AbstractSubsystemTest {
         return content;
     }
 
+    protected abstract String getSubsystemXmlFileName();
 
     /**
      * <p>

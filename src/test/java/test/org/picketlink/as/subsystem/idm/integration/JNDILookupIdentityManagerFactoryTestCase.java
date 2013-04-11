@@ -44,37 +44,37 @@ import org.picketlink.idm.model.SimpleUser;
  *
  */
 @RunWith(Arquillian.class)
-public class IdentityManagementConfigurationTestCase {
+public class JNDILookupIdentityManagerFactoryTestCase {
     
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                .addAsManifestResource(IdentityManagementConfigurationTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(IdentityManagementConfigurationTestCase.class);
+                .addAsResource(JNDILookupIdentityManagerFactoryTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                .addAsManifestResource(JNDILookupIdentityManagerFactoryTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                .addClass(JNDILookupIdentityManagerFactoryTestCase.class);
 
         System.out.println(deployment.toString(true));
         
         return deployment;
     }
     
-    @Resource (mappedName="picketlink/DevIdentityManager")
-    private IdentityManagerFactory devIdentityManagerFactory;
+    @Resource (mappedName="picketlink/JPABasedWithDataSourceIMF")
+    private IdentityManagerFactory jpaBasedWithDataSourceIMF;
     
-    @Resource (mappedName="picketlink/StagingIdentityManager")
-    private IdentityManagerFactory stagingIdentityManagerFactory;
+    @Resource (mappedName="picketlink/JPABasedWithEntityManagerFactoryIMF")
+    private IdentityManagerFactory jpaBasedWithEntityManagerFactoryIMF;
 
-    @Resource (mappedName="picketlink/FileBasedCompleteIdentityManager")
-    private IdentityManagerFactory fileCompleteIdentityManagerFactory;
+    @Resource (mappedName="picketlink/FileBasedWithAllConfigIMF")
+    private IdentityManagerFactory fileBasedWithAllConfigIMF;
 
-    @Resource (mappedName="picketlink/FileBasedSimpleIdentityManager")
-    private IdentityManagerFactory fileSimpleIdentityManagerFactory;
+    @Resource (mappedName="picketlink/FileBasedSimpleConfigIMF")
+    private IdentityManagerFactory fileBasedSimpleConfigIMF;
 
     @Test
-    public void testDevIdentityManager() throws Exception {
-        IdentityManager identityManager = this.devIdentityManagerFactory.createIdentityManager();
+    public void testJPABasedWithDataSourceConfig() throws Exception {
+        IdentityManager identityManager = this.jpaBasedWithDataSourceIMF.createIdentityManager();
         
         SimpleUser user = new SimpleUser("jonhy");
         
@@ -92,8 +92,8 @@ public class IdentityManagementConfigurationTestCase {
     }
     
     @Test
-    public void testStagingIdentityManager() throws Exception {
-        IdentityManager identityManager = this.stagingIdentityManagerFactory.createIdentityManager();
+    public void testJPABasedWithEntityManagerFactoryIMF() throws Exception {
+        IdentityManager identityManager = this.jpaBasedWithEntityManagerFactoryIMF.createIdentityManager();
         
         SimpleUser user = new SimpleUser("anne");
         
@@ -111,8 +111,8 @@ public class IdentityManagementConfigurationTestCase {
     }
     
     @Test
-    public void testFileSimpleIdentityManager() throws Exception {
-        IdentityManager identityManager = this.fileSimpleIdentityManagerFactory.createIdentityManager();
+    public void testFileBasedSimpleConfigIMF() throws Exception {
+        IdentityManager identityManager = this.fileBasedSimpleConfigIMF.createIdentityManager();
         
         SimpleUser user = new SimpleUser("peter");
         
@@ -130,8 +130,8 @@ public class IdentityManagementConfigurationTestCase {
     }
     
     @Test
-    public void testFileCompleteIdentityManager() throws Exception {
-        IdentityManager identityManager = this.fileCompleteIdentityManagerFactory.createIdentityManager();
+    public void testFileBasedWithAllConfigIMF() throws Exception {
+        IdentityManager identityManager = this.fileBasedWithAllConfigIMF.createIdentityManager();
         
         SimpleUser user = new SimpleUser("mark");
         
