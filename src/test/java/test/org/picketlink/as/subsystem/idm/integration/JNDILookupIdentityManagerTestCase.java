@@ -67,7 +67,7 @@ public class JNDILookupIdentityManagerTestCase {
 
     @Test
     public void testDefaultIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("jonhy");
+        SimpleUser user = new SimpleUser("jason");
         
         this.defaultIdentityManager.add(user);
         
@@ -84,7 +84,7 @@ public class JNDILookupIdentityManagerTestCase {
     
     @Test
     public void testUserRealmIdentityManager() throws Exception {
-        SimpleUser user = new SimpleUser("jonhy");
+        SimpleUser user = new SimpleUser("travolta");
         
         this.userRealmIdentityManager.add(user);
         

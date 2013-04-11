@@ -165,11 +165,11 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         ModelNode realmsNode = operation.get(ModelElement.REALMS.getName());
 
         if (realmsNode.isDefined()) {
+            BaseAbstractStoreConfiguration<?> identityStoreConfiguration = (BaseAbstractStoreConfiguration<?>) this.storeConfigs.get(ModelElement.forName(storeType));
+            
             String[] realms = realmsNode.asString().split(",");
 
             for (String realm : realms) {
-                BaseAbstractStoreConfiguration<?> identityStoreConfiguration = (BaseAbstractStoreConfiguration<?>) this.storeConfigs.get(ModelElement.forName(storeType));
-                
                 identityStoreConfiguration.addRealm(realm);
             }
         }

@@ -54,7 +54,7 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
     }
 
     @Before
-    public void onSetup() {
+    public void onSetup() throws Exception {
         configureFakeAS7Installation();
         installModelIntoController();
     }
@@ -95,6 +95,7 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
                 createKernelServicesBuilder.setSubsystemXml(getValidSubsystemXML());
                 
                 this.kernelServices = createKernelServicesBuilder.build();
+                
                 this.resultingModelNode = this.kernelServices.readWholeModel();
             } catch (Exception e) {
                 e.printStackTrace();
