@@ -96,4 +96,9 @@ public class AbstractFederationSubsystemTestCase extends AbstractPicketLinkSubsy
     protected ServiceProviderService getServiceProviderService(String alias) throws Exception {
         return (ServiceProviderService) getInstalledService(ServiceProviderService.createServiceName(alias)).getValue();
     }
+    
+    @Override
+    protected String getSubsystemXmlFileName() {
+        return "picketlink-subsystem-federation.xml";
+    }
 }

@@ -35,7 +35,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.idm.IdentityManagerFactory;
@@ -64,7 +64,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
         ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
-                IdentityManagerService.createServiceName(alias), new IdentityManagerService(operation));
+                IdentityManagerFactoryService.createServiceName(alias), new IdentityManagerFactoryService(operation));
         Resource resource = context.readResource(PathAddress.EMPTY_ADDRESS);
 
         Resource jpaStoreResource = resource.getChild(PathElement.pathElement(ModelElement.JPA_STORE.getName(),

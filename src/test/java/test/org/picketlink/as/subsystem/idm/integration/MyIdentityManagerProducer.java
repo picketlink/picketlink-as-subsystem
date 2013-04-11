@@ -35,24 +35,24 @@ import org.picketlink.idm.IdentityManagerFactory;
 @ApplicationScoped
 public class MyIdentityManagerProducer {
 
-    @Resource (mappedName="picketlink/DevIdentityManager")
+    @Resource (mappedName="picketlink/JPABasedWithDataSourceIMF")
     @Produces
     @IdentityManagerConfig ("dev")
-    private IdentityManagerFactory devIdentityManager;
+    private IdentityManagerFactory developmentIMF;
     
-    @Resource (mappedName="picketlink/StagingIdentityManager")
+    @Resource (mappedName="picketlink/JPABasedWithEntityManagerFactoryIMF")
     @Produces
     @IdentityManagerConfig ("staging")
-    private IdentityManagerFactory stagingIdentityManager;
+    private IdentityManagerFactory stagingIMF;
 
-    @Resource (mappedName="picketlink/FileBasedCompleteIdentityManager")
+    @Resource (mappedName="picketlink/FileBasedWithAllConfigIMF")
     @Produces
     @IdentityManagerConfig ("production")
-    private IdentityManagerFactory fileCompleteIdentityManager;
+    private IdentityManagerFactory productionIMF;
 
-    @Resource (mappedName="picketlink/FileBasedSimpleIdentityManager")
+    @Resource (mappedName="picketlink/FileBasedSimpleConfigIMF")
     @Produces
     @IdentityManagerConfig ("test")
-    private IdentityManagerFactory fileSimpleIdentityManager;
+    private IdentityManagerFactory testingIMF;
     
 }

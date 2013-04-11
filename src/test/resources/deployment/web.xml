@@ -14,7 +14,7 @@
 
 	<resource-ref>
 		<description>Development IdentityManager</description>
-		<res-ref-name>java:picketlink/DevIdentityManager</res-ref-name>
+		<res-ref-name>java:picketlink/FileBasedWithAllConfigIMF/default</res-ref-name>
 		<res-type>org.picketlink.idm.IdentityManager</res-type>
 	</resource-ref>
 

@@ -1,45 +1,5 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
 
-	<identity-management jndi-name="picketlink/FileBasedWithAllConfigIMF"
-		alias="file-based-complete">
-		<file-store realms="default" working-dir="/tmp/pl-idm-complete"
-			always-create-files="true" async-write="true"
-			async-write-thread-pool="10">
-			<features supportsAll="true" />
-		</file-store>
-	</identity-management>
-
-	<identity-management jndi-name="picketlink/FileBasedSimpleConfigIMF"
-		alias="file-based-simple">
-		<file-store realms="default">
-			<features supportsAll="true" />
-		</file-store>
-	</identity-management>
-
-	<identity-management jndi-name="picketlink/JPABasedWithDataSourceIMF"
-		alias="development">
-		<jpa-store data-source="jboss/datasources/ExampleDS" realms="default,userRealm">
-			<features>
-				<feature group="user" group-operation="read,create,delete,update" />
-				<feature group="role" group-operation="read,create,delete,update" />
-				<feature group="agent" group-operation="read,create,delete,update" />
-				<feature group="group" group-operation="read,create,delete,update" />
-				<feature group="credential" group-operation="validate,update" />
-			</features>
-			<relationships>
-				<relationship class="org.picketlink.idm.model.Authorization" />
-			</relationships>
-		</jpa-store>
-	</identity-management>
-
-	<identity-management jndi-name="picketlink/JPABasedWithEntityManagerFactoryIMF"
-		alias="staging">
-		<jpa-store entity-manager-factory="jboss/TestingIDMEMF"
-			realms="default,staging,production" tiers="web,service,data">
-			<features supportsAll="true" />
-		</jpa-store>
-	</identity-management>
-	
 	<federation alias="federation-ws-trust-enabled">
 		<security-token-service alias="PicketLinkSTS"
 			endpoint="http://localhost:8080/picketlink-sts2" security-domain="picketlink-sts" />

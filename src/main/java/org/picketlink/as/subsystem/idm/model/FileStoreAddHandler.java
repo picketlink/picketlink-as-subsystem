@@ -22,48 +22,17 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import java.util.List;
-
-import org.jboss.as.controller.OperationContext;
-import org.jboss.as.controller.OperationFailedException;
-import org.jboss.as.controller.PathAddress;
-import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
-import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceController;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class FileStoreAddHandler extends AbstractResourceAddStepHandler {
+public class FileStoreAddHandler extends AbstractIdentityStoreAddStepHandler {
 
     public static final FileStoreAddHandler INSTANCE = new FileStoreAddHandler();
 
     private FileStoreAddHandler() {
         super(ModelElement.FILE_STORE);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
-    @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-            throws OperationFailedException {
-        String identityManagementAlias = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getElement(1).getValue();
-
-        ServiceController<?> container = (ServiceController<IdentityManagerService>) context
-                .getServiceRegistry(false).getService(IdentityManagerService.createServiceName(identityManagementAlias));
-
-        IdentityManagerService identityManagerService = (IdentityManagerService) container.getService();
-        
-        identityManagerService.configureStore(operation);
     }
 
 }

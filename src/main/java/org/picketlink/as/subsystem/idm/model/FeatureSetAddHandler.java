@@ -31,7 +31,7 @@ import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceController;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 
@@ -61,10 +61,10 @@ public class FeatureSetAddHandler extends AbstractResourceAddStepHandler {
         ModelNode supportAllFeatures = operation.get(ModelElement.COMMON_SUPPORTS_ALL.getName());
 
         if (supportAllFeatures.isDefined() && supportAllFeatures.asBoolean()) {
-            ServiceController<?> container = (ServiceController<IdentityManagerService>) context.getServiceRegistry(false)
-                    .getService(IdentityManagerService.createServiceName(identityManagementAlias));
+            ServiceController<?> container = (ServiceController<IdentityManagerFactoryService>) context.getServiceRegistry(false)
+                    .getService(IdentityManagerFactoryService.createServiceName(identityManagementAlias));
 
-            IdentityManagerService identityManagerService = (IdentityManagerService) container.getService();
+            IdentityManagerFactoryService identityManagerService = (IdentityManagerFactoryService) container.getService();
 
             identityManagerService.configureAllFeatures(operation);
         }
