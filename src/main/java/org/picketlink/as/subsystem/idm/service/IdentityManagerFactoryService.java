@@ -193,7 +193,9 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
             String[] realms = realmsNode.asString().split(",");
 
             for (String realm : realms) {
-                identityStoreConfiguration.addRealm(realm);
+                if (!StringUtil.isNullOrEmpty(realm)) {
+                    identityStoreConfiguration.addRealm(realm.trim());
+                }
             }
         }
     }
@@ -341,6 +343,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private void startJPAIdentityStore() {
         JPAIdentityStoreConfiguration jpaConfig = (JPAIdentityStoreConfiguration) this.storeConfigs.get(ModelElement.JPA_STORE);
+        
         if (jpaConfig == null) {
             return;
         }
@@ -368,6 +371,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         }
 
         Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
+        
         for (EntityType<?> entity : entities) {
             Class<?> javaType = entity.getJavaType();
             IDMEntity idmEntity = javaType.getAnnotation(IDMEntity.class);
@@ -409,13 +413,11 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
                                 entityClassLoader));
             }
         });
-
     }
 
     private void configureJPAIdentityStore(ModelNode modelNode) {
         ModelNode jpaDataSourceNode = modelNode.get(ModelElement.JPA_STORE_DATASOURCE.getName());
         ModelNode jpaEntityModule = modelNode.get(ModelElement.JPA_STORE_ENTITY_MODULE.getName());
-
         ModelNode jpaEntityManagerFactoryNode = modelNode.get(ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
 
         if (jpaEntityManagerFactoryNode.isDefined()) {

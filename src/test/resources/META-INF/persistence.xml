@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<persistence xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+    version="2.0">
+
+    <persistence-unit name="identity" transaction-type="JTA">
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyIdentityObject</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyPartitionObject</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyRelationshipObject</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyRelationshipIdentityObject</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyRelationshipObjectAttribute</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyIdentityObjectAttribute</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyCredentialObject</class>
+        <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyCredentialObjectAttribute</class>
+
+        <exclude-unlisted-classes>true</exclude-unlisted-classes>
+
+        <properties>
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+            <property name="hibernate.show_sql" value="false" />
+            <property name="hibernate.format_sql" value="true" />
+
+            <property name="hibernate.listeners.envers.autoRegister" value="false" />
+            <property name="javax.persistence.validation.mode" value="none" />
+        </properties>
+    </persistence-unit>
+
+</persistence>

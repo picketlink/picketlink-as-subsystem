@@ -35,6 +35,13 @@
 			<features supportsAll="true" />
 		</jpa-store>
 	</identity-management>
+	<identity-management jndi-name="picketlink/JPABasedWithCustomEntitiesIMF"
+		alias="custom-entities">
+		<jpa-store data-source="jboss/datasources/ExampleDS" entity-module="org.picketlink.test"
+			realms="default">
+			<features supportsAll="true" />
+		</jpa-store>
+	</identity-management>
 	<federation alias="federation-ws-trust-enabled">
 		<security-token-service alias="PicketLinkSTS"
 			endpoint="http://localhost:8080/picketlink-sts2" security-domain="picketlink-sts" />

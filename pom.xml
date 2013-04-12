@@ -380,7 +380,7 @@
 							<goal>test</goal>
 						</goals>
 						<configuration>
-							<skip>true</skip>
+							<skip>false</skip>
 							<excludes>
 								<exclude>test/**/integration/*TestCase.java</exclude>
 							</excludes>
@@ -519,6 +519,18 @@
 							</execution>
 						</executions>
 					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-jar-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<goals>
+									<goal>test-jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
 				</plugins>
 			</build>
 		</profile>
@@ -531,6 +543,39 @@
 					<scope>test</scope>
 				</dependency>
 			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.6</version>
+						<executions>
+							<execution>
+								<id>update-test-module</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<phase>package</phase>
+								<configuration>
+									<target>
+										<property name="test.module.base.dir" value="target/test-classes/module" />
+										
+										<property name="jboss.as.module.dir"
+											value="${jboss.as.home}/modules/system/layers/base/org/picketlink" />
+
+										<copy file="target/${project.artifactId}-${project.version}-tests.jar"
+											todir="${jboss.as.module.dir}/test/main/" />
+
+										<copy file="${test.module.base.dir}/test/main/module.xml" todir="${jboss.as.module.dir}/test/main" />
+
+										<echo>PicketLink subsystem installation complete.</echo>
+									</target>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 		<profile>
 			<id>arquillian-remote</id>
@@ -667,7 +712,8 @@
 
 										<property name="module.base.dir" value="target/classes/module" />
 
-										<copy file="${module.base.dir}/extension/main/module.xml" todir="${jboss.as.module.dir}/as/extension/main" />
+										<copy file="${module.base.dir}/extension/main/module.xml"
+											todir="${jboss.as.module.dir}/as/extension/main" />
 										<copy file="${module.base.dir}/common/main/module.xml"
 											todir="${jboss.as.module.dir}/common/main" />
 										<copy file="${module.base.dir}/core/main/module.xml"
@@ -676,9 +722,8 @@
 											todir="${jboss.as.module.dir}/idm/main" />
 										<copy file="${module.base.dir}/idm/schema/main/module.xml"
 											todir="${jboss.as.module.dir}/idm/schema/main" />
-										<copy file="${module.base.dir}/main/module.xml"
-											todir="${jboss.as.module.dir}/main" />
-
+										<copy file="${module.base.dir}/main/module.xml" todir="${jboss.as.module.dir}/main" />
+										
 										<echo>PicketLink Modules installation complete.</echo>
 									</target>
 								</configuration>
@@ -718,6 +763,8 @@
 								<configuration>
 									<target>
 										<property name="module.dir" value="target/classes/module" />
+										<property name="test.module.base.dir" value="target/test-classes/module" />
+										
 										<property name="jboss.as.module.dir"
 											value="${jboss.as.home}/modules/system/layers/base/org/picketlink" />
 
@@ -727,7 +774,8 @@
 										<copy file="target/${project.artifactId}-${project.version}.jar"
 											todir="${jboss.as.module.dir}/as/extension/main/" />
 
-										<copy file="${module.dir}/extension/main/module.xml" todir="${jboss.as.module.dir}/as/extension/main" />
+										<copy file="${module.dir}/extension/main/module.xml"
+											todir="${jboss.as.module.dir}/as/extension/main" />
 
 										<echo>PicketLink subsystem installation complete.</echo>
 									</target>

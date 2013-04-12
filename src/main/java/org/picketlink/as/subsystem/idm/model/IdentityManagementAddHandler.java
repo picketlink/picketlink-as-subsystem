@@ -26,6 +26,7 @@ import java.util.List;
 
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.ServiceVerificationHandler;
@@ -51,19 +52,13 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         super(ModelElement.IDENTITY_MANAGEMENT);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
+            final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
             throws OperationFailedException {
-        String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
+        final String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
-        ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
+        final ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
                 IdentityManagerFactoryService.createServiceName(alias), new IdentityManagerFactoryService(operation));
         Resource resource = context.readResource(PathAddress.EMPTY_ADDRESS);
 
@@ -85,10 +80,19 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             }
         }
 
-        ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
-                .setInitialMode(Mode.PASSIVE).install();
+        final ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
+                .setInitialMode(Mode.NEVER).install();
 
         newControllers.add(controller);
+        
+        // This needs to run after all child resources so that they can detect a fresh state
+        context.addStep(new OperationStepHandler() {
+            @Override
+            public void execute(OperationContext context, ModelNode operation) throws OperationFailedException {
+                controller.setMode(Mode.PASSIVE);
+                context.stepCompleted();
+            }
+        }, OperationContext.Stage.RUNTIME);
     }
 
 }

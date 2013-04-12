@@ -65,6 +65,9 @@ public class JNDILookupIdentityManagerFactoryTestCase {
     
     @Resource (mappedName="picketlink/JPABasedWithEntityManagerFactoryIMF")
     private IdentityManagerFactory jpaBasedWithEntityManagerFactoryIMF;
+    
+    @Resource (mappedName="picketlink/JPABasedWithCustomEntitiesIMF")
+    private IdentityManagerFactory jpaBasedWithCustomEntitiesIMF;
 
     @Resource (mappedName="picketlink/FileBasedWithAllConfigIMF")
     private IdentityManagerFactory fileBasedWithAllConfigIMF;
@@ -96,6 +99,25 @@ public class JNDILookupIdentityManagerFactoryTestCase {
         IdentityManager identityManager = this.jpaBasedWithEntityManagerFactoryIMF.createIdentityManager();
         
         SimpleUser user = new SimpleUser("anne");
+        
+        identityManager.add(user);
+        
+        Password password = new Password("mypassWd");
+        
+        identityManager.updateCredential(user, password);
+        
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
+        
+        identityManager.validateCredentials(credentials);
+        
+        Assert.assertEquals(Status.VALID, credentials.getStatus());
+    }
+    
+    @Test
+    public void testJPABasedWithCustomEntitiesIMF() throws Exception {
+        IdentityManager identityManager = this.jpaBasedWithCustomEntitiesIMF.createIdentityManager();
+        
+        SimpleUser user = new SimpleUser("mario");
         
         identityManager.add(user);
         
