@@ -162,6 +162,11 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
             configureLDAPIdentityStore(operation);
         }
         
+        configureRealms(operation, storeType);
+        configureTiers(operation, storeType);
+    }
+
+    private void configureRealms(ModelNode operation, String storeType) {
         ModelNode realmsNode = operation.get(ModelElement.REALMS.getName());
 
         if (realmsNode.isDefined()) {
@@ -171,6 +176,20 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
             for (String realm : realms) {
                 identityStoreConfiguration.addRealm(realm);
+            }
+        }
+    }
+
+    private void configureTiers(ModelNode operation, String storeType) {
+        ModelNode tierNode = operation.get(ModelElement.TIERS.getName());
+
+        if (tierNode.isDefined()) {
+            BaseAbstractStoreConfiguration<?> identityStoreConfiguration = (BaseAbstractStoreConfiguration<?>) this.storeConfigs.get(ModelElement.forName(storeType));
+            
+            String[] tiers = tierNode.asString().split(",");
+
+            for (String tier : tiers) {
+                identityStoreConfiguration.addTier(tier);
             }
         }
     }

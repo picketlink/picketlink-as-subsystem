@@ -29,11 +29,17 @@ import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.naming.ManagedReferenceFactory;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
+import org.jboss.msc.service.ServiceController.Mode;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
+import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 
 /**
  * @author Pedro Silva
@@ -53,6 +59,34 @@ public abstract class AbstractIdentityStoreAddStepHandler extends AbstractResour
                 .getElement(1).getValue();
 
         doPerformRuntime(identityManagementAlias, context, operation, model, verificationHandler, newControllers);
+        
+        installIdentityManagersForRealms(context, operation, verificationHandler, newControllers, identityManagementAlias);
+    }
+
+    private void installIdentityManagersForRealms(OperationContext context, ModelNode operation,
+            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers,
+            String identityManagementAlias) {
+        ModelNode realmsNode = operation.get(ModelElement.REALMS.getName());
+
+        if (realmsNode.isDefined()) {
+            String[] realms = realmsNode.asString().split(",");
+
+            for (String realm : realms) {
+                IdentityManagerService identityManagerService = new IdentityManagerService(identityManagementAlias, realm);
+                
+                ServiceBuilder<ManagedReferenceFactory> identityManagerServiceBuilder = context.getServiceTarget().addService(
+                        IdentityManagerService.createServiceName(identityManagementAlias, realm),
+                        identityManagerService);
+
+                identityManagerServiceBuilder.addDependency(IdentityManagerFactoryService
+                        .createServiceName(identityManagementAlias), IdentityManagerFactory.class, identityManagerService.getIdentityManagerFactory());
+
+                ServiceController<ManagedReferenceFactory> identityManagerController = identityManagerServiceBuilder
+                        .addListener(verificationHandler).setInitialMode(Mode.PASSIVE).install();
+
+                newControllers.add(identityManagerController);
+            }
+        }
     }
 
     protected void doPerformRuntime(String identityManagementAlias, OperationContext context, ModelNode operation, ModelNode model,
