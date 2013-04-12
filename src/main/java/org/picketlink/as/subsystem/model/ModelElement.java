@@ -58,6 +58,7 @@ public enum ModelElement {
     IDENTITY_MANAGEMENT_JNDI_NAME ("jndi-name"),
     JPA_STORE ("jpa-store"),
     JPA_STORE_DATASOURCE ("data-source"),
+    JPA_STORE_ENTITY_MODULE("entity-module"),
     JPA_STORE_ENTITY_MANAGER_FACTORY ("entity-manager-factory"),
     FILE_STORE ("file-store"),
     FILE_STORE_WORKING_DIR ("working-dir"),

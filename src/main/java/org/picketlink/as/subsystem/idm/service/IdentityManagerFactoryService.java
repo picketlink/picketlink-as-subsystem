@@ -27,12 +27,14 @@ import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.metamodel.EntityType;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.jboss.as.controller.PathAddress;
@@ -45,6 +47,10 @@ import org.jboss.as.naming.ValueManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.as.naming.service.BinderService;
 import org.jboss.dmr.ModelNode;
+import org.jboss.modules.Module;
+import org.jboss.modules.ModuleIdentifier;
+import org.jboss.modules.ModuleLoadException;
+import org.jboss.modules.ModuleLoader;
 import org.jboss.msc.inject.InjectionException;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.Service;
@@ -68,15 +74,8 @@ import org.picketlink.idm.config.IdentityConfiguration;
 import org.picketlink.idm.config.IdentityStoreConfiguration;
 import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
 import org.picketlink.idm.config.LDAPIdentityStoreConfiguration;
+import org.picketlink.idm.jpa.annotations.IDMEntity;
 import org.picketlink.idm.jpa.internal.JPAContextInitializer;
-import org.picketlink.idm.jpa.schema.CredentialObject;
-import org.picketlink.idm.jpa.schema.CredentialObjectAttribute;
-import org.picketlink.idm.jpa.schema.IdentityObject;
-import org.picketlink.idm.jpa.schema.IdentityObjectAttribute;
-import org.picketlink.idm.jpa.schema.PartitionObject;
-import org.picketlink.idm.jpa.schema.RelationshipIdentityObject;
-import org.picketlink.idm.jpa.schema.RelationshipObject;
-import org.picketlink.idm.jpa.schema.RelationshipObjectAttribute;
 import org.picketlink.idm.model.Relationship;
 
 /**
@@ -86,17 +85,22 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private static String SERVICE_NAME_PREFIX = "IdentityManagementService";
 
-    private EntityManagerFactory embeddedEMF;
-    private EntityManagerFactory providedEMF;
+    private boolean embeddedEmf;
 
-    private String jndiName;
-    private Map<ModelElement, IdentityStoreConfiguration> storeConfigs = new HashMap<ModelElement, IdentityStoreConfiguration>();
+    private EntityManagerFactory emf;
 
-    private String jpaStoreDataSource;
-    private String jpaStoreEntityManagerFactory;
-    private String alias;
+    private final String jndiName;
+    private final Map<ModelElement, IdentityStoreConfiguration> storeConfigs = new HashMap<ModelElement, IdentityStoreConfiguration>();
+
+    private final String alias;
 
     private IdentityManagerFactory identityManagerFactory;
+
+    private String jpaStoreEntityManagerFactory;
+
+    private String jpaStoreDataSource;
+
+    private String jpaStoreEntityModule;
 
     public IdentityManagerFactoryService(ModelNode modelNode) {
         this.alias = modelNode.get(ModelElement.COMMON_ALIAS.getName()).asString();
@@ -111,41 +115,46 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     @Override
     public void start(StartContext context) throws StartException {
         ROOT_LOGGER.info("Starting Identity Service");
-        ROOT_LOGGER.info("Creating entity manager factory");
 
-        if (!StringUtil.isNullOrEmpty(this.jpaStoreEntityManagerFactory)) {
-            try {
-                this.providedEMF = (EntityManagerFactory) new InitialContext().lookup(this.jpaStoreEntityManagerFactory);
-            } catch (NamingException e) {
-                throw new RuntimeException(e);
-            }
-        } else if (!StringUtil.isNullOrEmpty(this.jpaStoreDataSource)) {
-            Map<Object, Object> properties = new HashMap<Object, Object>();
-
-            properties.put("javax.persistence.jtaDataSource", this.jpaStoreDataSource);
-
-            properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
-
-            this.embeddedEMF = Persistence.createEntityManagerFactory("identity", properties);
-        }
+        startJPAIdentityStore();
 
         this.identityManagerFactory = createIdentityManagerFactory();
 
         publishIdentityManagerFactory(context);
     }
 
+    private EntityManagerFactory createEntityManagerFactory() throws ModuleLoadException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+
+        if (!StringUtil.isNullOrEmpty(jpaStoreEntityModule)) {
+            ModuleLoader moduleLoader = Module.getContextModuleLoader();
+            Module module = moduleLoader.loadModule(ModuleIdentifier.create(jpaStoreEntityModule));
+            Thread.currentThread().setContextClassLoader(module.getClassLoader());
+        }
+
+        try {
+            Map<Object, Object> properties = new HashMap<Object, Object>();
+            properties.put("javax.persistence.jtaDataSource", jpaStoreDataSource);
+            properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
+
+            return Persistence.createEntityManagerFactory("identity", properties);
+        } finally {
+            Thread.currentThread().setContextClassLoader(classLoader);
+        }
+    }
+
     @Override
     public void stop(StopContext context) {
         ROOT_LOGGER.info("Stopping Identity Service");
 
-        if (this.embeddedEMF != null) {
-            ROOT_LOGGER.info("Closing entity manager factory");
-            embeddedEMF.close();
+        unpublishIdentityManagerFactory(context);
+
+        if (embeddedEmf && emf != null) {
+            ROOT_LOGGER.debug("Closing entity manager factory");
+            emf.close();
         }
 
-        this.providedEMF = null;
-
-        unpublishIdentityManagerFactory(context);
+        emf = null;
 
         this.identityManagerFactory = null;
     }
@@ -302,51 +311,99 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         this.storeConfigs.put(ModelElement.LDAP_STORE, storeConfig);
     }
 
-    private void configureJPAIdentityStore(ModelNode modelNode) {
-        JPAIdentityStoreConfiguration jpaConfig = new JPAIdentityStoreConfiguration();
-
-        ModelNode jpaDataSourceNode = modelNode.get(ModelElement.JPA_STORE_DATASOURCE.getName());
-
-        if (jpaDataSourceNode.isDefined()) {
-            this.jpaStoreDataSource = jpaDataSourceNode.asString();
+    private void startJPAIdentityStore() {
+        JPAIdentityStoreConfiguration jpaConfig = (JPAIdentityStoreConfiguration) this.storeConfigs.get(ModelElement.JPA_STORE);
+        if (jpaConfig == null) {
+            return;
         }
+
+        if (!StringUtil.isNullOrEmpty(jpaStoreEntityManagerFactory)) {
+            try {
+                ROOT_LOGGER.debug("Looking up entity manager factory: " + jpaStoreEntityManagerFactory);
+
+                this.emf = (EntityManagerFactory) new InitialContext().lookup(jpaStoreEntityManagerFactory);
+                embeddedEmf = false;
+            } catch (NamingException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (!StringUtil.isNullOrEmpty(jpaStoreDataSource)) {
+            try {
+                ROOT_LOGGER.debug("Creating entity manager factory for module: " + "myschema");
+
+                this.emf = createEntityManagerFactory();
+                embeddedEmf = true;
+            } catch (ModuleLoadException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new RuntimeException("No entity manager factory configured");
+        }
+
+        Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
+        for (EntityType<?> entity : entities) {
+            Class<?> javaType = entity.getJavaType();
+            IDMEntity idmEntity = javaType.getAnnotation(IDMEntity.class);
+            if (idmEntity != null) {
+                switch (idmEntity.value()) {
+                    case CREDENTIAL_ATTRIBUTE:
+                        jpaConfig.setCredentialAttributeClass(javaType);
+                        break;
+                    case IDENTITY_ATTRIBUTE:
+                        jpaConfig.setAttributeClass(javaType);
+                        break;
+                    case IDENTITY_CREDENTIAL:
+                        jpaConfig.setCredentialClass(javaType);
+                        break;
+                    case IDENTITY_TYPE:
+                        jpaConfig.setIdentityClass(javaType);
+                        break;
+                    case PARTITION:
+                        jpaConfig.setPartitionClass(javaType);
+                        break;
+                    case RELATIONSHIP:
+                        jpaConfig.setRelationshipClass(javaType);
+                        break;
+                    case RELATIONSHIP_ATTRIBUTE:
+                        jpaConfig.setRelationshipAttributeClass(javaType);
+                        break;
+                    case RELATIONSHIP_IDENTITY:
+                        jpaConfig.setRelationshipIdentityClass(javaType);
+                        break;
+                }
+            }
+        }
+
+        jpaConfig.addContextInitializer(new JPAContextInitializer(emf) {
+            @Override
+            public EntityManager getEntityManager() {
+                return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
+                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager()));
+            }
+        });
+
+    }
+
+    private void configureJPAIdentityStore(ModelNode modelNode) {
+        ModelNode jpaDataSourceNode = modelNode.get(ModelElement.JPA_STORE_DATASOURCE.getName());
+        ModelNode jpaEntityModule = modelNode.get(ModelElement.JPA_STORE_ENTITY_MODULE.getName());
 
         ModelNode jpaEntityManagerFactoryNode = modelNode.get(ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
 
         if (jpaEntityManagerFactoryNode.isDefined()) {
-            this.jpaStoreEntityManagerFactory = jpaEntityManagerFactoryNode.asString();
+            jpaStoreEntityManagerFactory = jpaEntityManagerFactoryNode.asString();
+            embeddedEmf = false;
+        } else if (jpaDataSourceNode.isDefined()) {
+            jpaStoreDataSource = jpaDataSourceNode.asString();
+            embeddedEmf = true;
+        } else {
+            throw new RuntimeException("No entity manager factory configured");
         }
 
-        jpaConfig.setIdentityClass(IdentityObject.class);
-        jpaConfig.setCredentialClass(CredentialObject.class);
-        jpaConfig.setCredentialAttributeClass(CredentialObjectAttribute.class);
-        jpaConfig.setAttributeClass(IdentityObjectAttribute.class);
-        jpaConfig.setRelationshipClass(RelationshipObject.class);
-        jpaConfig.setRelationshipIdentityClass(RelationshipIdentityObject.class);
-        jpaConfig.setRelationshipAttributeClass(RelationshipObjectAttribute.class);
-        jpaConfig.setPartitionClass(PartitionObject.class);
+        if (jpaEntityModule.isDefined()) {
+            jpaStoreEntityModule = jpaEntityModule.asString();
+        }
 
-        jpaConfig.addContextInitializer(new JPAContextInitializer(this.embeddedEMF) {
-            @Override
-            public EntityManager getEntityManager() {
-                EntityManagerFactory emf = null;
-
-                if (embeddedEMF != null) {
-                    emf = embeddedEMF;
-                } else if (providedEMF != null) {
-                    emf = providedEMF;
-                } else {
-                    throw new RuntimeException(
-                            "No EntityManagerFactory configured. Can not obtain EntityManager for the JPA store.");
-                }
-
-                EntityManager em = (EntityManager) Proxy.newProxyInstance(getClass().getClassLoader(),
-                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager()));
-
-                return em;
-            }
-        });
-
+        JPAIdentityStoreConfiguration jpaConfig = new JPAIdentityStoreConfiguration();
         this.storeConfigs.put(ModelElement.JPA_STORE, jpaConfig);
     }
 
