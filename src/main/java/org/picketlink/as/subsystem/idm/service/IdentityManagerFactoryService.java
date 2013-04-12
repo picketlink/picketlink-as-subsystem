@@ -48,6 +48,7 @@ import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.as.naming.service.BinderService;
 import org.jboss.dmr.ModelNode;
 import org.jboss.modules.Module;
+import org.jboss.modules.ModuleClassLoader;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
@@ -102,6 +103,8 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private String jpaStoreEntityModule;
 
+    private ModuleClassLoader entityClassLoader;
+
     public IdentityManagerFactoryService(ModelNode modelNode) {
         this.alias = modelNode.get(ModelElement.COMMON_ALIAS.getName()).asString();
         this.jndiName = modelNode.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_NAME.getName()).asString();
@@ -123,13 +126,13 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         publishIdentityManagerFactory(context);
     }
 
-    private EntityManagerFactory createEntityManagerFactory() throws ModuleLoadException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+    private void createEntityManagerFactory() throws ModuleLoadException {
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 
         if (!StringUtil.isNullOrEmpty(jpaStoreEntityModule)) {
             ModuleLoader moduleLoader = Module.getContextModuleLoader();
             Module module = moduleLoader.loadModule(ModuleIdentifier.create(jpaStoreEntityModule));
-            Thread.currentThread().setContextClassLoader(module.getClassLoader());
+            entityClassLoader = module.getClassLoader();
         }
 
         try {
@@ -137,9 +140,15 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
             properties.put("javax.persistence.jtaDataSource", jpaStoreDataSource);
             properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
 
-            return Persistence.createEntityManagerFactory("identity", properties);
+            if (entityClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(entityClassLoader);
+            }
+
+            this.emf = Persistence.createEntityManagerFactory("identity", properties);
         } finally {
-            Thread.currentThread().setContextClassLoader(classLoader);
+            if (entityClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
+            }
         }
     }
 
@@ -330,7 +339,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
             try {
                 ROOT_LOGGER.debug("Creating entity manager factory for module: " + "myschema");
 
-                this.emf = createEntityManagerFactory();
+                createEntityManagerFactory();
                 embeddedEmf = true;
             } catch (ModuleLoadException e) {
                 throw new RuntimeException(e);
@@ -377,7 +386,8 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
             @Override
             public EntityManager getEntityManager() {
                 return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager()));
+                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager(),
+                                entityClassLoader));
             }
         });
 
