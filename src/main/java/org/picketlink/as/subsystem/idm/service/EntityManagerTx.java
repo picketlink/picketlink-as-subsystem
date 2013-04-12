@@ -37,9 +37,11 @@ import javax.transaction.UserTransaction;
 public class EntityManagerTx implements InvocationHandler {
 
     private final EntityManager em;
+    private final ClassLoader entityClassLoader;
 
-    public EntityManagerTx(EntityManager em) {
+    public EntityManagerTx(EntityManager em, ClassLoader classLoader) {
         this.em = em;
+        this.entityClassLoader = classLoader;
     }
 
     @Override
@@ -58,9 +60,19 @@ public class EntityManagerTx implements InvocationHandler {
             em.joinTransaction();
         }
 
+        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+
         try {
+            if (entityClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(entityClassLoader);
+            }
+
             return method.invoke(em, args);
         } finally {
+            if (entityClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
+            }
+
             if (tx != null) {
                 tx.commit();
             }
