@@ -44,6 +44,7 @@ import javax.naming.NamingException;
 import org.jboss.as.naming.deployment.ContextNames;
 import org.picketlink.common.util.StringUtil;
 import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.internal.DefaultIdentityManager;
 
 /**
@@ -79,16 +80,18 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      */
     @Override
     public IdentityManager create(CreationalContext<IdentityManager> creationalContext) {
-        IdentityManager identityManager = null;
+        IdentityManagerFactory identityManagerFactory = null;
         
         try {
             String formattedJNDIName = this.identityManagerJNDIUrl.replaceAll(ContextNames.JAVA_CONTEXT_SERVICE_NAME.getSimpleName() + ":", "");
             
-            identityManager = (IdentityManager) new InitialContext().lookup(formattedJNDIName);
+            identityManagerFactory = (IdentityManagerFactory) new InitialContext().lookup(formattedJNDIName);
         } catch (NamingException e) {
             throw new RuntimeException("Error looking up IdentityManager from [" + this.identityManagerJNDIUrl + "]", e);
         };
 
+        IdentityManager identityManager = identityManagerFactory.createIdentityManager();
+        
         this.injectionTarget.inject(identityManager, creationalContext);
         this.injectionTarget.postConstruct(identityManager);
 
