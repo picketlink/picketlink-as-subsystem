@@ -43,6 +43,10 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
             ModelElement.JPA_STORE_DATASOURCE.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
 
+    public static final SimpleAttributeDefinition ENTITY_MODULE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.JPA_STORE_ENTITY_MODULE.getName(), ModelType.STRING, true)
+            .setAllowExpression(false).build();
+
     public static final SimpleAttributeDefinition ENTITY_MANAGER_FACTORY = new SimpleAttributeDefinitionBuilder(
             ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
@@ -57,6 +61,7 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
 
     static {
         INSTANCE.addAttribute(DATA_SOURCE);
+        INSTANCE.addAttribute(ENTITY_MODULE);
         INSTANCE.addAttribute(ENTITY_MANAGER_FACTORY);
         INSTANCE.addAttribute(REALMS);
         INSTANCE.addAttribute(TIERS);
