@@ -467,7 +467,9 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         ServiceController<?> service = context.getController().getServiceContainer()
                 .getService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiName));
 
-        service.setMode(Mode.REMOVE);
+        if (service != null) {
+            service.setMode(Mode.REMOVE);
+        }
     }
     
     public String getJndiName() {
