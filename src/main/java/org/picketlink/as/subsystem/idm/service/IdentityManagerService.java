@@ -75,12 +75,12 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
 
         this.jndiName = identityManagerFactoryService.getJndiName() + "/" + this.realm;
         
-        publishIdentityManagerFactory(context);
+        publishIdentityManager(context);
     }
 
     @Override
     public void stop(StopContext context) {
-        unpublishIdentityManagerFactory(context);
+        unpublishIdentityManager(context);
     }
 
     public static ServiceName createServiceName(String identityManagementAlias, String realm) {
@@ -91,7 +91,7 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
         return identityManagerFactory;
     }
 
-    private void publishIdentityManagerFactory(StartContext context) {
+    private void publishIdentityManager(StartContext context) {
         final BinderService binderService = new BinderService("IdentityManagerService-" + this.identityManagementAlias + "-"
                 + this.realm);
         final ServiceBuilder<ManagedReferenceFactory> builder = context
@@ -120,7 +120,7 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
         builder.setInitialMode(Mode.ACTIVE).install();
     }
 
-    private void unpublishIdentityManagerFactory(StopContext context) {
+    private void unpublishIdentityManager(StopContext context) {
         ServiceController<?> service = context.getController().getServiceContainer()
                 .getService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiName));
 
