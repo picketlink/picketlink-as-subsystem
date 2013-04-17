@@ -55,14 +55,11 @@ public class PicketLinkIDMDeploymentProcessor implements DeploymentUnitProcessor
                 deploymentUnit = deploymentUnit.getParent();
             }
 
-            ROOT_LOGGER.infov("Enabling PicketLink IDM extension for {0}", deploymentUnit.getName());
-            addExtension(deploymentUnit, new PicketLinkIDMSubsystemExtension());
+            Metadata<Extension> metadata = new MetadataImpl<Extension>(new PicketLinkIDMSubsystemExtension(), deploymentUnit.getName());
+            deploymentUnit.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
+            
+            ROOT_LOGGER.configuringDeployment("PicketLink IDM CDI Extension", deploymentUnit.getName());
         }
-    }
-
-    private void addExtension(DeploymentUnit du, Extension extension) {
-        Metadata<Extension> metadata = new MetadataImpl<Extension>(extension, du.getName());
-        du.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
     }
 
     @Override

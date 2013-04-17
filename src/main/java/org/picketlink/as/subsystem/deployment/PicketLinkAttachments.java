@@ -20,29 +20,19 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.picketlink.as.subsystem;
+package org.picketlink.as.subsystem.deployment;
 
-import org.jboss.logging.Message;
-import org.jboss.logging.MessageBundle;
-import org.jboss.logging.Messages;
+import org.jboss.as.server.deployment.AttachmentKey;
+import org.picketlink.as.subsystem.federation.service.PicketLinkService;
 
 /**
- * <p>JBoss Logging message bundle.</p>
+ * @author Pedro Silva
  * 
- * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
-@MessageBundle(projectCode = "JBAS")
-public interface PicketLinkMessages {
+public interface PicketLinkAttachments {
 
-    /**
-     * A logger with the category of the package name.
-     */
-    PicketLinkMessages MESSAGES = Messages.getBundle(PicketLinkMessages.class);
+    AttachmentKey<PicketLinkService<?>> FEDERATION_ATTACHMENT_KEY = AttachmentKey.create(PicketLinkService.class);
+    AttachmentKey<Boolean> IDM_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
+    AttachmentKey<Boolean> CORE_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
 
-    @Message(id = 12502, value = "No writer provided for element %s. Check if a writer is registered in PicketLinkSubsystemWriter.")
-    IllegalStateException noModelElementWriterProvided(String modelEmement);
-
-    @Message(id = 12503, value = "No IdentityConfiguration provided. Maybe you forgot to provide a @Producer method for the IdentityConfiguration.")
-    IllegalStateException idmNoConfigurationProvided();
 }

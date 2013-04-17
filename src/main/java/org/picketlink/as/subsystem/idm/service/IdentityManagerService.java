@@ -46,7 +46,7 @@ import org.picketlink.idm.model.Realm;
  */
 public class IdentityManagerService implements Service<ManagedReferenceFactory>, ManagedReferenceFactory {
 
-    private static String SERVICE_NAME_PREFIX = "IdentityManager";
+    private static String SERVICE_NAME_PREFIX = "IdentityManagerService";
 
     private final InjectedValue<IdentityManagerFactory> identityManagerFactory = new InjectedValue<IdentityManagerFactory>();
 

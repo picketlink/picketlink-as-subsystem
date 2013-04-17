@@ -22,6 +22,8 @@
 
 package org.picketlink.as.subsystem.idm;
 
+import static org.picketlink.as.subsystem.PicketLinkMessages.MESSAGES;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Collections;
@@ -207,8 +209,7 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManage
         });
 
         if (beans.isEmpty()) {
-            throw new IllegalStateException(
-                    "No IdentityConfiguration provided. Maybe you forgot to provide a @Producer method for the IdentityConfiguration.");
+            throw MESSAGES.idmNoConfigurationProvided();
         }
 
         Bean<IdentityConfiguration> bean = (Bean<IdentityConfiguration>) beans.iterator().next();

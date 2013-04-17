@@ -84,7 +84,7 @@ import org.picketlink.idm.model.Relationship;
  */
 public class IdentityManagerFactoryService implements Service<IdentityManagerFactory> {
 
-    private static String SERVICE_NAME_PREFIX = "IdentityManagementService";
+    private static String SERVICE_NAME_PREFIX = "IdentityManagerFactoryService";
 
     private boolean embeddedEmf;
 
@@ -117,8 +117,6 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     @Override
     public void start(StartContext context) throws StartException {
-        ROOT_LOGGER.info("Starting Identity Service");
-
         startJPAIdentityStore();
 
         this.identityManagerFactory = createIdentityManagerFactory();

@@ -22,7 +22,6 @@
 package org.picketlink.as.subsystem.core.deployment;
 
 import static org.jboss.as.weld.WeldDeploymentMarker.isWeldDeployment;
-import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
 
 import java.util.Iterator;
@@ -91,7 +90,6 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
                     coreExtension = new PicketLinkCoreSubsystemExtension();
                 }
 
-                ROOT_LOGGER.infov("Enabling PicketLink Core extension for {0}", deploymentUnit.getName());
                 addExtension(deploymentUnit, coreExtension);
 
                 try {

@@ -21,13 +21,14 @@
  */
 package org.picketlink.as.subsystem.federation.deployment;
 
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.FEDERATION_ATTACHMENT_KEY;
+
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.picketlink.as.subsystem.PicketLinkLogger;
-import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
 import org.picketlink.as.subsystem.federation.service.PicketLinkService;
 
 /**
@@ -53,17 +54,13 @@ public class FederationDeploymentProcessor implements DeploymentUnitProcessor {
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        String deploymentUnitName = deploymentUnit.getName();
-
-        PicketLinkService<?> attachment = deploymentUnit
-                .getAttachment(PicketLinkStructureDeploymentProcessor.PICKETLINK_FEDERATION_ATTACHMENT_KEY);
+        PicketLinkService<?> attachment = deploymentUnit.getAttachment(FEDERATION_ATTACHMENT_KEY);
 
         if (attachment != null) {
             PicketLinkService<?> service = (PicketLinkService<?>) attachment.getValue();
 
-            // if a service exists for this deployment, configure it with the PicketLink configurations defined by the model.
             if (service != null) {
-                PicketLinkLogger.ROOT_LOGGER.configuringDeployment(service.getClass().getSimpleName(), deploymentUnitName);
+                PicketLinkLogger.ROOT_LOGGER.configuringDeployment(service.getClass().getSimpleName(), deploymentUnit.getName());
                 service.configure(deploymentUnit);
             }
         }

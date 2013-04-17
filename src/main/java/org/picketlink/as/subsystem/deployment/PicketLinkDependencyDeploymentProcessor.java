@@ -25,7 +25,6 @@ import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
 import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isFederationDeployment;
 import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isIDMDeployment;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isPicketLinkDeployment;
 
 import org.jboss.as.server.deployment.Attachments;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
@@ -41,9 +40,9 @@ import org.jboss.modules.filter.PathFilters;
 
 /**
  * <p>
- * Specific {@link DeploymentUnitProcessor} to automatically configure the PicketLink module dependency.
+ * Specific {@link DeploymentUnitProcessor} to automatically configure the PicketLink module dependencies.
  * </p>
- * 
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 9, 2012
  */
@@ -55,82 +54,29 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.jboss.as.server.deployment.DeploymentUnitProcessor#deploy(org.jboss.as.server.deployment.DeploymentPhaseContext)
      */
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        if (isPicketLinkDeployment(deploymentUnit)) {
+        if (isFederationDeployment(deploymentUnit)) {
             configureFederationDependencies(deploymentUnit);
-            configureCoreDependencies(deploymentUnit);
-            configureIDMDependencies(deploymentUnit);
-        } else {
-            if (isFederationDeployment(deploymentUnit)) {
-                configureFederationDependencies(deploymentUnit);
-            }
-
-            if (isCoreDeployment(deploymentUnit)) {
-                configureCoreDependencies(deploymentUnit);
-            }
-
-            if (isIDMDeployment(deploymentUnit)) {
-                configureIDMDependencies(deploymentUnit);
-            }
         }
-    }
 
-    /**
-     * <p>
-     * Add the PicketLink Federation dependencies to the {@link DeploymentUnit}.
-     * </p>
-     * 
-     * @param deploymentUnit
-     */
-    private void configureFederationDependencies(DeploymentUnit deploymentUnit) {
-        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink"));
-        ROOT_LOGGER.infov("Added PicketLink Federation dependencies to {0}", deploymentUnit.getName());
-    }
+        if (isCoreDeployment(deploymentUnit)) {
+            configureCoreDependencies(deploymentUnit);
+        }
 
-    /**
-     * <p>
-     * Add the PicketLink IDM dependencies to the {@link DeploymentUnit}.
-     * </p>
-     * 
-     * @param deploymentUnit
-     */
-    private void configureIDMDependencies(DeploymentUnit deploymentUnit) {
-        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.idm"));
-        ROOT_LOGGER.infov("Added PicketLink IDM dependencies to {0}", deploymentUnit.getName());
-    }
-
-    /**
-     * <p>
-     * Add the PicketLink Core dependencies to the {@link DeploymentUnit}.
-     * </p>
-     * 
-     * @param deploymentUnit
-     */
-    private void configureCoreDependencies(DeploymentUnit deploymentUnit) {
-        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.core"));
-        ROOT_LOGGER.infov("Added PicketLink Core dependencies to {0}", deploymentUnit.getName());
-    }
-
-    private void addDependency(DeploymentUnit deploymentUnit, ModuleIdentifier moduleIdentifier) {
-        final ModuleSpecification moduleSpec = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
-        final ModuleLoader moduleLoader = deploymentUnit.getAttachment(Attachments.SERVICE_MODULE_LOADER);
-
-        ModuleDependency dependency = new ModuleDependency(moduleLoader, moduleIdentifier, false, true, false, false);
-        
-        dependency.addImportFilter(PathFilters.getMetaInfFilter(), true);
-        
-        moduleSpec.addSystemDependency(dependency);
+        if (isIDMDeployment(deploymentUnit)) {
+            configureIDMDependencies(deploymentUnit);
+        }
     }
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.jboss.as.server.deployment.DeploymentUnitProcessor#undeploy(org.jboss.as.server.deployment.DeploymentUnit)
      */
     @Override
@@ -138,4 +84,50 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
 
     }
 
+    /**
+     * <p>
+     * Add the PicketLink Federation dependencies to the {@link DeploymentUnit}.
+     * </p>
+     *
+     * @param deploymentUnit
+     */
+    private void configureFederationDependencies(DeploymentUnit deploymentUnit) {
+        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink"));
+        ROOT_LOGGER.configuringDeployment("PicketLink Federation Dependencies", deploymentUnit.getName());
+    }
+
+    /**
+     * <p>
+     * Add the PicketLink IDM dependencies to the {@link DeploymentUnit}.
+     * </p>
+     *
+     * @param deploymentUnit
+     */
+    private void configureIDMDependencies(DeploymentUnit deploymentUnit) {
+        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.idm"));
+        ROOT_LOGGER.configuringDeployment("PicketLink IDM Dependencies", deploymentUnit.getName());
+    }
+
+    /**
+     * <p>
+     * Add the PicketLink Core dependencies to the {@link DeploymentUnit}.
+     * </p>
+     *
+     * @param deploymentUnit
+     */
+    private void configureCoreDependencies(DeploymentUnit deploymentUnit) {
+        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.core"));
+        ROOT_LOGGER.configuringDeployment("PicketLink Core Dependencies", deploymentUnit.getName());
+    }
+
+    private void addDependency(DeploymentUnit deploymentUnit, ModuleIdentifier moduleIdentifier) {
+        final ModuleSpecification moduleSpec = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
+        final ModuleLoader moduleLoader = deploymentUnit.getAttachment(Attachments.SERVICE_MODULE_LOADER);
+
+        ModuleDependency dependency = new ModuleDependency(moduleLoader, moduleIdentifier, false, true, false, false);
+
+        dependency.addImportFilter(PathFilters.getMetaInfFilter(), true);
+
+        moduleSpec.addSystemDependency(dependency);
+    }
 }

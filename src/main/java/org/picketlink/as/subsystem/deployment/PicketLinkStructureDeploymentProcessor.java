@@ -21,7 +21,9 @@
  */
 package org.picketlink.as.subsystem.deployment;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.CORE_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.FEDERATION_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.IDM_ATTACHMENT_KEY;
 
 import org.jboss.as.server.deployment.AttachmentKey;
 import org.jboss.as.server.deployment.Attachments;
@@ -43,17 +45,6 @@ import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
 public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitProcessor {
-
-    public static final AttachmentKey<Boolean> PICKETLINK_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
-    
-    public static final AttachmentKey<PicketLinkService<?>> PICKETLINK_FEDERATION_ATTACHMENT_KEY = AttachmentKey
-            .create(PicketLinkService.class);
-
-    public static final AttachmentKey<Boolean> PICKETLINK_IDM_ATTACHMENT_KEY = AttachmentKey
-            .create(Boolean.class);
-
-    public static final AttachmentKey<Boolean> PICKETLINK_CORE_ATTACHMENT_KEY = AttachmentKey
-            .create(Boolean.class);
 
     public static final ModuleIdentifier IDM_MODULE_IDENTIFIER = ModuleIdentifier.create("org.picketlink.idm");
     public static final ModuleIdentifier CORE_MODULE_IDENTIFIER = ModuleIdentifier.create("org.picketlink.core");
@@ -84,30 +75,25 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
         }
         
         if (federationService != null) {
-            deploymentUnit.putAttachment(PICKETLINK_FEDERATION_ATTACHMENT_KEY, (PicketLinkService<?>) federationService.getValue());
-            ROOT_LOGGER.infov("Enabling PicketLink Federation for {0}", deploymentUnit.getName());
+            deploymentUnit.putAttachment(FEDERATION_ATTACHMENT_KEY, (PicketLinkService<?>) federationService.getValue());
         }
     }
 
     private void markIDMDeployment(DeploymentUnit deploymentUnit) {
-        ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
-
-        for (ModuleDependency d : moduleSpecification.getUserDependencies()) {
-            if (d.getIdentifier().equals(IDM_MODULE_IDENTIFIER)) {
-                deploymentUnit.putAttachment(PICKETLINK_IDM_ATTACHMENT_KEY, Boolean.TRUE);
-                ROOT_LOGGER.infov("Enabling PicketLink IDM for {0}", deploymentUnit.getName());
-                return;
-            }
-        }
+        markDeploymentWithModuleDependency(IDM_MODULE_IDENTIFIER, IDM_ATTACHMENT_KEY, deploymentUnit);
     }
     
     private void markCoreDeployment(DeploymentUnit deploymentUnit) {
+        markDeploymentWithModuleDependency(CORE_MODULE_IDENTIFIER, CORE_ATTACHMENT_KEY, deploymentUnit);
+    }
+    
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    private void markDeploymentWithModuleDependency(ModuleIdentifier moduleDependencyIdentifier, AttachmentKey attachment, DeploymentUnit deploymentUnit) {
         ModuleSpecification moduleSpecification = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
 
         for (ModuleDependency d : moduleSpecification.getUserDependencies()) {
-            if (d.getIdentifier().equals(CORE_MODULE_IDENTIFIER)) {
-                deploymentUnit.putAttachment(PICKETLINK_CORE_ATTACHMENT_KEY, Boolean.TRUE);
-                ROOT_LOGGER.infov("Enabling PicketLink Core for {0}", deploymentUnit.getName());
+            if (d.getIdentifier().equals(moduleDependencyIdentifier)) {
+                deploymentUnit.putAttachment(attachment, Boolean.TRUE);
                 return;
             }
         }
@@ -117,20 +103,16 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
     public void undeploy(DeploymentUnit context) {
     }
     
-    public static boolean isPicketLinkDeployment(DeploymentUnit deploymentUnit) {
-        return deploymentUnit.getAttachment(PICKETLINK_ATTACHMENT_KEY) != null;
-    }
-    
     public static boolean isFederationDeployment(DeploymentUnit deploymentUnit) {
-        return deploymentUnit.getAttachment(PICKETLINK_FEDERATION_ATTACHMENT_KEY) != null;
+        return deploymentUnit.getAttachment(FEDERATION_ATTACHMENT_KEY) != null;
     }
     
     public static boolean isIDMDeployment(DeploymentUnit deploymentUnit) {
-        return deploymentUnit.getAttachment(PICKETLINK_IDM_ATTACHMENT_KEY) != null;
+        return deploymentUnit.getAttachment(IDM_ATTACHMENT_KEY) != null;
     }
 
     public static boolean isCoreDeployment(DeploymentUnit deploymentUnit) {
-        return deploymentUnit.getAttachment(PICKETLINK_CORE_ATTACHMENT_KEY) != null;
+        return deploymentUnit.getAttachment(CORE_ATTACHMENT_KEY) != null;
     }
 
 }
