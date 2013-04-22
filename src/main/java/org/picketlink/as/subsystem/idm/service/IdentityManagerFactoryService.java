@@ -126,27 +126,27 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private void createEntityManagerFactory() throws ModuleLoadException {
         ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+        ModuleLoader moduleLoader = Module.getContextModuleLoader();
+        Module module;
 
         if (!StringUtil.isNullOrEmpty(jpaStoreEntityModule)) {
-            ModuleLoader moduleLoader = Module.getContextModuleLoader();
-            Module module = moduleLoader.loadModule(ModuleIdentifier.create(jpaStoreEntityModule));
-            entityClassLoader = module.getClassLoader();
+            module = moduleLoader.loadModule(ModuleIdentifier.create(jpaStoreEntityModule));
+        } else {
+            module = moduleLoader.loadModule(ModuleIdentifier.create("org.picketlink.as.extension"));
         }
+
+        entityClassLoader = module.getClassLoader();
 
         try {
             Map<Object, Object> properties = new HashMap<Object, Object>();
             properties.put("javax.persistence.jtaDataSource", jpaStoreDataSource);
             properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
 
-            if (entityClassLoader != null) {
-                Thread.currentThread().setContextClassLoader(entityClassLoader);
-            }
+            Thread.currentThread().setContextClassLoader(entityClassLoader);
 
             this.emf = Persistence.createEntityManagerFactory("identity", properties);
         } finally {
-            if (entityClassLoader != null) {
-                Thread.currentThread().setContextClassLoader(originalClassLoader);
-            }
+            Thread.currentThread().setContextClassLoader(originalClassLoader);
         }
     }
 
