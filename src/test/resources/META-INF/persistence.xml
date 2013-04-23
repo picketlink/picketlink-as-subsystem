@@ -3,7 +3,7 @@
     xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
     version="2.0">
 
-    <persistence-unit name="identity" transaction-type="JTA">
+    <persistence-unit name="custom-pu" transaction-type="JTA">
         <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyIdentityObject</class>
         <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyPartitionObject</class>
         <class>test.org.picketlink.as.subsystem.idm.integration.jpa.MyRelationshipObject</class>

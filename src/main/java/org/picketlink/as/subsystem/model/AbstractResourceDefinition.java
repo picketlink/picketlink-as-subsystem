@@ -27,12 +27,12 @@ import java.util.List;
 
 import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.PathElement;
+import org.jboss.as.controller.ReloadRequiredRemoveStepHandler;
 import org.jboss.as.controller.ResourceDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleResourceDefinition;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
 import org.picketlink.as.subsystem.PicketLinkExtension;
-import org.picketlink.as.subsystem.federation.model.idp.IDPWriteAttributeHandler;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -48,6 +48,17 @@ public abstract class AbstractResourceDefinition extends SimpleResourceDefinitio
                 .getResourceDescriptionResolver(modelElement.getName()), addHandler,
                 removeHandler);
         this.modelElement = modelElement;
+    }
+
+    protected AbstractResourceDefinition(ModelElement modelElement, final OperationStepHandler addHandler, SimpleAttributeDefinition... attributes) {
+        super(PathElement.pathElement(modelElement.getName()), PicketLinkExtension
+                .getResourceDescriptionResolver(modelElement.getName()), addHandler,
+                ReloadRequiredRemoveStepHandler.INSTANCE);
+        this.modelElement = modelElement;
+        
+        for (SimpleAttributeDefinition attributeDefinition : attributes) {
+            addAttribute(attributeDefinition);
+        }
     }
     
     @Override

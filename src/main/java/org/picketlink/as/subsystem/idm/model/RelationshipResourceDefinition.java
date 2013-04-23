@@ -35,18 +35,14 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class RelationshipResourceDefinition extends AbstractResourceDefinition {
 
-    public static final RelationshipResourceDefinition INSTANCE = new RelationshipResourceDefinition();
-
     public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(
             ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false)
             .setAllowExpression(false).build();
 
-    static {
-        INSTANCE.addAttribute(CLASS);
-    }
+    public static final RelationshipResourceDefinition INSTANCE = new RelationshipResourceDefinition(CLASS);
     
-    private RelationshipResourceDefinition() {
-        super(ModelElement.RELATIONSHIP, RelationshipAddHandler.INSTANCE, RelationshipRemoveHandler.INSTANCE);
+    private RelationshipResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.RELATIONSHIP, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
     @Override

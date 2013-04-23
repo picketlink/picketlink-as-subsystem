@@ -59,6 +59,7 @@ public enum ModelElement {
     JPA_STORE ("jpa-store"),
     JPA_STORE_DATASOURCE ("data-source"),
     JPA_STORE_ENTITY_MODULE("entity-module"),
+    JPA_STORE_ENTITY_MODULE_UNIT_NAME("entity-module-unit-name"),
     JPA_STORE_ENTITY_MANAGER_FACTORY ("entity-manager-factory"),
     FILE_STORE ("file-store"),
     FILE_STORE_WORKING_DIR ("working-dir"),

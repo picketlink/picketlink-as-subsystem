@@ -37,18 +37,14 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class FeatureSetResourceDefinition extends AbstractResourceDefinition {
 
-    public static final FeatureSetResourceDefinition INSTANCE = new FeatureSetResourceDefinition();
-
     public static final SimpleAttributeDefinition SUPPORTS_ALL = new SimpleAttributeDefinitionBuilder(
             ModelElement.COMMON_SUPPORTS_ALL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set("true"))
             .setAllowExpression(false).build();
 
-    static {
-        INSTANCE.addAttribute(SUPPORTS_ALL);
-    }
+    public static final FeatureSetResourceDefinition INSTANCE = new FeatureSetResourceDefinition(SUPPORTS_ALL);
     
-    private FeatureSetResourceDefinition() {
-        super(ModelElement.FEATURES, FeatureSetAddHandler.INSTANCE, FeatureSetRemoveHandler.INSTANCE);
+    private FeatureSetResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.FEATURES, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
     @Override

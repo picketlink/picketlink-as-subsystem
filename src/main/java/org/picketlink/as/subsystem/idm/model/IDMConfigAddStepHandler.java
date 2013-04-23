@@ -22,30 +22,41 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.AbstractRemoveStepHandler;
+import java.util.List;
+
+import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceController;
 
 /**
- * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
+ * @author Pedro Silva
+ * 
  */
-public class FeatureRemoveHandler extends AbstractRemoveStepHandler {
+public class IDMConfigAddStepHandler extends AbstractAddStepHandler {
 
-    public static final FeatureRemoveHandler INSTANCE = new FeatureRemoveHandler();
+    private final AttributeDefinition[] attributes;
 
-    private FeatureRemoveHandler() {
+    IDMConfigAddStepHandler(final AttributeDefinition[] attributes) {
+        this.attributes = attributes;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
-            throws OperationFailedException {
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (AttributeDefinition attr : attributes) {
+            attr.validateAndSet(operation, model);
+        }
     }
 
+    @Override
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
+            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
+            throws OperationFailedException {
+        super.performRuntime(context, operation, model, verificationHandler, newControllers);
+        // once we add a cache configuration, we need to restart all the services for the changes to take effect
+        context.reloadRequired();
+    }
 }

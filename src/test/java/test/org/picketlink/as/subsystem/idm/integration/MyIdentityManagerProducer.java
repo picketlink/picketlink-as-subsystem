@@ -45,7 +45,7 @@ public class MyIdentityManagerProducer {
     @IdentityManagerConfig ("staging")
     private IdentityManagerFactory stagingIMF;
 
-    @Resource (mappedName="picketlink/FileBasedWithAllConfigIMF")
+    @Resource (mappedName="picketlink/file-based-complete")
     @Produces
     @IdentityManagerConfig ("production")
     private IdentityManagerFactory productionIMF;

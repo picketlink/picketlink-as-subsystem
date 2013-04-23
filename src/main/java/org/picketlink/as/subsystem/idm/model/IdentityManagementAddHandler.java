@@ -23,23 +23,36 @@
 package org.picketlink.as.subsystem.idm.model;
 
 import java.util.List;
+import java.util.Set;
 
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.registry.Resource;
+import org.jboss.as.controller.registry.Resource.ResourceEntry;
+import org.jboss.as.naming.ManagedReferenceFactory;
+import org.jboss.as.naming.ServiceBasedNamingStore;
+import org.jboss.as.naming.ValueManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.naming.deployment.JndiName;
+import org.jboss.as.naming.service.BinderService;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.inject.InjectionException;
+import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
+import org.jboss.msc.value.ImmediateValue;
+import org.picketlink.as.subsystem.PicketLinkExtension;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
+import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.idm.IdentityManagerFactory;
+import org.picketlink.idm.config.BaseAbstractStoreConfiguration;
+import org.picketlink.idm.config.IdentityConfiguration;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -57,42 +70,184 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
             throws OperationFailedException {
         final String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
+        
+        ModelNode jndiNameNode = operation.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_NAME.getName());
+        
+        String jndiName = null;
+        
+        if (jndiNameNode.isDefined()) {
+            jndiName = jndiNameNode.asString();
+        }
+        
+        jndiName = toJndiName(jndiName, alias);
 
-        final ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
-                IdentityManagerFactoryService.createServiceName(alias), new IdentityManagerFactoryService(operation));
-        Resource resource = context.readResource(PathAddress.EMPTY_ADDRESS);
+        Resource identityManagementResource = context.readResource(PathAddress.EMPTY_ADDRESS);
 
-        Resource jpaStoreResource = resource.getChild(PathElement.pathElement(ModelElement.JPA_STORE.getName(),
-                ModelElement.JPA_STORE.getName()));
+        IdentityConfiguration configuration = fromResource(identityManagementResource);
+        
+        IdentityManagerFactoryService identityManagerFactoryService = null; 
 
-        if (jpaStoreResource != null) {
-            ModelNode dataSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
-            ModelNode emfSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
+        Set<ResourceEntry> jpaStoreResources = identityManagementResource.getChildren(ModelElement.JPA_STORE.getName());
+        
+        if (!jpaStoreResources.isEmpty()) {
+            identityManagerFactoryService = installJPABasedIdentityManagerFactory(context, verificationHandler, newControllers,
+                    alias, jndiName, configuration, jpaStoreResources);
+        } else {
+            identityManagerFactoryService = new IdentityManagerFactoryService(alias, jndiName, configuration);
+            
+            ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(identityManagerFactoryService.createServiceName(alias), identityManagerFactoryService);
+            
+            ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
+                    .setInitialMode(Mode.PASSIVE).install();
 
-            if (dataSourceNode.isDefined()) {
-                serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME
-                        .append(dataSourceNode.asString().split("/")));
-            }
+            newControllers.add(controller);
+        }
+        
+        publishIdentityManagerFactory(context, identityManagerFactoryService, newControllers);
+        publishIdentityManagers(context, verificationHandler, newControllers, alias, identityManagerFactoryService);
+    }
 
-            if (emfSourceNode.isDefined()) {
-                serviceBuilder
-                        .addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(emfSourceNode.asString().split("/")));
-            }
+    private IdentityManagerFactoryService installJPABasedIdentityManagerFactory(OperationContext context,
+            final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers,
+            final String alias, String jndiName, IdentityConfiguration configuration, Set<ResourceEntry> jpaStoreResources) {
+        IdentityManagerFactoryService identityManagerFactoryService;
+        Resource jpaStoreResource;
+        jpaStoreResource = jpaStoreResources.iterator().next();
+        
+        ModelNode jpaDataSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
+        ModelNode jpaEntityModule = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MODULE.getName());
+        ModelNode jpaEntityModuleUnitName = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MODULE_UNIT_NAME.getName());
+        ModelNode jpaEntityManagerFactoryNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
+        
+        String dataSourceJndiName = null;
+        
+        if (jpaDataSourceNode.isDefined()) {
+            dataSourceJndiName = jpaDataSourceNode.asString();
+        }
+        
+        String entityModuleName = null;
+
+        if (jpaEntityModule.isDefined()) {
+            entityModuleName = jpaEntityModule.asString();
+        }
+        
+        String emfJndiName = null;
+        
+        if (jpaEntityManagerFactoryNode.isDefined()) {
+            emfJndiName = jpaEntityManagerFactoryNode.asString();
         }
 
-        final ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
-                .setInitialMode(Mode.NEVER).install();
+        String entityModuleUnitName = null;
+
+        if (jpaEntityModuleUnitName.isDefined()) {
+            entityModuleUnitName = jpaEntityModuleUnitName.asString();
+        }
+        
+        identityManagerFactoryService = new IdentityManagerFactoryService(alias, jndiName, dataSourceJndiName, entityModuleName, entityModuleUnitName, emfJndiName, configuration);
+        
+        ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(identityManagerFactoryService.createServiceName(alias), identityManagerFactoryService);
+        
+        if (dataSourceJndiName != null) {
+            serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(dataSourceJndiName.split("/")));
+        }
+
+        if (emfJndiName != null) {
+            serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(emfJndiName
+                    .split("/")));
+        }
+        
+        ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
+                .setInitialMode(Mode.PASSIVE).install();
 
         newControllers.add(controller);
+        return identityManagerFactoryService;
+    }
+
+    private IdentityConfiguration fromResource(Resource resource) {
+        IdentityConfiguration configuration = new IdentityConfiguration();
         
-        // This needs to run after all child resources so that they can detect a fresh state
-        context.addStep(new OperationStepHandler() {
-            @Override
-            public void execute(OperationContext context, ModelNode operation) throws OperationFailedException {
-                controller.setMode(Mode.PASSIVE);
-                context.stepCompleted();
+        for (ModelElement supportedStoreTypes : getSupportedStoreTypes()) {
+            String elementName = supportedStoreTypes.getName();
+
+            Resource storeResource = resource.getChild(PathElement.pathElement(elementName, elementName));
+
+            if (storeResource != null) {
+                BaseAbstractStoreConfiguration<?> storeConfig = IdentityManagementConfiguration.configureStore(supportedStoreTypes, storeResource);
+
+                configuration.addConfig(storeConfig);
             }
-        }, OperationContext.Stage.RUNTIME);
+        }
+        return configuration;
+    }
+
+    private void publishIdentityManagers(OperationContext context, final ServiceVerificationHandler verificationHandler,
+            final List<ServiceController<?>> newControllers, final String alias,
+            IdentityManagerFactoryService identityManagementService) {
+        Set<String> configuredRealms = identityManagementService.getConfiguredRealms();
+        
+        for (String realmName : configuredRealms) {
+            IdentityManagerService identityManagerService = new IdentityManagerService(alias, realmName);
+
+            ServiceBuilder<ManagedReferenceFactory> identityManagerServiceBuilder = context.getServiceTarget()
+                    .addService(IdentityManagerService.createServiceName(alias, realmName), identityManagerService);
+
+            identityManagerServiceBuilder.addDependency(IdentityManagerFactoryService.createServiceName(alias),
+                    IdentityManagerFactory.class, identityManagerService.getIdentityManagerFactory());
+
+            ServiceController<ManagedReferenceFactory> identityManagerController = identityManagerServiceBuilder
+                    .addListener(verificationHandler).setInitialMode(Mode.PASSIVE).install();
+
+            newControllers.add(identityManagerController);
+        }
+    }
+
+    private void publishIdentityManagerFactory(OperationContext context, IdentityManagerFactoryService service, final List<ServiceController<?>> newControllers) {
+        String jndiName = service.getJndiName();
+        
+        final ContextNames.BindInfo bindInfo = jndiName.startsWith("java:") ? ContextNames.bindInfoFor(jndiName
+                .substring(jndiName.indexOf(":") + 1)) : ContextNames.bindInfoFor(jndiName);
+
+        final BinderService binderService = new BinderService(bindInfo.getBindName());
+        
+        final ServiceBuilder<ManagedReferenceFactory> builder = context.getServiceTarget()
+                .addService(bindInfo.getBinderServiceName(), binderService)
+                .addAliases(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(jndiName));
+
+        builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
+                binderService.getNamingStoreInjector());
+
+        builder.addDependency(IdentityManagerFactoryService.createServiceName(service.getAlias()), IdentityManagerFactory.class,
+                new Injector<IdentityManagerFactory>() {
+                    @Override
+                    public void inject(final IdentityManagerFactory value) throws InjectionException {
+                        binderService.getManagedObjectInjector().inject(
+                                new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
+                    }
+
+                    @Override
+                    public void uninject() {
+                        binderService.getManagedObjectInjector().uninject();
+                    }
+                });
+
+        newControllers.add(builder.setInitialMode(Mode.ACTIVE).install());
+    }
+
+    private String toJndiName(String value, String alias) {
+        JndiName jndiName = null;
+        
+        if (value == null) {
+            jndiName = JndiName.of(PicketLinkExtension.SUBSYSTEM_NAME).append(alias);
+        } else {
+            jndiName = value.startsWith("java:") ? JndiName.of(value.substring(value.indexOf(":") + 1)) : value.startsWith("/") ? JndiName.of(value
+                    .substring(1)) : JndiName.of(value);
+        }
+        
+        return jndiName.getAbsoluteName();
+    }
+
+    private static final ModelElement[] getSupportedStoreTypes() {
+        return new ModelElement[] { ModelElement.JPA_STORE, ModelElement.FILE_STORE, ModelElement.LDAP_STORE };
     }
 
 }

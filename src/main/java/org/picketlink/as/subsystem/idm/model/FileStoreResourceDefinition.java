@@ -37,8 +37,6 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class FileStoreResourceDefinition extends AbstractResourceDefinition {
 
-    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition();
-
     public static final SimpleAttributeDefinition WORKING_DIR = new SimpleAttributeDefinitionBuilder(
             ModelElement.FILE_STORE_WORKING_DIR.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
@@ -62,18 +60,11 @@ public class FileStoreResourceDefinition extends AbstractResourceDefinition {
     public static final SimpleAttributeDefinition TIERS = new SimpleAttributeDefinitionBuilder(
             ModelElement.TIERS.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(WORKING_DIR);
-        INSTANCE.addAttribute(ALWAYS_CREATE_FILE);
-        INSTANCE.addAttribute(ASYNC_WRITE);
-        INSTANCE.addAttribute(ASYNC_WRITE_THREAD_POOL);
-        INSTANCE.addAttribute(REALMS);
-        INSTANCE.addAttribute(TIERS);
-    }
     
-    private FileStoreResourceDefinition() {
-        super(ModelElement.FILE_STORE, FileStoreAddHandler.INSTANCE, FileStoreRemoveHandler.INSTANCE);
+    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition(WORKING_DIR, ALWAYS_CREATE_FILE, ASYNC_WRITE, ASYNC_WRITE_THREAD_POOL, REALMS, TIERS);
+
+    private FileStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.FILE_STORE, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
     @Override

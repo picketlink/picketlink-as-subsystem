@@ -1,5 +1,5 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
-	<identity-management jndi-name="picketlink/FileBasedWithAllConfigIMF"
+	<identity-management
 		alias="file-based-complete">
 		<file-store realms="default" working-dir="/tmp/pl-idm-complete"
 			always-create-files="true" async-write="true"
@@ -13,7 +13,7 @@
 			<features supportsAll="true" />
 		</file-store>
 	</identity-management>
-	<identity-management jndi-name="picketlink/JPABasedWithDataSourceIMF"
+	<identity-management jndi-name="java:picketlink/JPABasedWithDataSourceIMF"
 		alias="development">
 		<jpa-store data-source="jboss/datasources/ExampleDS" realms="default,userRealm">
 			<features>
@@ -37,7 +37,7 @@
 	</identity-management>
 	<identity-management jndi-name="picketlink/JPABasedWithCustomEntitiesIMF"
 		alias="custom-entities">
-		<jpa-store data-source="jboss/datasources/ExampleDS" entity-module="org.picketlink.test"
+		<jpa-store data-source="jboss/datasources/ExampleDS" entity-module="org.picketlink.test" entity-module-unit-name="custom-pu"
 			realms="default">
 			<features supportsAll="true" />
 		</jpa-store>

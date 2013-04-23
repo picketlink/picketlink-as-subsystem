@@ -35,8 +35,6 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class FeatureResourceDefinition extends AbstractResourceDefinition {
 
-    public static final FeatureResourceDefinition INSTANCE = new FeatureResourceDefinition();
-
     public static final SimpleAttributeDefinition FEATURE_GROUP = new SimpleAttributeDefinitionBuilder(
             ModelElement.FEATURE_GROUP.getName(), ModelType.STRING, false)
             .setAllowExpression(false).build();
@@ -45,13 +43,10 @@ public class FeatureResourceDefinition extends AbstractResourceDefinition {
             ModelElement.FEATURE_OPERATION.getName(), ModelType.STRING, false)
             .setAllowExpression(false).build();
 
-    static {
-        INSTANCE.addAttribute(FEATURE_GROUP);
-        INSTANCE.addAttribute(FEATURE_OPERATION);
-    }
+    public static final FeatureResourceDefinition INSTANCE = new FeatureResourceDefinition(FEATURE_GROUP, FEATURE_OPERATION);
     
-    private FeatureResourceDefinition() {
-        super(ModelElement.FEATURE, FeatureAddHandler.INSTANCE, FeatureRemoveHandler.INSTANCE);
+    private FeatureResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.FEATURE, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
     @Override

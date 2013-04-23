@@ -94,6 +94,7 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
     private void publishIdentityManager(StartContext context) {
         final BinderService binderService = new BinderService("IdentityManagerService-" + this.identityManagementAlias + "-"
                 + this.realm);
+        
         final ServiceBuilder<ManagedReferenceFactory> builder = context
                 .getController()
                 .getServiceContainer()

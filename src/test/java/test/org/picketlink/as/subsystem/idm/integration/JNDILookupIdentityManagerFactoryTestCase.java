@@ -69,7 +69,7 @@ public class JNDILookupIdentityManagerFactoryTestCase {
     @Resource (mappedName="picketlink/JPABasedWithCustomEntitiesIMF")
     private IdentityManagerFactory jpaBasedWithCustomEntitiesIMF;
 
-    @Resource (mappedName="picketlink/FileBasedWithAllConfigIMF")
+    @Resource (mappedName="picketlink/file-based-complete")
     private IdentityManagerFactory fileBasedWithAllConfigIMF;
 
     @Resource (mappedName="picketlink/FileBasedSimpleConfigIMF")

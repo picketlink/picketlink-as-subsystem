@@ -37,14 +37,16 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
 
-    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition();
-
     public static final SimpleAttributeDefinition DATA_SOURCE = new SimpleAttributeDefinitionBuilder(
             ModelElement.JPA_STORE_DATASOURCE.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
 
     public static final SimpleAttributeDefinition ENTITY_MODULE = new SimpleAttributeDefinitionBuilder(
             ModelElement.JPA_STORE_ENTITY_MODULE.getName(), ModelType.STRING, true)
+            .setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition ENTITY_MODULE_UNIT_NAME = new SimpleAttributeDefinitionBuilder(
+            ModelElement.JPA_STORE_ENTITY_MODULE_UNIT_NAME.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
 
     public static final SimpleAttributeDefinition ENTITY_MANAGER_FACTORY = new SimpleAttributeDefinitionBuilder(
@@ -58,17 +60,11 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
     public static final SimpleAttributeDefinition TIERS = new SimpleAttributeDefinitionBuilder(
             ModelElement.TIERS.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(DATA_SOURCE);
-        INSTANCE.addAttribute(ENTITY_MODULE);
-        INSTANCE.addAttribute(ENTITY_MANAGER_FACTORY);
-        INSTANCE.addAttribute(REALMS);
-        INSTANCE.addAttribute(TIERS);
-    }
     
-    private JPAStoreResourceDefinition() {
-        super(ModelElement.JPA_STORE, JPAStoreAddHandler.INSTANCE, JPAStoreRemoveHandler.INSTANCE);
+    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition(DATA_SOURCE, ENTITY_MODULE, ENTITY_MODULE_UNIT_NAME,ENTITY_MANAGER_FACTORY, REALMS, TIERS);
+
+    private JPAStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.JPA_STORE, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
     @Override
