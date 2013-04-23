@@ -98,7 +98,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(identityManagerFactoryService.createServiceName(alias), identityManagerFactoryService);
             
             ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
-                    .setInitialMode(Mode.PASSIVE).install();
+                    .setInitialMode(Mode.ACTIVE).install();
 
             newControllers.add(controller);
         }
@@ -160,6 +160,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
                 .setInitialMode(Mode.PASSIVE).install();
 
         newControllers.add(controller);
+        
         return identityManagerFactoryService;
     }
 
@@ -230,7 +231,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
                     }
                 });
 
-        newControllers.add(builder.setInitialMode(Mode.ACTIVE).install());
+        newControllers.add(builder.setInitialMode(Mode.PASSIVE).install());
     }
 
     private String toJndiName(String value, String alias) {
