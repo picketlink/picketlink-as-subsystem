@@ -45,6 +45,7 @@
         	<module name="org.picketlink" />
 
         	<module name="org.jboss.weld.core" services="import"/>
+        	<module name="org.jboss.weld.spi"/>
         	<module name="javax.enterprise.api"/>
 	</dependencies>
 </module>

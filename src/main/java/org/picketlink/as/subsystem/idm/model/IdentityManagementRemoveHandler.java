@@ -30,7 +30,6 @@ import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceController;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerService;

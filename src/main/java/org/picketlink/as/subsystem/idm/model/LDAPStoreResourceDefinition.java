@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
