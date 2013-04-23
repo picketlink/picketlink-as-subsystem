@@ -25,9 +25,11 @@ package org.picketlink.as.subsystem.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.ReloadRequiredRemoveStepHandler;
+import org.jboss.as.controller.ReloadRequiredWriteAttributeHandler;
 import org.jboss.as.controller.ResourceDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleResourceDefinition;
@@ -74,7 +76,9 @@ public abstract class AbstractResourceDefinition extends SimpleResourceDefinitio
         
     }
 
-    protected abstract OperationStepHandler doGetAttributeWriterHandler();
+    protected OperationStepHandler doGetAttributeWriterHandler() {
+        return new ReloadRequiredWriteAttributeHandler(this.attributes.toArray(new AttributeDefinition[this.attributes.size()]));
+    }
 
     public List<SimpleAttributeDefinition> getAttributes() {
         return this.attributes;

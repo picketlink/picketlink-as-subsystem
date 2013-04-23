@@ -45,8 +45,4 @@ public class RelationshipResourceDefinition extends AbstractResourceDefinition {
         super(ModelElement.RELATIONSHIP, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return RelationshipWriteAttributeHandler.INSTANCE;
-    }
 }

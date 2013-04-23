@@ -80,8 +80,4 @@ public class LDAPStoreResourceDefinition extends AbstractResourceDefinition {
         addChildResourceDefinition(RelationshipResourceDefinition.INSTANCE, resourceRegistration);
     }
 
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return LDAPStoreWriteAttributeHandler.INSTANCE;
-    }
 }

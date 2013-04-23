@@ -62,8 +62,4 @@ public class IdentityManagementResourceDefinition extends AbstractResourceDefini
         addChildResourceDefinition(LDAPStoreResourceDefinition.INSTANCE, resourceRegistration);
     }
     
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return IdentityManagementWriteAttributeHandler.INSTANCE;
-    }
 }

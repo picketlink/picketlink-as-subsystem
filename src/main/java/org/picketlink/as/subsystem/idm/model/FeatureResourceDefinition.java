@@ -49,8 +49,4 @@ public class FeatureResourceDefinition extends AbstractResourceDefinition {
         super(ModelElement.FEATURE, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return FeatureWriteAttributeHandler.INSTANCE;
-    }
 }

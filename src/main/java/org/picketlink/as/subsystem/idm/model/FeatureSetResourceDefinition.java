@@ -52,8 +52,4 @@ public class FeatureSetResourceDefinition extends AbstractResourceDefinition {
         addChildResourceDefinition(FeatureResourceDefinition.INSTANCE, resourceRegistration);
     }
     
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return FeatureSetWriteAttributeHandler.INSTANCE;
-    }
 }

@@ -73,8 +73,4 @@ public class FileStoreResourceDefinition extends AbstractResourceDefinition {
         addChildResourceDefinition(RelationshipResourceDefinition.INSTANCE, resourceRegistration);
     }
     
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return FileStoreWriteAttributeHandler.INSTANCE;
-    }
 }
