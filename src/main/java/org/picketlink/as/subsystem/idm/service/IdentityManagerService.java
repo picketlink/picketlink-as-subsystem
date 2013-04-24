@@ -80,7 +80,6 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
 
     @Override
     public void stop(StopContext context) {
-        unpublishIdentityManager(context);
     }
 
     public static ServiceName createServiceName(String identityManagementAlias, String realm) {
@@ -119,13 +118,6 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
                 });
 
         builder.setInitialMode(Mode.ACTIVE).install();
-    }
-
-    private void unpublishIdentityManager(StopContext context) {
-        ServiceController<?> service = context.getController().getServiceContainer()
-                .getService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiName));
-
-        service.setMode(Mode.REMOVE);
     }
 
     @Override
