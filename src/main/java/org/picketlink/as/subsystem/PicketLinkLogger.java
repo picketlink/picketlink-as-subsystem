@@ -51,4 +51,8 @@ public interface PicketLinkLogger extends BasicLogger {
     @LogMessage(level = INFO)
     @Message(id = 12501, value = "[%s] - Configuring deployment %s")
     void configuringDeployment(String serviceName, String deploymentName);
+
+    @LogMessage(level = INFO)
+    @Message(id = 12502, value = "Bound [%s] to [%s]")
+    void boundToJndi(String alias, String jndiName);
 }

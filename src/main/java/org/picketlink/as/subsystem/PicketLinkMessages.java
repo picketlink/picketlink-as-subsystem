@@ -40,9 +40,9 @@ public interface PicketLinkMessages {
      */
     PicketLinkMessages MESSAGES = Messages.getBundle(PicketLinkMessages.class);
 
-    @Message(id = 12502, value = "No writer provided for element %s. Check if a writer is registered in PicketLinkSubsystemWriter.")
+    @Message(id = 12600, value = "No writer provided for element %s. Check if a writer is registered in PicketLinkSubsystemWriter.")
     IllegalStateException noModelElementWriterProvided(String modelEmement);
 
-    @Message(id = 12503, value = "No IdentityConfiguration provided. Maybe you forgot to provide a @Producer method for the IdentityConfiguration.")
+    @Message(id = 12601, value = "No IdentityConfiguration provided. Maybe you forgot to provide a @Producer method for the IdentityConfiguration.")
     IllegalStateException idmNoConfigurationProvided();
 }

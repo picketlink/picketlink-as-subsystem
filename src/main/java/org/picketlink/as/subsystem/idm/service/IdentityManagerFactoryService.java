@@ -31,6 +31,7 @@ import org.jboss.as.naming.ManagedReferenceFactory;
 import org.jboss.as.naming.ServiceBasedNamingStore;
 import org.jboss.as.naming.ValueManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.naming.deployment.ContextNames.BindInfo;
 import org.jboss.as.naming.deployment.JndiName;
 import org.jboss.as.naming.service.BinderService;
 import org.jboss.msc.inject.InjectionException;
@@ -124,11 +125,8 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     }
 
     private void publishIdentityManagerFactory(StartContext context) {
-        String jndiName = this.jndiName;
-        
-        ROOT_LOGGER.debugf("Publishing IdentityManagerFactory for [%s] in JNDI as [%s]", this.alias, jndiName);
-
-        ServiceName serviceName = createJndiIdentityManagerFactoryServiceName();
+        BindInfo bindInfo = createIdentityManagerFactoryBindInfo();
+        ServiceName serviceName = bindInfo.getBinderServiceName();
         final BinderService binderService = new BinderService(serviceName.getCanonicalName());
         final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
                 .addService(serviceName, binderService).addAliases(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(jndiName));
@@ -151,15 +149,18 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
                 });
 
         builder.setInitialMode(Mode.PASSIVE).install();
+        
+        ROOT_LOGGER.boundToJndi("IdentityManagerFactory " + this.alias, bindInfo.getAbsoluteJndiName());
     }
 
     private void publishIdentityManagers(StartContext context) {
         Set<String> configuredRealms = getConfiguredRealms();
 
         for (final String realmName : configuredRealms) {
-            ServiceName serviceName = createJndiIdentityManagerServiceName(realmName);
+            BindInfo bindInfo = createJndiIdentityManagerBindInfo(realmName);
+            ServiceName serviceName = bindInfo.getBinderServiceName();
             
-            ROOT_LOGGER.debugf("Publishing IdentityManager in JNDI as [%s]", serviceName.getCanonicalName());
+            ROOT_LOGGER.boundToJndi("IdentityManager", bindInfo.getAbsoluteJndiName());
             
             final BinderService binderService = new BinderService(serviceName.getCanonicalName());
 
@@ -170,7 +171,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
             builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                     binderService.getNamingStoreInjector());
-            builder.addDependency(createJndiIdentityManagerFactoryServiceName(), ManagedReferenceFactory.class,
+            builder.addDependency(createIdentityManagerFactoryBindInfo().getBinderServiceName(), ManagedReferenceFactory.class,
                     new Injector<ManagedReferenceFactory>() {
                         @Override
                         public void inject(final ManagedReferenceFactory value) throws InjectionException {
@@ -188,22 +189,22 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     }
 
     private void unpublishIdentityManagers(StopContext context) {
-        for (String realmName : getConfiguredRealms()) {
-            context.getController().getServiceContainer()
-                    .getService(createJndiIdentityManagerServiceName(realmName)).setMode(Mode.REMOVE);
-        }
+//        for (String realmName : getConfiguredRealms()) {
+//            context.getController().getServiceContainer()
+//                    .getService(createJndiIdentityManagerBindInfo(realmName).getBinderServiceName()).setMode(Mode.REMOVE);
+//        }
     }
 
     private void unpublishIdentityManagerFactory(StopContext context) {
-        context.getController().getServiceContainer().getService(createJndiIdentityManagerFactoryServiceName()).setMode(Mode.REMOVE);
+        context.getController().setMode(Mode.REMOVE);
     }
 
-    private ServiceName createJndiIdentityManagerFactoryServiceName() {
-        return ContextNames.bindInfoFor(this.jndiName).getBinderServiceName();
+    private BindInfo createIdentityManagerFactoryBindInfo() {
+        return ContextNames.bindInfoFor(this.jndiName);
     }
     
-    private ServiceName createJndiIdentityManagerServiceName(String realmName) {
-        return ContextNames.bindInfoFor(this.jndiName + "/" + realmName).getBinderServiceName();
+    private BindInfo createJndiIdentityManagerBindInfo(String realmName) {
+        return ContextNames.bindInfoFor(this.jndiName + "/" + realmName);
     }
 
     private String toJndiName(String jndiName) {
