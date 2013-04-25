@@ -23,7 +23,9 @@
 package org.picketlink.as.subsystem.federation.metrics;
 
 import org.jboss.security.audit.AuditEvent;
+import org.picketlink.as.subsystem.PicketLinkLogger;
 import org.picketlink.identity.federation.core.audit.PicketLinkAuditEvent;
+import org.picketlink.identity.federation.core.audit.PicketLinkAuditEventType;
 import org.picketlink.identity.federation.core.audit.PicketLinkAuditHelper;
 import org.picketlink.identity.federation.core.exceptions.ConfigurationException;
 
@@ -56,8 +58,9 @@ public class PicketLinkSubsystemMetrics extends PicketLinkAuditHelper {
     @Override
     public void audit(AuditEvent event) {
         PicketLinkAuditEvent picketLinkEvent = (PicketLinkAuditEvent) event;
+        PicketLinkAuditEventType eventType = picketLinkEvent.getType();
         
-        switch (picketLinkEvent.getType()) {
+        switch (eventType) {
             case CREATED_ASSERTION:
                 createdAssertionsCount++;
                 break;
@@ -91,6 +94,9 @@ public class PicketLinkSubsystemMetrics extends PicketLinkAuditHelper {
             case RESPONSE_FROM_IDP:
                 responseFromIDPCount++;
                 break;
+            default:
+                PicketLinkLogger.ROOT_LOGGER.warnf("Ignoring unexpected event type [%s]", eventType);
+                return;
         }
         
         super.audit(picketLinkEvent);

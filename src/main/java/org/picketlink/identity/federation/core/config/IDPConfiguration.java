@@ -39,9 +39,6 @@ public class IDPConfiguration extends IDPType implements ProviderConfiguration {
     private String alias;
     private String securityDomain;
     
-    private boolean signOutgoingMessages;
-    private boolean ignoreIncomingSignatures = true;
-    
     private Map<String, String> trustDomainAlias = new HashMap<String, String>();
 
     public IDPConfiguration() {

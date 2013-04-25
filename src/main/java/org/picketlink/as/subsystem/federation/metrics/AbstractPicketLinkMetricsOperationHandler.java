@@ -36,8 +36,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceName;
-import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
-import org.picketlink.as.subsystem.federation.service.PicketLinkService;
+import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 import org.picketlink.as.subsystem.model.ModelElement;
 
 /**
@@ -114,11 +113,12 @@ public abstract class AbstractPicketLinkMetricsOperationHandler implements Opera
                     final String name = address.getLastElement().getValue();
                     final String attributeName = operation.require(NAME).asString();
 
-                    final ServiceController<PicketLinkService<?>> controller = (ServiceController<PicketLinkService<?>>) context.getServiceRegistry(false)
-                            .getService(createServiceName(name));
+                    final ServiceController<?> controller = context.getServiceRegistry(false).getService(createServiceName(name));
                     if (controller != null) {
                         try {
-                            doPopulateResult(controller.getValue().getMetrics(), context.getResult(), attributeName);
+                            PicketLinkFederationService<?> service = (PicketLinkFederationService<?>) controller.getValue();
+                            
+                            doPopulateResult(service.getMetrics(), context.getResult(), attributeName);
                         } catch (Exception e) {
                             throw new OperationFailedException(new ModelNode().set(MESSAGES.failedToGetMetrics(e.getMessage())));
                         }

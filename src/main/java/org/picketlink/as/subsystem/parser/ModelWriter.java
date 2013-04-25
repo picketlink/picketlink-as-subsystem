@@ -25,7 +25,6 @@ package org.picketlink.as.subsystem.parser;
 import javax.xml.stream.XMLStreamException;
 
 import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.Property;
 import org.jboss.staxmapper.XMLExtendedStreamWriter;
 
 /**

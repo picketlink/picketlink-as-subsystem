@@ -38,7 +38,7 @@ import org.jboss.modules.ModuleIdentifier;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceRegistry;
 import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
-import org.picketlink.as.subsystem.federation.service.PicketLinkService;
+import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 
 /**
@@ -75,7 +75,7 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
         }
         
         if (federationService != null) {
-            deploymentUnit.putAttachment(FEDERATION_ATTACHMENT_KEY, (PicketLinkService<?>) federationService.getValue());
+            deploymentUnit.putAttachment(FEDERATION_ATTACHMENT_KEY, (PicketLinkFederationService<?>) federationService.getValue());
         }
     }
 

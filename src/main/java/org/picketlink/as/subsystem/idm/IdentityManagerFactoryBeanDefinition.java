@@ -47,7 +47,7 @@ import org.picketlink.idm.internal.DefaultIdentityManagerFactory;
 
 /**
  * <p>
- * {@link Bean} implementation to define/customize the behaviour for {@link IdentityManagerFactory} instances.
+ * {@link Bean} implementation to define and customize the behaviour for {@link IdentityManagerFactory} instances.
  * </p>
  * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

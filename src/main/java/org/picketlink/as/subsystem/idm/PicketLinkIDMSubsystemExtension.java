@@ -28,10 +28,11 @@ import javax.enterprise.inject.spi.Extension;
 
 /**
  * <p>
- * {@link Extension} implementation to enable PicketLink IDM when deploying the application using the subsystem.
+ * CDI {@link Extension} to enable PicketLink IDM when deploying CDI applications using the subsystem.
  * </p>
  * 
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
+ * @author Pedro Igor
  */
 public class PicketLinkIDMSubsystemExtension implements Extension {
 

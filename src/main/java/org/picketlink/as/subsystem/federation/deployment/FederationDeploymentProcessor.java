@@ -29,7 +29,7 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.picketlink.as.subsystem.PicketLinkLogger;
-import org.picketlink.as.subsystem.federation.service.PicketLinkService;
+import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 
 /**
  * <p>
@@ -54,10 +54,10 @@ public class FederationDeploymentProcessor implements DeploymentUnitProcessor {
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        PicketLinkService<?> attachment = deploymentUnit.getAttachment(FEDERATION_ATTACHMENT_KEY);
+        PicketLinkFederationService<?> attachment = deploymentUnit.getAttachment(FEDERATION_ATTACHMENT_KEY);
 
         if (attachment != null) {
-            PicketLinkService<?> service = (PicketLinkService<?>) attachment.getValue();
+            PicketLinkFederationService<?> service = (PicketLinkFederationService<?>) attachment.getValue();
 
             if (service != null) {
                 PicketLinkLogger.ROOT_LOGGER.configuringDeployment(service.getClass().getSimpleName(), deploymentUnit.getName());

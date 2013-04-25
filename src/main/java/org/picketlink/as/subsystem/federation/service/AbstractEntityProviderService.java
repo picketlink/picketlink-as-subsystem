@@ -47,13 +47,13 @@ import org.picketlink.identity.federation.core.exceptions.ConfigurationException
 import org.picketlink.identity.federation.core.handler.config.Handler;
 import org.picketlink.identity.federation.core.handler.config.Handlers;
 import org.picketlink.identity.federation.core.saml.v2.constants.JBossSAMLURIConstants;
+import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler;
 import org.picketlink.identity.federation.web.constants.GeneralConstants;
 import org.picketlink.identity.federation.web.handlers.saml2.RolesGenerationHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2AuthenticationHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2EncryptionHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2IssuerTrustHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2LogOutHandler;
-import org.picketlink.identity.federation.web.handlers.saml2.SAML2SignatureGenerationHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2SignatureValidationHandler;
 
 /**
@@ -62,16 +62,16 @@ import org.picketlink.identity.federation.web.handlers.saml2.SAML2SignatureValid
  * @param <T>
  * @param <C>
  */
-public abstract class AbstractEntityProviderService<T extends PicketLinkService<T>, C extends ProviderConfiguration> implements PicketLinkService<T> {
+public abstract class AbstractEntityProviderService<T extends PicketLinkFederationService<T>, C extends ProviderConfiguration> implements PicketLinkFederationService<T> {
     
     private PicketLinkType picketLinkType;
     private C configuration;
     private FederationService federationService;
     private PicketLinkSubsystemMetrics metrics;
-    private static List<Class> commonHandlersList;
+    private static List<Class<? extends SAML2Handler>> commonHandlersList;
 
     static {
-        commonHandlersList = new ArrayList<Class>();
+        commonHandlersList = new ArrayList<Class<? extends SAML2Handler>>();
         commonHandlersList.add(SAML2IssuerTrustHandler.class);
         commonHandlersList.add(SAML2LogOutHandler.class);
         commonHandlersList.add(SAML2AuthenticationHandler.class);
@@ -162,7 +162,7 @@ public abstract class AbstractEntityProviderService<T extends PicketLinkService<
         List<Handler> handlers = getPicketLinkType().getHandlers().getHandler();
         
         // remove the common handlers from the configuration. leaving only the user defined handlers.
-        for (Class commonHandlerClass : commonHandlersList) {
+        for (Class<?> commonHandlerClass : commonHandlersList) {
             for (Handler handler : new ArrayList<Handler>(handlers)) {
                 if (handler.getClazz().equals(commonHandlerClass.getName())) {
                     getPicketLinkType().getHandlers().remove(handler);
@@ -183,7 +183,7 @@ public abstract class AbstractEntityProviderService<T extends PicketLinkService<
      * <p>Adds the common handlers into the configuration.</p>
      */
     protected void doAddHandlers() {
-        for (Class commonHandlerClass : commonHandlersList) {
+        for (Class<? extends SAML2Handler> commonHandlerClass : commonHandlersList) {
             addHandler(commonHandlerClass, getPicketLinkType());
         }
     }

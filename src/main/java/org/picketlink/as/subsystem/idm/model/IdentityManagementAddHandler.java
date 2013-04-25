@@ -86,7 +86,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             identityManagerFactoryService = new IdentityManagerFactoryService(alias, jndiName, configuration);
 
             ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
-                    identityManagerFactoryService.createServiceName(alias), identityManagerFactoryService);
+                    IdentityManagerFactoryService.createServiceName(alias), identityManagerFactoryService);
 
             ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
                     .setInitialMode(Mode.PASSIVE).install();
@@ -98,7 +98,6 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
     private IdentityManagerFactoryService installJPABasedIdentityManagerFactory(OperationContext context,
             final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers,
             final String alias, String jndiName, IdentityConfiguration configuration, Set<ResourceEntry> jpaStoreResources) {
-        IdentityManagerFactoryService identityManagerFactoryService;
         Resource jpaStoreResource;
         jpaStoreResource = jpaStoreResources.iterator().next();
 
@@ -137,7 +136,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
                 entityModuleName, entityModuleUnitName, configuration);
 
         ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
-                jpaBasedIdentityManagerFactory.createServiceName(alias), jpaBasedIdentityManagerFactory);
+                JPABasedIdentityManagerFactoryService.createServiceName(alias), jpaBasedIdentityManagerFactory);
 
         if (dataSourceJndiName != null) {
             serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(dataSourceJndiName.split("/")));

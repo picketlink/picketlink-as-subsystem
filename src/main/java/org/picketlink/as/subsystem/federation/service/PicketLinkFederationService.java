@@ -19,29 +19,34 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+package org.picketlink.as.subsystem.federation.service;
 
-package org.picketlink.as.subsystem.idm.model;
-
-import org.jboss.as.controller.SimpleAttributeDefinition;
-import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
-import org.jboss.dmr.ModelType;
-import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
-import org.picketlink.as.subsystem.model.ModelElement;
+import org.jboss.as.server.deployment.DeploymentUnit;
+import org.jboss.msc.service.Service;
+import org.picketlink.as.subsystem.federation.metrics.PicketLinkSubsystemMetrics;
 
 /**
+ * <p>Interface for PicketLink specific services.</p>
+ * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * @since Mar 16, 2012
+ *
+ * @param <T>
  */
-public class RelationshipResourceDefinition extends AbstractResourceDefinition {
+public interface PicketLinkFederationService<T> extends Service<T> {
 
-    public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false)
-            .setAllowExpression(false).build();
+    /**
+     * <p>Configures a {@link DeploymentUnit} as a PicketLink deployment. For example: Identity Providers and Service Providers.</p>
+     * 
+     * @param deploymentUnit
+     */
+    void configure(DeploymentUnit deploymentUnit);
 
-    public static final RelationshipResourceDefinition INSTANCE = new RelationshipResourceDefinition(CLASS);
+    /**
+     * <p>Returns a {@link PicketLinkSubsystemMetrics}.</p>
+     * 
+     * @return
+     */
+    PicketLinkSubsystemMetrics getMetrics();
     
-    private RelationshipResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.RELATIONSHIP, new IDMConfigAddStepHandler(attributes), attributes);
-    }
     
 }

@@ -23,7 +23,7 @@
 package org.picketlink.as.subsystem.deployment;
 
 import org.jboss.as.server.deployment.AttachmentKey;
-import org.picketlink.as.subsystem.federation.service.PicketLinkService;
+import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 
 /**
  * @author Pedro Silva
@@ -31,7 +31,7 @@ import org.picketlink.as.subsystem.federation.service.PicketLinkService;
  */
 public interface PicketLinkAttachments {
 
-    AttachmentKey<PicketLinkService<?>> FEDERATION_ATTACHMENT_KEY = AttachmentKey.create(PicketLinkService.class);
+    AttachmentKey<PicketLinkFederationService<?>> FEDERATION_ATTACHMENT_KEY = AttachmentKey.create(PicketLinkFederationService.class);
     AttachmentKey<Boolean> IDM_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
     AttachmentKey<Boolean> CORE_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
 

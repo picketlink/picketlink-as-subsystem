@@ -44,16 +44,10 @@ public class FederationService implements Service<FederationService> {
 
     private static final String SERVICE_NAME = "FederationService";
 
-    private String alias;
-    
     private KeyProviderType keyProvider;
     private STSConfiguration samlConfig;
 
     private IdentityProviderService identityProviderService;
-
-    public FederationService(String alias) {
-        this.alias = alias;
-    }
 
     /* (non-Javadoc)
      * @see org.jboss.msc.value.Value#getValue()
