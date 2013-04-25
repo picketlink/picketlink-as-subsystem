@@ -80,6 +80,11 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
 
     @Override
     public void stop(StopContext context) {
+        context.getController().getServiceContainer().getService(createJndiServiceName()).setMode(Mode.REMOVE);
+    }
+
+    private ServiceName createJndiServiceName() {
+        return ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiName);
     }
 
     public static ServiceName createServiceName(String identityManagementAlias, String realm) {
@@ -97,7 +102,7 @@ public class IdentityManagerService implements Service<ManagedReferenceFactory>,
         final ServiceBuilder<ManagedReferenceFactory> builder = context
                 .getController()
                 .getServiceContainer()
-                .addService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, this.jndiName), binderService);
+                .addService(createJndiServiceName(), binderService);
 
         builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                 binderService.getNamingStoreInjector());

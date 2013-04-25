@@ -23,40 +23,30 @@ package org.picketlink.as.subsystem.idm.service;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.metamodel.EntityType;
-
-import org.hibernate.cfg.AvailableSettings;
-import org.jboss.as.jpa.hibernate4.JBossAppServerJtaPlatform;
-import org.jboss.as.jpa.transaction.JtaManagerImpl;
-import org.jboss.modules.Module;
-import org.jboss.modules.ModuleClassLoader;
-import org.jboss.modules.ModuleIdentifier;
-import org.jboss.modules.ModuleLoadException;
-import org.jboss.modules.ModuleLoader;
+import org.jboss.as.naming.ManagedReferenceFactory;
+import org.jboss.as.naming.ServiceBasedNamingStore;
+import org.jboss.as.naming.ValueManagedReferenceFactory;
+import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.naming.deployment.JndiName;
+import org.jboss.as.naming.service.BinderService;
+import org.jboss.msc.inject.InjectionException;
+import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.Service;
+import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
-import org.picketlink.common.util.StringUtil;
+import org.jboss.msc.value.ImmediateValue;
+import org.picketlink.as.subsystem.PicketLinkExtension;
 import org.picketlink.idm.IdentityManagerFactory;
 import org.picketlink.idm.config.IdentityConfiguration;
 import org.picketlink.idm.config.IdentityStoreConfiguration;
-import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
-import org.picketlink.idm.jpa.annotations.IDMEntity;
-import org.picketlink.idm.jpa.internal.JPAContextInitializer;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -65,31 +55,20 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private static String SERVICE_NAME_PREFIX = "IdentityManagerFactoryService";
 
-    private boolean embeddedEmf;
-    private EntityManagerFactory emf;
     private String jndiName;
     private final String alias;
     private IdentityManagerFactory identityManagerFactory;
-    private String jpaStoreEntityManagerFactory;
-    private String jpaStoreDataSource;
-    private String jpaStoreEntityModule;
-    private String jpaStoreEntityModuleUnitName = "identity";
-    private ModuleClassLoader entityClassLoader;
     private IdentityConfiguration identityConfiguration;
 
     public IdentityManagerFactoryService(String alias, String jndiName, IdentityConfiguration configuration) {
         this.alias = alias;
-        this.jndiName = jndiName;
-        this.identityConfiguration = configuration;
-    }
 
-    public IdentityManagerFactoryService(String alias, String jndiName, String dataSourceJndiName, String entityModuleName,
-            String entityModuleUnitName, String emfJndiName, IdentityConfiguration configuration) {
-        this(alias, jndiName, configuration);
-        this.jpaStoreDataSource = dataSourceJndiName;
-        this.jpaStoreEntityManagerFactory = emfJndiName;
-        this.jpaStoreEntityModule = entityModuleName;
-        this.jpaStoreEntityModuleUnitName = entityModuleUnitName;
+        if (jndiName == null) {
+            jndiName = JndiName.of(PicketLinkExtension.SUBSYSTEM_NAME).append(this.alias).getAbsoluteName();
+        }
+
+        this.jndiName = toJndiName(jndiName);
+        this.identityConfiguration = configuration;
     }
 
     @Override
@@ -99,24 +78,22 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     @Override
     public void start(StartContext context) throws StartException {
-        configureJPAIdentityStore();
+        ROOT_LOGGER.debugf("Starting IdentityManagerFactoryService for %s", this.alias);
+
         this.identityManagerFactory = this.identityConfiguration.buildIdentityManagerFactory();
+        publishIdentityManagerFactory(context);
+        publishIdentityManagers(context);
     }
 
     @Override
     public void stop(StopContext context) {
-        ROOT_LOGGER.info("Stopping Identity Service");
+        ROOT_LOGGER.debugf("Stopping IdentityManagerFactoryService for %s", this.alias);
 
-        if (embeddedEmf && emf != null) {
-            ROOT_LOGGER.debug("Closing entity manager factory");
-            emf.close();
-        }
-
-        emf = null;
-
+        unpublishIdentityManagerFactory(context);
+        unpublishIdentityManagers(context);
         this.identityManagerFactory = null;
     }
-    
+
     public String getJndiName() {
         return this.jndiName;
     }
@@ -124,132 +101,95 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     public IdentityConfiguration getIdentityConfiguration() {
         return this.identityConfiguration;
     }
-
-    public String getAlias() {
-        return this.alias;
-    }
     
-    public Set<String> getConfiguredRealms() {
-        HashSet<String> hashSet = new HashSet<String>();
-        
-        List<IdentityStoreConfiguration> configuredStores = this.identityConfiguration.getConfiguredStores();
-        
-        for (IdentityStoreConfiguration identityStoreConfiguration : configuredStores) {
-            hashSet.addAll(identityStoreConfiguration.getRealms());
-        }
-        
-        return hashSet;
-    }
-
     public static ServiceName createServiceName(String alias) {
         return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
     }
 
-    private void configureJPAIdentityStore() {
-        JPAIdentityStoreConfiguration jpaConfig = null;
-        
-        for (IdentityStoreConfiguration identityStoreConfiguration : this.identityConfiguration.getConfiguredStores()) {
-            if (JPAIdentityStoreConfiguration.class.isInstance(identityStoreConfiguration)) {
-                jpaConfig = (JPAIdentityStoreConfiguration) identityStoreConfiguration;
-                break;
-            }
-        }
-        
-        if (jpaConfig == null) {
-            return;
-        }
-
-        if (!StringUtil.isNullOrEmpty(jpaStoreEntityManagerFactory)) {
-            try {
-                ROOT_LOGGER.debug("Looking up entity manager factory: " + jpaStoreEntityManagerFactory);
-
-                this.emf = (EntityManagerFactory) new InitialContext().lookup(jpaStoreEntityManagerFactory);
-                embeddedEmf = false;
-            } catch (NamingException e) {
-                throw new RuntimeException(e);
-            }
-        } else if (!StringUtil.isNullOrEmpty(jpaStoreDataSource)) {
-            try {
-                ROOT_LOGGER.debug("Creating entity manager factory for module: " + "myschema");
-
-                createEntityManagerFactory();
-                embeddedEmf = true;
-            } catch (ModuleLoadException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            throw new RuntimeException("No entity manager factory configured");
-        }
-
-        Set<EntityType<?>> entities = emf.getMetamodel().getEntities();
-
-        for (EntityType<?> entity : entities) {
-            Class<?> javaType = entity.getJavaType();
-            IDMEntity idmEntity = javaType.getAnnotation(IDMEntity.class);
-            if (idmEntity != null) {
-                switch (idmEntity.value()) {
-                    case CREDENTIAL_ATTRIBUTE:
-                        jpaConfig.setCredentialAttributeClass(javaType);
-                        break;
-                    case IDENTITY_ATTRIBUTE:
-                        jpaConfig.setAttributeClass(javaType);
-                        break;
-                    case IDENTITY_CREDENTIAL:
-                        jpaConfig.setCredentialClass(javaType);
-                        break;
-                    case IDENTITY_TYPE:
-                        jpaConfig.setIdentityClass(javaType);
-                        break;
-                    case PARTITION:
-                        jpaConfig.setPartitionClass(javaType);
-                        break;
-                    case RELATIONSHIP:
-                        jpaConfig.setRelationshipClass(javaType);
-                        break;
-                    case RELATIONSHIP_ATTRIBUTE:
-                        jpaConfig.setRelationshipAttributeClass(javaType);
-                        break;
-                    case RELATIONSHIP_IDENTITY:
-                        jpaConfig.setRelationshipIdentityClass(javaType);
-                        break;
-                }
-            }
-        }
-
-        jpaConfig.addContextInitializer(new JPAContextInitializer(emf) {
-            @Override
-            public EntityManager getEntityManager() {
-                return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager(),
-                                entityClassLoader));
-            }
-        });
+    protected String getAlias() {
+        return this.alias;
     }
-    
-    private void createEntityManagerFactory() throws ModuleLoadException {
-        ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 
-        if (!StringUtil.isNullOrEmpty(jpaStoreEntityModule)) {
-            ModuleLoader moduleLoader = Module.getContextModuleLoader();
-            Module module = moduleLoader.loadModule(ModuleIdentifier.create(jpaStoreEntityModule));
-            entityClassLoader = module.getClassLoader();
+    private Set<String> getConfiguredRealms() {
+        HashSet<String> realms = new HashSet<String>();
+
+        List<IdentityStoreConfiguration> configuredStores = this.identityConfiguration.getConfiguredStores();
+
+        for (IdentityStoreConfiguration identityStoreConfiguration : configuredStores) {
+            realms.addAll(identityStoreConfiguration.getRealms());
         }
 
-        try {
-            Map<Object, Object> properties = new HashMap<Object, Object>();
-            properties.put("javax.persistence.jtaDataSource", jpaStoreDataSource);
-            properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
+        return realms;
+    }
 
-            if (entityClassLoader != null) {
-                Thread.currentThread().setContextClassLoader(entityClassLoader);
-            }
+    private void publishIdentityManagerFactory(StartContext context) {
+        String jndiName = getJndiName();
 
-            this.emf = Persistence.createEntityManagerFactory(this.jpaStoreEntityModuleUnitName, properties);
-        } finally {
-            if (entityClassLoader != null) {
-                Thread.currentThread().setContextClassLoader(originalClassLoader);
+        ServiceName serviceName = createJndiServiceName();
+        final BinderService binderService = new BinderService(serviceName.getCanonicalName());
+        final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
+                .addService(serviceName, binderService).addAliases(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(jndiName));
+
+        builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
+                binderService.getNamingStoreInjector());
+
+        builder.addDependency(IdentityManagerFactoryService.createServiceName(getAlias()), IdentityManagerFactory.class,
+                new Injector<IdentityManagerFactory>() {
+                    @Override
+                    public void inject(final IdentityManagerFactory value) throws InjectionException {
+                        binderService.getManagedObjectInjector().inject(
+                                new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
+                    }
+
+                    @Override
+                    public void uninject() {
+                        binderService.getManagedObjectInjector().uninject();
+                    }
+                });
+
+        builder.setInitialMode(Mode.PASSIVE).install();
+    }
+
+    private void publishIdentityManagers(StartContext context) {
+        Set<String> configuredRealms = getConfiguredRealms();
+
+        for (String realmName : configuredRealms) {
+            IdentityManagerService identityManagerService = new IdentityManagerService(alias, realmName);
+
+            ServiceBuilder<ManagedReferenceFactory> identityManagerServiceBuilder = context.getController()
+                    .getServiceContainer()
+                    .addService(IdentityManagerService.createServiceName(alias, realmName), identityManagerService);
+
+            identityManagerServiceBuilder.addDependency(IdentityManagerFactoryService.createServiceName(alias),
+                    IdentityManagerFactory.class, identityManagerService.getIdentityManagerFactory());
+
+            identityManagerServiceBuilder.setInitialMode(Mode.PASSIVE).install();
+        }
+    }
+
+    private void unpublishIdentityManagers(StopContext context) {
+        for (String realm : getConfiguredRealms()) {
+            context.getController().getServiceContainer()
+                    .getService(IdentityManagerService.createServiceName(getAlias(), realm)).setMode(Mode.REMOVE);
+        }
+    }
+
+    private void unpublishIdentityManagerFactory(StopContext context) {
+        context.getController().getServiceContainer().getService(createJndiServiceName()).setMode(Mode.REMOVE);
+    }
+
+    private ServiceName createJndiServiceName() {
+        return ContextNames.bindInfoFor(this.jndiName).getBinderServiceName();
+    }
+
+    private String toJndiName(String jndiName) {
+        if (jndiName != null) {
+            if (jndiName.startsWith("java:")) {
+                jndiName = jndiName.substring(jndiName.indexOf(":") + 1);
             }
         }
+
+        return jndiName;
     }
     
 }

@@ -23,9 +23,6 @@ package test.org.picketlink.as.subsystem;
 
 import junit.framework.Assert;
 
-import org.jboss.as.subsystem.test.AdditionalInitialization;
-import org.jboss.as.subsystem.test.KernelServices;
-import org.jboss.as.subsystem.test.KernelServicesBuilder;
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
 
@@ -59,37 +56,6 @@ public class ParseCompleteDomainModelTestCase extends AbstractPicketLinkSubsyste
         
         Assert.assertNotNull("Expected a populated model.", model);
         Assert.assertNotNull("ModelNode instance is not defined.", model.isDefined());
-    }
-
-    /**
-     * Tests that the SubsystemParser.writeContent() works as expected.
-     * 
-     * @throws Exception
-     */
-    @Test
-    public void testParseAndMarshalModel() throws Exception {
-        String subsystemXml = getValidSubsystemXML();
-
-        KernelServicesBuilder createKernelServicesBuilder = super.createKernelServicesBuilder(new AdditionalInitialization());
-        
-        createKernelServicesBuilder.setSubsystemXml(subsystemXml);
-        
-        KernelServices servicesA = createKernelServicesBuilder.build();
-
-        ModelNode modelA = servicesA.readWholeModel();
-        String marshalled = servicesA.getPersistedSubsystemXml();
-
-        System.out.println(marshalled);
-
-        KernelServicesBuilder createKernelServicesBuilderB = super.createKernelServicesBuilder(new AdditionalInitialization());
-        
-        createKernelServicesBuilderB.setSubsystemXml(marshalled);
-        
-        KernelServices servicesB = createKernelServicesBuilderB.build();
-
-        ModelNode modelB = servicesB.readWholeModel();
-
-        super.compare(modelA, modelB);
     }
 
     @Override

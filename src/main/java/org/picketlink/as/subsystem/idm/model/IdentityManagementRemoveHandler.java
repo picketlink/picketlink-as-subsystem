@@ -22,19 +22,12 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
-import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceController;
 import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerService;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.idm.config.IdentityStoreConfiguration;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -55,29 +48,9 @@ public class IdentityManagementRemoveHandler extends AbstractRemoveStepHandler {
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
             throws OperationFailedException {
-        final String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
+        String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
-        ModelNode jndiNameNode = operation.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_NAME.getName());
-        String jndiName = null;
-
-        if (jndiNameNode.isDefined()) {
-            jndiName = jndiNameNode.asString();
-        }
-
-        context.removeService(ContextNames.buildServiceName(ContextNames.JAVA_CONTEXT_SERVICE_NAME, jndiName));
-        ServiceController<?> service = (ServiceController<IdentityManagerFactoryService>) context.removeService(IdentityManagerFactoryService.createServiceName(alias));
-        
-        IdentityManagerFactoryService identityManagerService = (IdentityManagerFactoryService) service.getService();
-        
-        List<IdentityStoreConfiguration> stores = identityManagerService.getIdentityConfiguration().getConfiguredStores();
-        
-        for (IdentityStoreConfiguration identityStoreConfiguration : stores) {
-            Set<String> realms = identityStoreConfiguration.getRealms();
-            
-            for (String realm : realms) {
-                context.removeService(IdentityManagerService.createServiceName(alias, realm));
-            }
-        }
+        context.removeService(IdentityManagerFactoryService.createServiceName(alias));
     }
 
 }
