@@ -134,7 +134,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                 binderService.getNamingStoreInjector());
 
-        builder.addDependency(IdentityManagerFactoryService.createServiceName(getAlias()), IdentityManagerFactory.class,
+        builder.addDependency(createServiceName(getAlias()), IdentityManagerFactory.class,
                 new Injector<IdentityManagerFactory>() {
                     @Override
                     public void inject(final IdentityManagerFactory value) throws InjectionException {
@@ -189,14 +189,14 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     }
 
     private void unpublishIdentityManagers(StopContext context) {
-//        for (String realmName : getConfiguredRealms()) {
-//            context.getController().getServiceContainer()
-//                    .getService(createJndiIdentityManagerBindInfo(realmName).getBinderServiceName()).setMode(Mode.REMOVE);
-//        }
+        for (String realmName : getConfiguredRealms()) {
+            context.getController().getServiceContainer()
+                    .getService(createJndiIdentityManagerBindInfo(realmName).getBinderServiceName()).setMode(Mode.REMOVE);
+        }
     }
 
     private void unpublishIdentityManagerFactory(StopContext context) {
-        context.getController().setMode(Mode.REMOVE);
+        context.getController().getServiceContainer().getService(createIdentityManagerFactoryBindInfo().getBinderServiceName()).setMode(Mode.REMOVE);
     }
 
     private BindInfo createIdentityManagerFactoryBindInfo() {
