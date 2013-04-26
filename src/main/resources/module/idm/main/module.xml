@@ -18,8 +18,8 @@
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.idm">
 	
 	<resources>
-		<resource-root path="picketlink-idm-api-3.0.0-SNAPSHOT.jar" />
-		<resource-root path="picketlink-idm-impl-3.0.0-SNAPSHOT.jar" />
+		<resource-root path="picketlink-idm-api-3.0.0.Beta2.jar" />
+		<resource-root path="picketlink-idm-impl-3.0.0.Beta2.jar" />
 	</resources>
 
 	<dependencies>
