@@ -66,7 +66,7 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
     private final InjectedValue<ValueManagedReferenceFactory> providedEntityManagerFactory = new InjectedValue<ValueManagedReferenceFactory>();
     private EntityManagerFactory emf;
-    private String jpaStoreDataSource;
+    private final String jpaStoreDataSource;
     private String jpaStoreEntityModuleUnitName = "identity";
     private Module entitiesModule;
 
@@ -76,14 +76,16 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
         this.jpaStoreDataSource = dataSourceJndiName;
         this.jpaStoreEntityModuleUnitName = entityModuleUnitName;
 
-        if (entityModuleName != null) {
-            ModuleLoader moduleLoader = Module.getContextModuleLoader();
-            try {
-                this.entitiesModule = moduleLoader.loadModule(ModuleIdentifier.create(entityModuleName));
-            } catch (ModuleLoadException e) {
-                throw new IllegalStateException("Entities module not found [" + entityModuleName
-                        + "]. Unable to start IDM service for [" + alias + "].");
-            }
+        if (entityModuleName == null) {
+            entityModuleName = "org.picketlink.as.extension";
+        }
+
+        ModuleLoader moduleLoader = Module.getContextModuleLoader();
+        try {
+            this.entitiesModule = moduleLoader.loadModule(ModuleIdentifier.create(entityModuleName));
+        } catch (ModuleLoadException e) {
+            throw new IllegalStateException("Entities module not found [" + entityModuleName
+                    + "]. Unable to start IDM service for [" + alias + "].");
         }
     }
 
@@ -130,8 +132,7 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
             @Override
             public EntityManager getEntityManager() {
                 return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                        new Class<?>[] { EntityManager.class },
-                        new EntityManagerTx(emf.createEntityManager(), entitiesModule));
+                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager(), entitiesModule));
             }
         });
     }
