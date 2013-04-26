@@ -71,6 +71,8 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             jndiName = jndiNameNode.asString();
         }
 
+        jndiName = toJndiName(jndiName);
+
         Resource identityManagementResource = context.readResource(PathAddress.EMPTY_ADDRESS);
 
         IdentityConfiguration configuration = fromResource(identityManagementResource);
@@ -113,6 +115,8 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         if (jpaDataSourceNode.isDefined()) {
             dataSourceJndiName = jpaDataSourceNode.asString();
         }
+
+        dataSourceJndiName = toJndiName(dataSourceJndiName);
 
         String entityModuleName = null;
 
@@ -174,6 +178,16 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
     private static final ModelElement[] getSupportedStoreTypes() {
         return new ModelElement[] { ModelElement.JPA_STORE, ModelElement.FILE_STORE, ModelElement.LDAP_STORE };
+    }
+
+    private String toJndiName(String jndiName) {
+        if (jndiName != null) {
+            if (jndiName.startsWith("java:")) {
+                jndiName = jndiName.substring(jndiName.indexOf(":") + 1);
+            }
+        }
+
+        return jndiName;
     }
 
 }
