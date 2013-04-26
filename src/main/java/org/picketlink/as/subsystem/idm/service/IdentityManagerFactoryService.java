@@ -54,7 +54,7 @@ import org.picketlink.idm.config.IdentityStoreConfiguration;
  * This {@link Service} starts the {@link IdentityManagerFactory} using the configuration loaded from the domain model and
  * publishes it in JNDI.
  * </p>
- * 
+ *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  * @author Pedro Igor
  */
@@ -62,20 +62,20 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private static String SERVICE_NAME_PREFIX = "IdentityManagerFactoryService";
 
-    private String jndiName;
+    private final String jndiName;
     private final String alias;
     private IdentityManagerFactory identityManagerFactory;
-    private IdentityConfiguration identityConfiguration;
+    private final IdentityConfiguration identityConfiguration;
 
     public IdentityManagerFactoryService(String alias, String jndiName, IdentityConfiguration configuration) {
         this.alias = alias;
-        
+
         // if not jndi name was provide defaults to bellow
         if (jndiName == null) {
             jndiName = JndiName.of(PicketLinkExtension.SUBSYSTEM_NAME).append(this.alias).getAbsoluteName();
         }
 
-        this.jndiName = toJndiName(jndiName);
+        this.jndiName = jndiName;
         this.identityConfiguration = configuration;
     }
 
@@ -149,7 +149,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
                 });
 
         builder.setInitialMode(Mode.PASSIVE).install();
-        
+
         ROOT_LOGGER.boundToJndi("IdentityManagerFactory " + this.alias, bindInfo.getAbsoluteJndiName());
     }
 
@@ -159,9 +159,9 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         for (final String realmName : configuredRealms) {
             BindInfo bindInfo = createJndiIdentityManagerBindInfo(realmName);
             ServiceName serviceName = bindInfo.getBinderServiceName();
-            
+
             ROOT_LOGGER.boundToJndi("IdentityManager", bindInfo.getAbsoluteJndiName());
-            
+
             final BinderService binderService = new BinderService(serviceName.getCanonicalName());
 
             final ServiceBuilder<ManagedReferenceFactory> builder = context
@@ -202,19 +202,9 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     private BindInfo createIdentityManagerFactoryBindInfo() {
         return ContextNames.bindInfoFor(this.jndiName);
     }
-    
+
     private BindInfo createJndiIdentityManagerBindInfo(String realmName) {
         return ContextNames.bindInfoFor(this.jndiName + "/" + realmName);
-    }
-
-    private String toJndiName(String jndiName) {
-        if (jndiName != null) {
-            if (jndiName.startsWith("java:")) {
-                jndiName = jndiName.substring(jndiName.indexOf(":") + 1);
-            }
-        }
-
-        return jndiName;
     }
 
 }

@@ -18,7 +18,7 @@
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.idm.schema">
 	
 	<resources>
-		<resource-root path="picketlink-idm-schema-3.0.0-SNAPSHOT.jar" />
+		<resource-root path="picketlink-idm-schema-3.0.0.Beta2.jar" />
 	</resources>
 
 	<dependencies>

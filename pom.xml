@@ -79,7 +79,7 @@
 		<version.picketlink2>2.1.5.Final</version.picketlink2>
 
 		<!-- Current version of PicketLink libraries -->
-		<version.picketlink>3.0.0-SNAPSHOT</version.picketlink>
+		<version.picketlink>3.0.0.Beta2</version.picketlink>
 
 		<version.arquillian_drone>1.1.1.Final</version.arquillian_drone>
 	</properties>
