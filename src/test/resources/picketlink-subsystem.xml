@@ -37,7 +37,7 @@
 	</identity-management>
 	<identity-management jndi-name="picketlink/JPABasedWithCustomEntitiesIMF"
 		alias="custom-entities">
-		<jpa-store data-source="jboss/datasources/ExampleDS" entity-module="org.picketlink.test" entity-module-unit-name="custom-pu"
+		<jpa-store entity-module="org.picketlink.test" entity-module-unit-name="custom-pu"
 			realms="default">
 			<features supportsAll="true" />
 		</jpa-store>

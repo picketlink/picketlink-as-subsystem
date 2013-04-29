@@ -115,15 +115,13 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
         if (!hasEmbeddedEntityManagerFactory()) {
             this.emf = (EntityManagerFactory) this.providedEntityManagerFactory.getValue().getReference().getInstance();
-        } else if (!StringUtil.isNullOrEmpty(jpaStoreDataSource)) {
+        } else {
             try {
                 ROOT_LOGGER.debug("Creating entity manager factory for module: " + "myschema");
                 createEmbeddedEntityManagerFactory();
             } catch (ModuleLoadException e) {
                 throw new RuntimeException(e);
             }
-        } else {
-            throw new RuntimeException("No entity manager factory configured");
         }
 
         configureIDMEntities(jpaConfig);
@@ -195,7 +193,11 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
         try {
             Map<Object, Object> properties = new HashMap<Object, Object>();
-            properties.put("javax.persistence.jtaDataSource", this.jpaStoreDataSource);
+            
+            if (!StringUtil.isNullOrEmpty(this.jpaStoreDataSource)) {
+                properties.put("javax.persistence.jtaDataSource", this.jpaStoreDataSource);
+            }
+            
             properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
 
             if (this.entitiesModule != null) {
