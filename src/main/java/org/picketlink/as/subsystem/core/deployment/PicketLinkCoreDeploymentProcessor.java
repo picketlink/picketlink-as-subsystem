@@ -72,13 +72,13 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
 
                 PicketLinkCoreSubsystemExtension coreExtension = null;
 
-                if (warMetadata.getWebMetaData() != null && warMetadata.getWebMetaData().getResourceReferences() != null) {
+                if (warMetadata != null && warMetadata.getWebMetaData() != null && warMetadata.getWebMetaData().getResourceReferences() != null) {
                     ResourceReferencesMetaData resourceReferences = warMetadata.getWebMetaData().getResourceReferences();
 
                     Iterator<ResourceReferenceMetaData> iterator = resourceReferences.iterator();
 
                     while (iterator.hasNext()) {
-                        ResourceReferenceMetaData resourceReferenceMetaData = (ResourceReferenceMetaData) iterator.next();
+                        ResourceReferenceMetaData resourceReferenceMetaData = iterator.next();
 
                         if (resourceReferenceMetaData.getType().equals(IdentityManager.class.getName())) {
                             coreExtension = new PicketLinkCoreSubsystemExtension(resourceReferenceMetaData.getName());
@@ -113,7 +113,7 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
     @Override
     public void undeploy(DeploymentUnit context) {
     }
-    
+
     private boolean hasCoreCDIExtensions(DeploymentUnit deploymentUnit) {
         AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
 
