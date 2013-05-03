@@ -30,15 +30,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
-import javax.persistence.PersistenceException;
 import javax.persistence.metamodel.EntityType;
 import javax.transaction.Status;
-import javax.transaction.UserTransaction;
+import javax.transaction.TransactionManager;
 
 import org.hibernate.cfg.AvailableSettings;
 import org.jboss.as.jpa.hibernate4.JBossAppServerJtaPlatform;
@@ -65,6 +62,7 @@ import org.picketlink.idm.jpa.internal.JPAContextInitializer;
 public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactoryService {
 
     private final InjectedValue<ValueManagedReferenceFactory> providedEntityManagerFactory = new InjectedValue<ValueManagedReferenceFactory>();
+    private final InjectedValue<TransactionManager> transactionManager = new InjectedValue<TransactionManager>();
     private EntityManagerFactory emf;
     private final String jpaStoreDataSource;
     private String jpaStoreEntityModuleUnitName = "identity";
@@ -130,7 +128,8 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
             @Override
             public EntityManager getEntityManager() {
                 return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                        new Class<?>[] { EntityManager.class }, new EntityManagerTx(emf.createEntityManager(), entitiesModule));
+                        new Class<?>[] { EntityManager.class }, new EntityManagerInvocationHandler(emf.createEntityManager(),
+                                entitiesModule));
             }
         });
     }
@@ -193,11 +192,11 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
         try {
             Map<Object, Object> properties = new HashMap<Object, Object>();
-            
+
             if (!StringUtil.isNullOrEmpty(this.jpaStoreDataSource)) {
                 properties.put("javax.persistence.jtaDataSource", this.jpaStoreDataSource);
             }
-            
+
             properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
 
             if (this.entitiesModule != null) {
@@ -210,83 +209,40 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
         }
     }
 
+    public InjectedValue<TransactionManager> getTransactionManager() {
+        return transactionManager;
+    }
+
     public InjectedValue<ValueManagedReferenceFactory> getProvidedEntityManagerFactory() {
         return this.providedEntityManagerFactory;
     }
 
-    private class EntityManagerTx implements InvocationHandler {
+    private class EntityManagerInvocationHandler implements InvocationHandler {
 
         private final EntityManager em;
         private final Module entityModule;
 
-        public EntityManagerTx(EntityManager em, Module entitiesModule) {
+        public EntityManagerInvocationHandler(EntityManager em, Module entitiesModule) {
             this.em = em;
             this.entityModule = entitiesModule;
         }
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            UserTransaction tx = null;
-
-            if (isTxRequired(method, args)) {
-                tx = getUserTransaction();
-
-                if (tx.getStatus() == Status.STATUS_NO_TRANSACTION) {
-                    tx.begin();
-                } else {
-                    tx = null;
-                }
-
+            if (transactionManager.getValue().getStatus() != Status.STATUS_NO_TRANSACTION) {
                 this.em.joinTransaction();
             }
 
             ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
 
             try {
-                if (this.entityModule != null) {
-                    Thread.currentThread().setContextClassLoader(this.entityModule.getClassLoader());
-                }
-
+                Thread.currentThread().setContextClassLoader(this.entityModule.getClassLoader());
                 return method.invoke(this.em, args);
             } finally {
-                if (this.entityModule != null) {
-                    Thread.currentThread().setContextClassLoader(originalClassLoader);
-                }
-
-                if (tx != null) {
-                    tx.commit();
-                }
+                Thread.currentThread().setContextClassLoader(originalClassLoader);
             }
         }
 
-        private boolean isTxRequired(Method method, Object[] args) {
-            String n = method.getName();
-            if (n.equals("flush")) {
-                return true;
-            } else if (n.equals("getLockMode")) {
-                return true;
-            } else if (n.equals("lock")) {
-                return true;
-            } else if (n.equals("merge")) {
-                return true;
-            } else if (n.equals("persist")) {
-                return true;
-            } else if (n.equals("refresh")) {
-                return true;
-            } else if (n.equals("remove")) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
-        private UserTransaction getUserTransaction() {
-            try {
-                return (UserTransaction) new InitialContext().lookup("java:jboss/UserTransaction");
-            } catch (NamingException e) {
-                throw new PersistenceException(e);
-            }
-        }
     }
 
 }

@@ -25,6 +25,8 @@ package org.picketlink.as.subsystem.idm.model;
 import java.util.List;
 import java.util.Set;
 
+import javax.transaction.TransactionManager;
+
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
@@ -34,6 +36,7 @@ import org.jboss.as.controller.registry.Resource;
 import org.jboss.as.controller.registry.Resource.ResourceEntry;
 import org.jboss.as.naming.ValueManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
+import org.jboss.as.txn.service.TxnServices;
 import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
@@ -141,6 +144,8 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
         ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
                 JPABasedIdentityManagerFactoryService.createServiceName(alias), jpaBasedIdentityManagerFactory);
+
+        serviceBuilder.addDependency(TxnServices.JBOSS_TXN_TRANSACTION_MANAGER, TransactionManager.class, jpaBasedIdentityManagerFactory.getTransactionManager());
 
         if (dataSourceJndiName != null) {
             serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(dataSourceJndiName.split("/")));
