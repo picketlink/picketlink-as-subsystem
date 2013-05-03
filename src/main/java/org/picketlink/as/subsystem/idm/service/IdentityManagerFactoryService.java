@@ -38,6 +38,7 @@ import org.jboss.msc.inject.InjectionException;
 import org.jboss.msc.inject.Injector;
 import org.jboss.msc.service.Service;
 import org.jboss.msc.service.ServiceBuilder;
+import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
 import org.jboss.msc.service.ServiceName;
 import org.jboss.msc.service.StartContext;
@@ -190,13 +191,20 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
     private void unpublishIdentityManagers(StopContext context) {
         for (String realmName : getConfiguredRealms()) {
-            context.getController().getServiceContainer()
-                    .getService(createJndiIdentityManagerBindInfo(realmName).getBinderServiceName()).setMode(Mode.REMOVE);
+            ServiceController<?> service = context.getController().getServiceContainer()
+                    .getService(createJndiIdentityManagerBindInfo(realmName).getBinderServiceName());
+            if (service != null) {
+                service.setMode(Mode.REMOVE);
+            }
         }
     }
 
     private void unpublishIdentityManagerFactory(StopContext context) {
-        context.getController().getServiceContainer().getService(createIdentityManagerFactoryBindInfo().getBinderServiceName()).setMode(Mode.REMOVE);
+        ServiceController<?> service = context.getController().getServiceContainer()
+                .getService(createIdentityManagerFactoryBindInfo().getBinderServiceName());
+        if (service != null) {
+            service.setMode(Mode.REMOVE);
+        }
     }
 
     private BindInfo createIdentityManagerFactoryBindInfo() {
