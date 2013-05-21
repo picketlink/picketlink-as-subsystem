@@ -35,6 +35,7 @@ import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.metamodel.EntityType;
 import javax.transaction.Status;
+import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
 
 import org.hibernate.cfg.AvailableSettings;
@@ -229,7 +230,15 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-            if (transactionManager.getValue().getStatus() != Status.STATUS_NO_TRANSACTION) {
+            TransactionManager tm = transactionManager.getValue();
+            Transaction tx = null;
+
+            if (isTxRequired(method, args)) {
+                if (tm.getStatus() == Status.STATUS_NO_TRANSACTION) {
+                    tm.begin();
+                    tx = tm.getTransaction();
+                }
+
                 this.em.joinTransaction();
             }
 
@@ -237,9 +246,36 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
             try {
                 Thread.currentThread().setContextClassLoader(this.entityModule.getClassLoader());
+
                 return method.invoke(this.em, args);
             } finally {
                 Thread.currentThread().setContextClassLoader(originalClassLoader);
+
+                if (tx != null) {
+                    tx.commit();
+                    tm.suspend();
+                }
+            }
+        }
+
+        private boolean isTxRequired(Method method, Object[] args) {
+            String n = method.getName();
+            if (n.equals("flush")) {
+                return true;
+            } else if (n.equals("getLockMode")) {
+                return true;
+            } else if (n.equals("lock")) {
+                return true;
+            } else if (n.equals("merge")) {
+                return true;
+            } else if (n.equals("persist")) {
+                return true;
+            } else if (n.equals("refresh")) {
+                return true;
+            } else if (n.equals("remove")) {
+                return true;
+            } else {
+                return false;
             }
         }
 
