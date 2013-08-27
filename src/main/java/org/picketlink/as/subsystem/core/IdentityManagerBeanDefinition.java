@@ -22,11 +22,11 @@
 
 package org.picketlink.as.subsystem.core;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import org.jboss.as.naming.deployment.ContextNames;
+import org.picketlink.common.util.StringUtil;
+import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.PartitionManager;
+import org.picketlink.idm.internal.ContextualIdentityManager;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.spi.CreationalContext;
@@ -40,12 +40,11 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-
-import org.jboss.as.naming.deployment.ContextNames;
-import org.picketlink.common.util.StringUtil;
-import org.picketlink.idm.IdentityManager;
-import org.picketlink.idm.IdentityManagerFactory;
-import org.picketlink.idm.internal.DefaultIdentityManager;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * <p>
@@ -69,7 +68,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
         
         this.identityManagerJNDIUrl = identityManagerJNDIUrl;
         this.beanManager = beanManager;
-        AnnotatedType<? extends IdentityManager> at = this.beanManager.createAnnotatedType(DefaultIdentityManager.class);
+        AnnotatedType<? extends IdentityManager> at = this.beanManager.createAnnotatedType(IdentityManager.class);
         this.injectionTarget = (InjectionTarget<IdentityManager>) beanManager.createInjectionTarget(at);
     }
 
@@ -80,17 +79,17 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      */
     @Override
     public IdentityManager create(CreationalContext<IdentityManager> creationalContext) {
-        IdentityManagerFactory identityManagerFactory = null;
+        PartitionManager partitionManager = null;
         
         try {
             String formattedJNDIName = this.identityManagerJNDIUrl.replaceAll(ContextNames.JAVA_CONTEXT_SERVICE_NAME.getSimpleName() + ":", "");
             
-            identityManagerFactory = (IdentityManagerFactory) new InitialContext().lookup(formattedJNDIName);
+            partitionManager = (PartitionManager) new InitialContext().lookup(formattedJNDIName);
         } catch (NamingException e) {
             throw new RuntimeException("Error looking up IdentityManager from [" + this.identityManagerJNDIUrl + "]", e);
         };
 
-        IdentityManager identityManager = identityManagerFactory.createIdentityManager();
+        IdentityManager identityManager = partitionManager.createIdentityManager();
         
         this.injectionTarget.inject(identityManager, creationalContext);
         this.injectionTarget.postConstruct(identityManager);
@@ -178,7 +177,7 @@ public class IdentityManagerBeanDefinition implements Bean<IdentityManager> {
      */
     @Override
     public Class<?> getBeanClass() {
-        return DefaultIdentityManager.class;
+        return ContextualIdentityManager.class;
     }
 
     /*

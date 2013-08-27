@@ -33,9 +33,9 @@ import org.picketlink.as.subsystem.federation.service.AbstractEntityProviderServ
 import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
 import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.identity.federation.core.config.KeyValueType;
-import org.picketlink.identity.federation.core.handler.config.Handler;
-import org.picketlink.identity.federation.core.handler.config.Handlers;
+import org.picketlink.config.federation.KeyValueType;
+import org.picketlink.config.federation.handler.Handler;
+import org.picketlink.config.federation.handler.Handlers;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

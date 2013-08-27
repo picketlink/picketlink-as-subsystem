@@ -28,6 +28,7 @@ import java.util.Iterator;
 
 import javax.enterprise.inject.spi.Extension;
 
+import org.jboss.as.security.SecurityExtension;
 import org.jboss.as.server.deployment.AttachmentList;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
@@ -44,10 +45,9 @@ import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
 import org.picketlink.as.subsystem.core.PicketLinkCoreSubsystemExtension;
 import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
-import org.picketlink.deltaspike.core.api.provider.BeanManagerProvider;
-import org.picketlink.deltaspike.security.impl.extension.SecurityExtension;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.internal.IdentityStoreAutoConfiguration;
+import org.picketlink.producer.IdentityManagerProducer;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -120,7 +120,7 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
         if (extensions != null) {
             for (Metadata<Extension> e : extensions) {
                 if ((e.getValue() instanceof SecurityExtension) || (e.getValue() instanceof IdentityStoreAutoConfiguration)
-                        || (e.getValue() instanceof BeanManagerProvider)) {
+                        || (e.getValue() instanceof IdentityManagerProducer)) {
                     return true;
                 }
             }

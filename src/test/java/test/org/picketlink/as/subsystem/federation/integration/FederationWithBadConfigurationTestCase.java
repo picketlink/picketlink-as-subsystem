@@ -1,11 +1,15 @@
 package test.org.picketlink.as.subsystem.federation.integration;
 
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
 import org.jboss.arquillian.container.test.api.Deployment;
 import org.jboss.arquillian.container.test.api.OperateOnDeployment;
 import org.jboss.arquillian.container.test.api.TargetsContainer;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 /**
  * <p>
@@ -42,12 +46,12 @@ public class FederationWithBadConfigurationTestCase extends AbstractIntegrationT
     
     @Test
     @OperateOnDeployment("sales-bad")
-    public void testSalesBad() throws InterruptedException {
-        login();
-        
-        Assert.assertTrue("Custom Error Page",
-                browser.isElementPresent("xpath=//h1[@id='customErrorPage']"));
+    public void testSalesBad() throws Exception {
+        HtmlPage welcomePage = login(new WebClient());
 
+        HtmlElement customErrorMessage = welcomePage.getElementById("customErrorMessage");
+
+        assertNotNull("Custom error page not reached.", customErrorMessage);
     }
 
 }

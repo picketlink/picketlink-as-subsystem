@@ -22,11 +22,6 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.transaction.TransactionManager;
-
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
@@ -41,13 +36,18 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
 import org.picketlink.as.subsystem.idm.service.JPABasedIdentityManagerFactoryService;
+import org.picketlink.as.subsystem.idm.service.PartitionManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.idm.IdentityManagerFactory;
-import org.picketlink.idm.config.BaseAbstractStoreConfiguration;
+import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.config.IdentityConfiguration;
+import org.picketlink.idm.config.IdentityConfigurationBuilder;
+import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
+
+import javax.transaction.TransactionManager;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -77,32 +77,34 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         jndiName = toJndiName(jndiName);
 
         Resource identityManagementResource = context.readResource(PathAddress.EMPTY_ADDRESS);
+        IdentityConfigurationBuilder builder = new IdentityConfigurationBuilder();
+        NamedIdentityConfigurationBuilder namedConfiguration = builder.named("default");
 
-        IdentityConfiguration configuration = fromResource(identityManagementResource);
+        fromResource(identityManagementResource, namedConfiguration);
 
-        IdentityManagerFactoryService identityManagerFactoryService = null;
+        PartitionManagerService partitionManagerService = null;
 
         Set<ResourceEntry> jpaStoreResources = identityManagementResource.getChildren(ModelElement.JPA_STORE.getName());
 
         if (!jpaStoreResources.isEmpty()) {
-            identityManagerFactoryService = installJPABasedIdentityManagerFactory(context, verificationHandler, newControllers,
-                    alias, jndiName, configuration, jpaStoreResources);
+            partitionManagerService = installJPABasedIdentityManagerFactory(context, verificationHandler, newControllers,
+                    alias, jndiName, namedConfiguration, builder, jpaStoreResources);
         } else {
-            identityManagerFactoryService = new IdentityManagerFactoryService(alias, jndiName, configuration);
+            partitionManagerService = new PartitionManagerService(alias, jndiName, builder);
 
-            ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
-                    IdentityManagerFactoryService.createServiceName(alias), identityManagerFactoryService);
+            ServiceBuilder<PartitionManager> serviceBuilder = context.getServiceTarget().addService(
+                    PartitionManagerService.createServiceName(alias), partitionManagerService);
 
-            ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
+            ServiceController<PartitionManager> controller = serviceBuilder.addListener(verificationHandler)
                     .setInitialMode(Mode.PASSIVE).install();
 
             newControllers.add(controller);
         }
     }
 
-    private IdentityManagerFactoryService installJPABasedIdentityManagerFactory(OperationContext context,
+    private PartitionManagerService installJPABasedIdentityManagerFactory(OperationContext context,
             final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers,
-            final String alias, String jndiName, IdentityConfiguration configuration, Set<ResourceEntry> jpaStoreResources) {
+            final String alias, String jndiName, NamedIdentityConfigurationBuilder namedBuilder, IdentityConfigurationBuilder builder, Set<ResourceEntry> jpaStoreResources) {
         Resource jpaStoreResource;
         jpaStoreResource = jpaStoreResources.iterator().next();
 
@@ -140,9 +142,9 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         }
 
         JPABasedIdentityManagerFactoryService jpaBasedIdentityManagerFactory = new JPABasedIdentityManagerFactoryService(alias, jndiName, dataSourceJndiName,
-                entityModuleName, entityModuleUnitName, configuration);
+                entityModuleName, entityModuleUnitName, namedBuilder, builder);
 
-        ServiceBuilder<IdentityManagerFactory> serviceBuilder = context.getServiceTarget().addService(
+        ServiceBuilder<PartitionManager> serviceBuilder = context.getServiceTarget().addService(
                 JPABasedIdentityManagerFactoryService.createServiceName(alias), jpaBasedIdentityManagerFactory);
 
         serviceBuilder.addDependency(TxnServices.JBOSS_TXN_TRANSACTION_MANAGER, TransactionManager.class, jpaBasedIdentityManagerFactory.getTransactionManager());
@@ -155,7 +157,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(emfJndiName.split("/")), ValueManagedReferenceFactory.class, jpaBasedIdentityManagerFactory.getProvidedEntityManagerFactory());
         }
 
-        ServiceController<IdentityManagerFactory> controller = serviceBuilder.addListener(verificationHandler)
+        ServiceController<PartitionManager> controller = serviceBuilder.addListener(verificationHandler)
                 .setInitialMode(Mode.PASSIVE).install();
 
         newControllers.add(controller);
@@ -163,22 +165,16 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         return jpaBasedIdentityManagerFactory;
     }
 
-    private IdentityConfiguration fromResource(Resource resource) {
-        IdentityConfiguration configuration = new IdentityConfiguration();
-
+    private void fromResource(Resource resource, NamedIdentityConfigurationBuilder builder) {
         for (ModelElement supportedStoreTypes : getSupportedStoreTypes()) {
             String elementName = supportedStoreTypes.getName();
 
             Resource storeResource = resource.getChild(PathElement.pathElement(elementName, elementName));
 
             if (storeResource != null) {
-                BaseAbstractStoreConfiguration<?> storeConfig = IdentityManagementConfiguration.configureStore(
-                        supportedStoreTypes, storeResource);
-
-                configuration.addConfig(storeConfig);
+                IdentityManagementConfiguration.configureStore(supportedStoreTypes, storeResource, builder);
             }
         }
-        return configuration;
     }
 
     private static final ModelElement[] getSupportedStoreTypes() {

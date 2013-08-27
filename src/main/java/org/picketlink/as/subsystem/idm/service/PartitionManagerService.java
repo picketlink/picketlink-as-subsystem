@@ -21,12 +21,6 @@
  */
 package org.picketlink.as.subsystem.idm.service;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.jboss.as.naming.ManagedReferenceFactory;
 import org.jboss.as.naming.ServiceBasedNamingStore;
 import org.jboss.as.naming.ValueManagedReferenceFactory;
@@ -46,29 +40,36 @@ import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.ImmediateValue;
 import org.picketlink.as.subsystem.PicketLinkExtension;
-import org.picketlink.idm.IdentityManagerFactory;
-import org.picketlink.idm.config.IdentityConfiguration;
-import org.picketlink.idm.config.IdentityStoreConfiguration;
+import org.picketlink.idm.PartitionManager;
+import org.picketlink.idm.config.IdentityConfigurationBuilder;
+import org.picketlink.idm.internal.DefaultPartitionManager;
+import org.picketlink.idm.model.Partition;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.picketlink.as.subsystem.PicketLinkLogger.*;
 
 /**
  * <p>
- * This {@link Service} starts the {@link IdentityManagerFactory} using the configuration loaded from the domain model and
+ * This {@link Service} starts the {@link PartitionManager} using the configurationBuilder loaded from the domain model and
  * publishes it in JNDI.
  * </p>
  *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  * @author Pedro Igor
  */
-public class IdentityManagerFactoryService implements Service<IdentityManagerFactory> {
+public class PartitionManagerService implements Service<PartitionManager> {
 
-    private static String SERVICE_NAME_PREFIX = "IdentityManagerFactoryService";
+    private static String SERVICE_NAME_PREFIX = "PartitionManagerService";
 
     private final String jndiName;
     private final String alias;
-    private IdentityManagerFactory identityManagerFactory;
-    private final IdentityConfiguration identityConfiguration;
+    private PartitionManager partitionManager;
+    private final IdentityConfigurationBuilder configurationBuilder;
 
-    public IdentityManagerFactoryService(String alias, String jndiName, IdentityConfiguration configuration) {
+    public PartitionManagerService(String alias, String jndiName, IdentityConfigurationBuilder configurationBuilder) {
         this.alias = alias;
 
         // if not jndi name was provide defaults to bellow
@@ -77,32 +78,33 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         }
 
         this.jndiName = jndiName;
-        this.identityConfiguration = configuration;
+        this.configurationBuilder = configurationBuilder;
     }
 
     @Override
-    public IdentityManagerFactory getValue() throws IllegalStateException, IllegalArgumentException {
-        return this.identityManagerFactory;
+    public PartitionManager getValue() throws IllegalStateException, IllegalArgumentException {
+        return this.partitionManager;
     }
 
     @Override
     public void start(StartContext context) throws StartException {
-        ROOT_LOGGER.debugf("Starting IdentityManagerFactoryService for [%s]", this.alias);
-        this.identityManagerFactory = this.identityConfiguration.buildIdentityManagerFactory();
+        ROOT_LOGGER.debugf("Starting PartitionManagerService for [%s]", this.alias);
+        this.partitionManager = new DefaultPartitionManager(this.configurationBuilder.buildAll());
+
         publishIdentityManagerFactory(context);
         publishIdentityManagers(context);
     }
 
     @Override
     public void stop(StopContext context) {
-        ROOT_LOGGER.debugf("Stopping IdentityManagerFactoryService for [%s]", this.alias);
+        ROOT_LOGGER.debugf("Stopping PartitionManagerService for [%s]", this.alias);
         unpublishIdentityManagerFactory(context);
         unpublishIdentityManagers(context);
-        this.identityManagerFactory = null;
+        this.partitionManager = null;
     }
 
-    public IdentityConfiguration getIdentityConfiguration() {
-        return this.identityConfiguration;
+    public IdentityConfigurationBuilder getConfigurationBuilder() {
+        return this.configurationBuilder;
     }
 
     public static ServiceName createServiceName(String alias) {
@@ -116,10 +118,10 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
     private Set<String> getConfiguredRealms() {
         HashSet<String> realms = new HashSet<String>();
 
-        List<IdentityStoreConfiguration> configuredStores = this.identityConfiguration.getConfiguredStores();
+        List<Partition> partitions = this.partitionManager.getPartitions(Partition.class);
 
-        for (IdentityStoreConfiguration identityStoreConfiguration : configuredStores) {
-            realms.addAll(identityStoreConfiguration.getRealms());
+        for (Partition partition: partitions) {
+            realms.add(partition.getName());
         }
 
         return realms;
@@ -135,10 +137,10 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
         builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                 binderService.getNamingStoreInjector());
 
-        builder.addDependency(createServiceName(getAlias()), IdentityManagerFactory.class,
-                new Injector<IdentityManagerFactory>() {
+        builder.addDependency(createServiceName(getAlias()), PartitionManager.class,
+                new Injector<PartitionManager>() {
                     @Override
-                    public void inject(final IdentityManagerFactory value) throws InjectionException {
+                    public void inject(final PartitionManager value) throws InjectionException {
                         binderService.getManagedObjectInjector().inject(
                                 new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
                     }
@@ -151,7 +153,7 @@ public class IdentityManagerFactoryService implements Service<IdentityManagerFac
 
         builder.setInitialMode(Mode.PASSIVE).install();
 
-        ROOT_LOGGER.boundToJndi("IdentityManagerFactory " + this.alias, bindInfo.getAbsoluteJndiName());
+        ROOT_LOGGER.boundToJndi("PartitionManager " + this.alias, bindInfo.getAbsoluteJndiName());
     }
 
     private void publishIdentityManagers(StartContext context) {

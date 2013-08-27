@@ -22,9 +22,9 @@
 
 package org.picketlink.identity.federation.core.config;
 
-import java.util.Map;
+import org.picketlink.config.federation.SPType;
 
-import org.picketlink.identity.federation.core.config.SPType;
+import java.util.Map;
 
 /**
  * <p>

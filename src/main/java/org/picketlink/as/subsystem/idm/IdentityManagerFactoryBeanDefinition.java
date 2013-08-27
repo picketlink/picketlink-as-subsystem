@@ -22,13 +22,9 @@
 
 package org.picketlink.as.subsystem.idm;
 
-import static org.picketlink.as.subsystem.PicketLinkMessages.MESSAGES;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import org.picketlink.idm.PartitionManager;
+import org.picketlink.idm.config.IdentityConfiguration;
+import org.picketlink.idm.internal.DefaultPartitionManager;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.spi.CreationalContext;
@@ -40,10 +36,14 @@ import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.AnnotationLiteral;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-import org.picketlink.idm.IdentityManagerFactory;
-import org.picketlink.idm.config.IdentityConfiguration;
-import org.picketlink.idm.internal.DefaultIdentityManagerFactory;
+import static org.picketlink.as.subsystem.PicketLinkMessages.*;
 
 /**
  * <p>
@@ -53,17 +53,17 @@ import org.picketlink.idm.internal.DefaultIdentityManagerFactory;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * 
  */
-public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManagerFactory> {
+public class IdentityManagerFactoryBeanDefinition implements Bean<PartitionManager> {
 
     private BeanManager beanManager;
-    private InjectionTarget<IdentityManagerFactory> injectionTarget;
+    private InjectionTarget<PartitionManager> injectionTarget;
     private IdentityConfiguration configuration;
 
     @SuppressWarnings("unchecked")
     public IdentityManagerFactoryBeanDefinition(BeanManager beanManager) {
         this.beanManager = beanManager;
-        AnnotatedType<? extends IdentityManagerFactory> at = this.beanManager.createAnnotatedType(DefaultIdentityManagerFactory.class);
-        this.injectionTarget = (InjectionTarget<IdentityManagerFactory>) beanManager.createInjectionTarget(at);
+        AnnotatedType<? extends PartitionManager> at = this.beanManager.createAnnotatedType(DefaultPartitionManager.class);
+        this.injectionTarget = (InjectionTarget<PartitionManager>) beanManager.createInjectionTarget(at);
     }
 
     /*
@@ -72,10 +72,10 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManage
      * @see javax.enterprise.context.spi.Contextual#create(javax.enterprise.context.spi.CreationalContext)
      */
     @Override
-    public IdentityManagerFactory create(CreationalContext<IdentityManagerFactory> creationalContext) {
+    public PartitionManager create(CreationalContext<PartitionManager> creationalContext) {
         this.configuration = resolveIdentityConfiguration();
-        
-        IdentityManagerFactory identity = this.configuration.buildIdentityManagerFactory();
+
+        PartitionManager identity = new DefaultPartitionManager(Arrays.asList(this.configuration));
         
         this.injectionTarget.inject(identity, creationalContext);
         this.injectionTarget.postConstruct(identity);
@@ -89,7 +89,7 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManage
      * @see javax.enterprise.context.spi.Contextual#destroy(java.lang.Object, javax.enterprise.context.spi.CreationalContext)
      */
     @Override
-    public void destroy(IdentityManagerFactory instance, CreationalContext<IdentityManagerFactory> creationalContext) {
+    public void destroy(PartitionManager instance, CreationalContext<PartitionManager> creationalContext) {
         this.injectionTarget.preDestroy(instance);
         this.injectionTarget.dispose(instance);
     }
@@ -103,7 +103,7 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManage
     public Set<Type> getTypes() {
         Set<Type> types = new HashSet<Type>();
 
-        types.add(IdentityManagerFactory.class);
+        types.add(PartitionManager.class);
 
         return types;
     }
@@ -163,7 +163,7 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<IdentityManage
      */
     @Override
     public Class<?> getBeanClass() {
-        return DefaultIdentityManagerFactory.class;
+        return DefaultPartitionManager.class;
     }
 
     /*

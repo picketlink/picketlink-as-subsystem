@@ -25,8 +25,8 @@ package org.picketlink.as.subsystem.idm.service;
 import org.jboss.as.naming.ManagedReference;
 import org.jboss.as.naming.ManagedReferenceFactory;
 import org.picketlink.idm.IdentityManager;
-import org.picketlink.idm.IdentityManagerFactory;
-import org.picketlink.idm.model.Realm;
+import org.picketlink.idm.PartitionManager;
+import org.picketlink.idm.model.Partition;
 
 /**
  * @author Pedro Igor
@@ -34,20 +34,20 @@ import org.picketlink.idm.model.Realm;
  */
 public class IdentityManagerManagedReferenceFactory implements ManagedReferenceFactory {
 
-    private IdentityManagerFactory identityManagerFactory;
+    private PartitionManager partitionManager;
     private String realmName;
 
-    public IdentityManagerManagedReferenceFactory(String realmName, IdentityManagerFactory identityManagerFactory) {
+    public IdentityManagerManagedReferenceFactory(String realmName, PartitionManager partitionManager) {
         this.realmName = realmName;
-        this.identityManagerFactory = identityManagerFactory;
+        this.partitionManager = partitionManager;
     }
     
     @Override
     public ManagedReference getReference() {
         return new ManagedReference() {
-            
-            private IdentityManager identityManager = getIdentityManagerFactory().createIdentityManager(new Realm(realmName));
-            
+
+            private IdentityManager identityManager;
+
             @Override
             public void release() {
                 this.identityManager = null;
@@ -55,13 +55,18 @@ public class IdentityManagerManagedReferenceFactory implements ManagedReferenceF
 
             @Override
             public Object getInstance() {
+                if (this.identityManager == null) {
+                    Partition partition = getPartitionManager().getPartition(Partition.class, realmName);
+                    this.identityManager = getPartitionManager().createIdentityManager(partition);
+                }
+
                 return this.identityManager;
             }
         };
     }
 
-    public IdentityManagerFactory getIdentityManagerFactory() {
-        return this.identityManagerFactory;
+    public PartitionManager getPartitionManager() {
+        return this.partitionManager;
     }
 
 }

@@ -24,10 +24,10 @@ package org.picketlink.as.subsystem.federation.metrics;
 
 import org.jboss.security.audit.AuditEvent;
 import org.picketlink.as.subsystem.PicketLinkLogger;
+import org.picketlink.common.exceptions.ConfigurationException;
 import org.picketlink.identity.federation.core.audit.PicketLinkAuditEvent;
 import org.picketlink.identity.federation.core.audit.PicketLinkAuditEventType;
 import org.picketlink.identity.federation.core.audit.PicketLinkAuditHelper;
-import org.picketlink.identity.federation.core.exceptions.ConfigurationException;
 
 /**
  * <p>

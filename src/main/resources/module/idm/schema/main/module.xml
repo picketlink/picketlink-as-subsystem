@@ -16,17 +16,17 @@
 	http://www.fsf.org. -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.idm.schema">
-	
-	<resources>
-		<resource-root path="picketlink-idm-schema-3.0.0.Beta2.jar" />
-	</resources>
 
-	<dependencies>
-		<module name="javax.api" />
-		<module name="javax.persistence.api"/>
-		<module name="org.hibernate" services="import"/>
-		<module name="org.javassist"/>
-		<module name="org.picketlink.idm"/>
-	</dependencies>
+  <resources>
+    <resource-root path="picketlink-idm-simple-schema-2.5.0-SNAPSHOT.jar"/>
+  </resources>
+
+  <dependencies>
+    <module name="javax.api"/>
+    <module name="javax.persistence.api"/>
+    <module name="org.hibernate" services="import"/>
+    <module name="org.javassist"/>
+    <module name="org.picketlink.idm"/>
+  </dependencies>
 
 </module>

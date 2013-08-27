@@ -32,9 +32,9 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.picketlink.as.subsystem.model.ModelUtils;
+import org.picketlink.config.federation.KeyValueType;
+import org.picketlink.config.federation.TrustType;
 import org.picketlink.identity.federation.core.config.IDPConfiguration;
-import org.picketlink.identity.federation.core.config.KeyValueType;
-import org.picketlink.identity.federation.core.config.TrustType;
 
 /** ty Provider.
  * </p>

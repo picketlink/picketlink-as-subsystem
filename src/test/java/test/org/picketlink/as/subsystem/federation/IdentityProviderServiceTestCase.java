@@ -21,15 +21,14 @@
  */
 package test.org.picketlink.as.subsystem.federation;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import junit.framework.Assert;
-
 import org.junit.Test;
 import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
 import org.picketlink.as.subsystem.model.ModelElement;
+import org.picketlink.config.federation.TrustType;
 import org.picketlink.identity.federation.core.config.IDPConfiguration;
-import org.picketlink.identity.federation.core.config.TrustType;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

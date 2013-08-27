@@ -22,24 +22,16 @@
 
 package org.picketlink.as.subsystem.model;
 
-import static org.picketlink.as.subsystem.model.ModelElement.COMMON_ALIAS;
-import static org.picketlink.as.subsystem.model.ModelElement.COMMON_SECURITY_DOMAIN;
-import static org.picketlink.as.subsystem.model.ModelElement.COMMON_URL;
-import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER_ENCRYPT;
-import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER_ERROR_PAGE;
-import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER_LOGOUT_PAGE;
-import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER_POST_BINDING;
-import static org.picketlink.as.subsystem.model.ModelElement.COMMON_STRICT_POST_BINDING;
-import static org.picketlink.as.subsystem.model.ModelElement.COMMON_SUPPORTS_SIGNATURES;
-
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
-import org.picketlink.identity.federation.core.config.AuthPropertyType;
+import org.picketlink.config.federation.AuthPropertyType;
+import org.picketlink.config.federation.KeyProviderType;
 import org.picketlink.identity.federation.core.config.IDPConfiguration;
-import org.picketlink.identity.federation.core.config.KeyProviderType;
 import org.picketlink.identity.federation.core.config.SPConfiguration;
 import org.picketlink.identity.federation.core.config.STSConfiguration;
+
+import static org.picketlink.as.subsystem.model.ModelElement.*;
 
 /**
  * <p>

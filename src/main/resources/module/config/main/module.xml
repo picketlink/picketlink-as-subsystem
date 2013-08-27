@@ -15,15 +15,14 @@
 	Franklin St, Fifth Floor, Boston, MA ~ 02110-1301 USA, or see the FSF site: 
 	http://www.fsf.org. -->
 
-<module xmlns="urn:jboss:module:1.1" name="org.picketlink.common">
+<module xmlns="urn:jboss:module:1.1" name="org.picketlink.config">
   <resources>
-    <resource-root path="picketlink-common-2.5.0-SNAPSHOT.jar"/>
+    <resource-root path="picketlink-config-2.5.0-SNAPSHOT.jar"/>
   </resources>
 
   <dependencies>
     <module name="javax.api"/>
-    <module name="javax.xml.stream.api"/>
-    <module name="org.jboss.logging"/>
+    <module name="org.picketlink.common"/>
   </dependencies>
 
 </module>

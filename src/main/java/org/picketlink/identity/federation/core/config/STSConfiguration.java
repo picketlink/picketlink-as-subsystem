@@ -21,6 +21,9 @@
  */
 package org.picketlink.identity.federation.core.config;
 
+import org.picketlink.config.federation.STSType;
+import org.picketlink.config.federation.TrustType;
+
 import java.util.Map;
 
 
