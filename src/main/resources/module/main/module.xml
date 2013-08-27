@@ -20,8 +20,8 @@
   </resources>
 
   <dependencies>
-    <module name="org.picketlink.federation"/>
-    <module name="org.picketlink.federation.bindings"/>
+    <module name="org.picketlink.federation" export="true"/>
+    <module name="org.picketlink.federation.bindings" export="true"/>
   </dependencies>
 
 </module>
