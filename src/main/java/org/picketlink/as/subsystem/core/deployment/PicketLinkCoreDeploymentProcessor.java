@@ -21,14 +21,6 @@
  */
 package org.picketlink.as.subsystem.core.deployment;
 
-import static org.jboss.as.weld.WeldDeploymentMarker.isWeldDeployment;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
-
-import java.util.Iterator;
-
-import javax.enterprise.inject.spi.Extension;
-
-import org.jboss.as.security.SecurityExtension;
 import org.jboss.as.server.deployment.AttachmentList;
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
@@ -36,7 +28,6 @@ import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.web.deployment.WarMetaData;
-import org.jboss.as.weld.deployment.WeldAttachments;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
 import org.jboss.modules.Module;
@@ -44,10 +35,17 @@ import org.jboss.modules.ModuleLoadException;
 import org.jboss.weld.bootstrap.spi.Metadata;
 import org.jboss.weld.metadata.MetadataImpl;
 import org.picketlink.as.subsystem.core.PicketLinkCoreSubsystemExtension;
-import org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor;
-import org.picketlink.idm.IdentityManager;
+import org.picketlink.idm.PartitionManager;
 import org.picketlink.internal.IdentityStoreAutoConfiguration;
 import org.picketlink.producer.IdentityManagerProducer;
+
+import javax.enterprise.inject.spi.Extension;
+import java.util.Iterator;
+
+import static org.jboss.as.web.deployment.WarMetaData.*;
+import static org.jboss.as.weld.WeldDeploymentMarker.*;
+import static org.jboss.as.weld.deployment.WeldAttachments.*;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
@@ -68,7 +66,7 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
             }
 
             if (!hasCoreCDIExtensions(deploymentUnit)) {
-                WarMetaData warMetadata = deploymentUnit.getAttachment(WarMetaData.ATTACHMENT_KEY);
+                WarMetaData warMetadata = deploymentUnit.getAttachment(ATTACHMENT_KEY);
 
                 PicketLinkCoreSubsystemExtension coreExtension = null;
 
@@ -80,26 +78,24 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
                     while (iterator.hasNext()) {
                         ResourceReferenceMetaData resourceReferenceMetaData = iterator.next();
 
-                        if (resourceReferenceMetaData.getType().equals(IdentityManager.class.getName())) {
+                        if (resourceReferenceMetaData.getType().equals(PartitionManager.class.getName())) {
                             coreExtension = new PicketLinkCoreSubsystemExtension(resourceReferenceMetaData.getName());
                         }
                     }
                 }
 
-                if (coreExtension == null) {
-                    coreExtension = new PicketLinkCoreSubsystemExtension();
+                if (coreExtension != null) {
+                    addExtension(deploymentUnit, coreExtension);
                 }
 
-                addExtension(deploymentUnit, coreExtension);
-
                 try {
-                    Module module = Module.getBootModuleLoader().loadModule(
-                            PicketLinkStructureDeploymentProcessor.CORE_MODULE_IDENTIFIER);
+                    Module module = Module.getBootModuleLoader().loadModule(CORE_MODULE_IDENTIFIER);
+
                     for (Extension e : module.loadService(Extension.class)) {
                         addExtension(deploymentUnit, e);
                     }
                 } catch (ModuleLoadException e) {
-                    throw new DeploymentUnitProcessingException("Failed to load PicketLink Core extension", e);
+                    throw new DeploymentUnitProcessingException("Failed to configure CDI extensions for deployment [" + deploymentUnit.getName() + "].", e);
                 }
             }
         }
@@ -107,7 +103,7 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
 
     private void addExtension(DeploymentUnit du, Extension extension) {
         Metadata<Extension> metadata = new MetadataImpl<Extension>(extension, du.getName());
-        du.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
+        du.addToAttachmentList(PORTABLE_EXTENSIONS, metadata);
     }
 
     @Override
@@ -115,12 +111,11 @@ public class PicketLinkCoreDeploymentProcessor implements DeploymentUnitProcesso
     }
 
     private boolean hasCoreCDIExtensions(DeploymentUnit deploymentUnit) {
-        AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(WeldAttachments.PORTABLE_EXTENSIONS);
+        AttachmentList<Metadata<Extension>> extensions = deploymentUnit.getAttachment(PORTABLE_EXTENSIONS);
 
         if (extensions != null) {
             for (Metadata<Extension> e : extensions) {
-                if ((e.getValue() instanceof SecurityExtension) || (e.getValue() instanceof IdentityStoreAutoConfiguration)
-                        || (e.getValue() instanceof IdentityManagerProducer)) {
+                if ((e.getValue() instanceof IdentityStoreAutoConfiguration) || (e.getValue() instanceof IdentityManagerProducer)) {
                     return true;
                 }
             }

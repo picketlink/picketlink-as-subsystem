@@ -104,6 +104,7 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
      * @param deploymentUnit
      */
     private void configureIDMDependencies(DeploymentUnit deploymentUnit) {
+        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.idm.api"));
         addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.idm"));
         ROOT_LOGGER.configuringDeployment("PicketLink IDM Dependencies", deploymentUnit.getName());
     }
@@ -116,6 +117,7 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
      * @param deploymentUnit
      */
     private void configureCoreDependencies(DeploymentUnit deploymentUnit) {
+        addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.core.api"));
         addDependency(deploymentUnit, ModuleIdentifier.create("org.picketlink.core"));
         ROOT_LOGGER.configuringDeployment("PicketLink Core Dependencies", deploymentUnit.getName());
     }

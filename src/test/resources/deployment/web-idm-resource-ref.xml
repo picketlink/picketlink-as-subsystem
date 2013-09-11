@@ -13,9 +13,9 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
 	<resource-ref>
-		<description>Development IdentityManager</description>
-		<res-ref-name>java:picketlink/file-based-complete</res-ref-name>
-		<res-type>org.picketlink.idm.IdentityManager</res-type>
+		<description>Development PartitionManager</description>
+		<res-ref-name>java:picketlink/FileBasedPartitionManager</res-ref-name>
+		<res-type>org.picketlink.idm.PartitionManager</res-type>
 	</resource-ref>
 
 </web-app>

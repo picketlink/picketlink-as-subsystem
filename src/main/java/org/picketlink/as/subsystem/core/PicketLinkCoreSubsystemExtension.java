@@ -21,14 +21,16 @@
  */
 package org.picketlink.as.subsystem.core;
 
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
-
+import org.picketlink.as.subsystem.core.deployment.PicketLinkSubsystemIdentityManagerProducer;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.producer.IdentityManagerProducer;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 /**
  * <p>
@@ -37,45 +39,41 @@ import org.picketlink.producer.IdentityManagerProducer;
  * 
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
+@ApplicationScoped
 public class PicketLinkCoreSubsystemExtension implements Extension {
 
-    private String identityManagerJNDIName;
+    private String partitionManagerJNDIUrl;
 
     public PicketLinkCoreSubsystemExtension() {
 
     }
 
-    public PicketLinkCoreSubsystemExtension(String identityManagerJNDIName) {
-        this.identityManagerJNDIName = identityManagerJNDIName;
+    public PicketLinkCoreSubsystemExtension(String partitionManagerJNDIUrl) {
+        this.partitionManagerJNDIUrl = partitionManagerJNDIUrl;
     }
 
     /**
      * <p>
      * We should veto the {@link IdentityManagerProducer} when the {@link IdentityManager} must be used obtained from the JNDI,
      * instead of internally produced. In this case, the {@link IdentityManager} will be properly produced by the
-     * {@link IdentityManagerBeanDefinition}.
+     * {@link PartitionManagerBeanDefinition}.
      * </p>
      * 
      * @param event
      */
     public void vetoIdentityManagerProducer(@Observes ProcessAnnotatedType<IdentityManagerProducer> event) {
-        if (this.identityManagerJNDIName != null) {
+        if (this.partitionManagerJNDIUrl != null) {
             event.veto();
         }
     }
 
-    /**
-     * <p>
-     * Register the {@link IdentityManagerBeanDefinition}.
-     * </p>
-     * 
-     * @param event
-     * @param beanManager
-     */
-    public void registerIdentityManagerBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
-        if (this.identityManagerJNDIName != null) {
-            event.addBean(new IdentityManagerBeanDefinition(beanManager, this.identityManagerJNDIName));
+    public void test(@Observes BeforeBeanDiscovery event, BeanManager beanManager) {
+        if (this.partitionManagerJNDIUrl != null) {
+            event.addAnnotatedType(beanManager.createAnnotatedType(PicketLinkSubsystemIdentityManagerProducer.class));
         }
     }
 
+    public String getPartitionManagerJNDIUrl() {
+        return partitionManagerJNDIUrl;
+    }
 }

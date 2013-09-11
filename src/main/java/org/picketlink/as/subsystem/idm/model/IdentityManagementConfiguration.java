@@ -32,7 +32,7 @@ import org.picketlink.idm.config.IdentityStoreConfigurationBuilder;
 import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
 import org.picketlink.idm.config.LDAPIdentityStoreConfiguration;
 import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
-import org.picketlink.idm.model.Relationship;
+import org.picketlink.idm.model.AttributedType;
 
 import java.util.Set;
 
@@ -43,47 +43,36 @@ import java.util.Set;
  */
 public class IdentityManagementConfiguration {
 
-    public static void configureStore(ModelElement storeType, Resource resource, final NamedIdentityConfigurationBuilder builder) {
+    public static void configureStore(String storeType, Resource resource, final NamedIdentityConfigurationBuilder builder) {
         IdentityStoreConfigurationBuilder storeConfig = null;
 
-        if (storeType.equals(ModelElement.JPA_STORE)) {
-        } else if (storeType.equals(ModelElement.FILE_STORE)) {
+        if (storeType.equals(ModelElement.JPA_STORE.getName())) {
+            storeConfig = builder.stores().jpa();
+        } else if (storeType.equals(ModelElement.FILE_STORE.getName())) {
             storeConfig = configureFileIdentityStore(resource.getModel(), builder);
-        } else if (storeType.equals(ModelElement.LDAP_STORE)) {
+        } else if (storeType.equals(ModelElement.LDAP_STORE.getName())) {
         } else {
             throw PicketLinkMessages.MESSAGES.idmNoConfigurationProvided();
         }
 
-        Set<ResourceEntry> featuresSetEntries = resource.getChildren(ModelElement.FEATURES.getName());
+        Set<ResourceEntry> featuresSetEntries = resource.getChildren(ModelElement.SUPPORTED_TYPES.getName());
         
         if (featuresSetEntries != null && !featuresSetEntries.isEmpty()) {
             ResourceEntry featuresSet = featuresSetEntries.iterator().next();
             
             configureAllFeatures(featuresSet.getModel(), storeConfig);
             
-            Set<ResourceEntry> featuresList = featuresSet.getChildren(ModelElement.FEATURE.getName());
+            Set<ResourceEntry> featuresList = featuresSet.getChildren(ModelElement.SUPPORTED_TYPE.getName());
             
             for (ResourceEntry feature : featuresList) {
+                String typeName = feature.getModel().get(ModelElement.COMMON_CLASS.getName()).asString();
+
+                try {
+                    storeConfig.supportType((Class<? extends AttributedType>) Class.forName(typeName));
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Could not find type [" + typeName + "].", e);
+                }
             }
-        }
-
-        Set<ResourceEntry> relationshipsSet = resource.getChildren(ModelElement.RELATIONSHIP.getName());
-        
-        if (relationshipsSet != null && !relationshipsSet.isEmpty()) {
-            for (ResourceEntry relationship : relationshipsSet) {
-                configureRelationships(relationship.getModel(), storeConfig);
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static  void configureRelationships(ModelNode operation, IdentityStoreConfigurationBuilder storeConfig) {
-        String relationshipClass = operation.get(ModelElement.COMMON_CLASS.getName()).asString();
-
-        try {
-            storeConfig.supportType((Class<? extends Relationship>) Class.forName(relationshipClass));
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
         }
     }
 

@@ -25,7 +25,6 @@ package org.picketlink.as.subsystem.idm.model;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
-import org.jboss.as.controller.PathElement;
 import org.jboss.as.controller.ServiceVerificationHandler;
 import org.jboss.as.controller.registry.Resource;
 import org.jboss.as.controller.registry.Resource.ResourceEntry;
@@ -41,11 +40,11 @@ import org.picketlink.as.subsystem.idm.service.PartitionManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.idm.PartitionManager;
-import org.picketlink.idm.config.IdentityConfiguration;
 import org.picketlink.idm.config.IdentityConfigurationBuilder;
 import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
 
 import javax.transaction.TransactionManager;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -62,7 +61,7 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
+                                  final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
             throws OperationFailedException {
         final String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
@@ -78,18 +77,27 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
         Resource identityManagementResource = context.readResource(PathAddress.EMPTY_ADDRESS);
         IdentityConfigurationBuilder builder = new IdentityConfigurationBuilder();
-        NamedIdentityConfigurationBuilder namedConfiguration = builder.named("default");
 
-        fromResource(identityManagementResource, namedConfiguration);
+        fromResource(identityManagementResource, builder);
 
         PartitionManagerService partitionManagerService = null;
 
-        Set<ResourceEntry> jpaStoreResources = identityManagementResource.getChildren(ModelElement.JPA_STORE.getName());
+        Iterator<ResourceEntry> iterator = identityManagementResource.getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
 
-        if (!jpaStoreResources.isEmpty()) {
-            partitionManagerService = installJPABasedIdentityManagerFactory(context, verificationHandler, newControllers,
-                    alias, jndiName, namedConfiguration, builder, jpaStoreResources);
-        } else {
+        while (iterator.hasNext()) {
+            ResourceEntry configuration = iterator.next();
+
+            NamedIdentityConfigurationBuilder namedIdentityConfigurationBuilder = builder.named(configuration.getName());
+
+            Set<ResourceEntry> children = configuration.getChildren(ModelElement.JPA_STORE.getName());
+
+            if (!children.isEmpty()) {
+                partitionManagerService = installJPABasedIdentityManagerFactory(context, verificationHandler, newControllers,
+                        alias, jndiName, namedIdentityConfigurationBuilder, builder, children);
+            }
+        }
+
+        if (partitionManagerService == null) {
             partitionManagerService = new PartitionManagerService(alias, jndiName, builder);
 
             ServiceBuilder<PartitionManager> serviceBuilder = context.getServiceTarget().addService(
@@ -103,10 +111,9 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
     }
 
     private PartitionManagerService installJPABasedIdentityManagerFactory(OperationContext context,
-            final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers,
-            final String alias, String jndiName, NamedIdentityConfigurationBuilder namedBuilder, IdentityConfigurationBuilder builder, Set<ResourceEntry> jpaStoreResources) {
-        Resource jpaStoreResource;
-        jpaStoreResource = jpaStoreResources.iterator().next();
+                                                                          final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers,
+                                                                          final String alias, String jndiName, NamedIdentityConfigurationBuilder namedBuilder, IdentityConfigurationBuilder builder, Set<ResourceEntry> jpaStoreResources) {
+        ResourceEntry jpaStoreResource = jpaStoreResources.iterator().next();
 
         ModelNode jpaDataSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
         ModelNode jpaEntityModule = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MODULE.getName());
@@ -165,20 +172,26 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         return jpaBasedIdentityManagerFactory;
     }
 
-    private void fromResource(Resource resource, NamedIdentityConfigurationBuilder builder) {
-        for (ModelElement supportedStoreTypes : getSupportedStoreTypes()) {
-            String elementName = supportedStoreTypes.getName();
+    private void fromResource(Resource resource, IdentityConfigurationBuilder builder) {
+        Iterator<ResourceEntry> iterator = resource.getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
 
-            Resource storeResource = resource.getChild(PathElement.pathElement(elementName, elementName));
+        while (iterator.hasNext()) {
+            ResourceEntry configuration = iterator.next();
 
-            if (storeResource != null) {
-                IdentityManagementConfiguration.configureStore(supportedStoreTypes, storeResource, builder);
+            NamedIdentityConfigurationBuilder namedIdentityConfigurationBuilder = builder.named(configuration.getName());
+
+            Set<String> storeTypes = configuration.getChildTypes();
+
+            for (String storeType : storeTypes) {
+                for (ResourceEntry storeResource : configuration.getChildren(storeType)) {
+                    IdentityManagementConfiguration.configureStore(storeType, storeResource, namedIdentityConfigurationBuilder);
+                }
             }
         }
     }
 
     private static final ModelElement[] getSupportedStoreTypes() {
-        return new ModelElement[] { ModelElement.JPA_STORE, ModelElement.FILE_STORE, ModelElement.LDAP_STORE };
+        return new ModelElement[]{ModelElement.JPA_STORE, ModelElement.FILE_STORE, ModelElement.LDAP_STORE};
     }
 
     private String toJndiName(String jndiName) {

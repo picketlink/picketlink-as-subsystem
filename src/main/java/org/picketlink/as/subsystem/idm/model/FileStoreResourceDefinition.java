@@ -25,7 +25,6 @@ package org.picketlink.as.subsystem.idm.model;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
@@ -52,15 +51,7 @@ public class FileStoreResourceDefinition extends AbstractResourceDefinition {
             ModelElement.FILE_STORE_ASYNC_THREAD_POOL.getName(), ModelType.INT, true)
             .setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition REALMS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.REALMS.getName(), ModelType.STRING, true).setDefaultValue(new ModelNode().set("default"))
-            .setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition TIERS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.TIERS.getName(), ModelType.STRING, true)
-            .setAllowExpression(false).build();
-    
-    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition(WORKING_DIR, ALWAYS_CREATE_FILE, ASYNC_WRITE, ASYNC_WRITE_THREAD_POOL, REALMS, TIERS);
+    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition(WORKING_DIR, ALWAYS_CREATE_FILE, ASYNC_WRITE, ASYNC_WRITE_THREAD_POOL);
 
     private FileStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.FILE_STORE, new IDMConfigAddStepHandler(attributes), attributes);
@@ -68,8 +59,7 @@ public class FileStoreResourceDefinition extends AbstractResourceDefinition {
     
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
-        addChildResourceDefinition(FeatureSetResourceDefinition.INSTANCE, resourceRegistration);
-        addChildResourceDefinition(RelationshipResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(SupportedTypesResourceDefinition.INSTANCE, resourceRegistration);
     }
     
 }

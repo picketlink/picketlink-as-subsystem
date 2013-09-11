@@ -24,6 +24,8 @@ package org.picketlink.as.subsystem.idm.model;
 
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
+import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
@@ -32,16 +34,21 @@ import org.picketlink.as.subsystem.model.ModelElement;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 16, 2012
  */
-public class RelationshipResourceDefinition extends AbstractResourceDefinition {
+public class SupportedTypesResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false)
+    public static final SimpleAttributeDefinition SUPPORTS_ALL = new SimpleAttributeDefinitionBuilder(
+            ModelElement.COMMON_SUPPORTS_ALL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set("true"))
             .setAllowExpression(false).build();
 
-    public static final RelationshipResourceDefinition INSTANCE = new RelationshipResourceDefinition(CLASS);
+    public static final SupportedTypesResourceDefinition INSTANCE = new SupportedTypesResourceDefinition(SUPPORTS_ALL);
     
-    private RelationshipResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.RELATIONSHIP, new IDMConfigAddStepHandler(attributes), attributes);
+    private SupportedTypesResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.SUPPORTED_TYPES, new IDMConfigAddStepHandler(attributes), attributes);
+    }
+    
+    @Override
+    public void registerChildren(ManagementResourceRegistration resourceRegistration) {
+        addChildResourceDefinition(SupportedTypeResourceDefinition.INSTANCE, resourceRegistration);
     }
     
 }

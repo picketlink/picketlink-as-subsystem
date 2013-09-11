@@ -35,8 +35,6 @@ import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.picketlink.common.util.StringUtil;
 import org.picketlink.idm.config.IdentityConfigurationBuilder;
-import org.picketlink.idm.config.IdentityStoreConfiguration;
-import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
 import org.picketlink.idm.config.JPAStoreConfigurationBuilder;
 import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
 import org.picketlink.idm.jpa.internal.JPAIdentityStore;
@@ -70,7 +68,6 @@ import static org.picketlink.as.subsystem.PicketLinkLogger.*;
  */
 public class JPABasedIdentityManagerFactoryService extends PartitionManagerService {
 
-    private static final String DEFAULT_CONFIGURATION_NAME = "default";
     private static final String JPA_ANNOTATION_PACKAGE = "org.picketlink.idm.jpa.annotations";
 
     private final InjectedValue<ValueManagedReferenceFactory> providedEntityManagerFactory = new InjectedValue<ValueManagedReferenceFactory>();
@@ -170,6 +167,8 @@ public class JPABasedIdentityManagerFactoryService extends PartitionManagerServi
                 entities.add(javaType);
             }
         }
+
+        jpaConfig.mappedEntity(entities.toArray(new Class<?>[entities.size()]));
     }
 
     private boolean hasEmbeddedEntityManagerFactory() {

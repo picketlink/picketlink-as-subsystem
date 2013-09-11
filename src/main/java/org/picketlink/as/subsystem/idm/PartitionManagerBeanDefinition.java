@@ -38,29 +38,28 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.util.AnnotationLiteral;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.picketlink.as.subsystem.PicketLinkMessages.*;
 
 /**
- * <p>
- * {@link Bean} implementation to define and customize the behaviour for {@link IdentityManagerFactory} instances.
+ * <p> {@link Bean} implementation to define and customize the behaviour for {@link IdentityManagerFactory} instances.
  * </p>
- * 
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
  */
-public class IdentityManagerFactoryBeanDefinition implements Bean<PartitionManager> {
+public class PartitionManagerBeanDefinition implements Bean<PartitionManager> {
 
     private BeanManager beanManager;
     private InjectionTarget<PartitionManager> injectionTarget;
-    private IdentityConfiguration configuration;
+    private List<IdentityConfiguration> configuration;
 
     @SuppressWarnings("unchecked")
-    public IdentityManagerFactoryBeanDefinition(BeanManager beanManager) {
+    public PartitionManagerBeanDefinition(BeanManager beanManager) {
         this.beanManager = beanManager;
         AnnotatedType<? extends PartitionManager> at = this.beanManager.createAnnotatedType(DefaultPartitionManager.class);
         this.injectionTarget = (InjectionTarget<PartitionManager>) beanManager.createInjectionTarget(at);
@@ -75,8 +74,8 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<PartitionManag
     public PartitionManager create(CreationalContext<PartitionManager> creationalContext) {
         this.configuration = resolveIdentityConfiguration();
 
-        PartitionManager identity = new DefaultPartitionManager(Arrays.asList(this.configuration));
-        
+        PartitionManager identity = new DefaultPartitionManager(this.configuration);
+
         this.injectionTarget.inject(identity, creationalContext);
         this.injectionTarget.postConstruct(identity);
 
@@ -195,28 +194,31 @@ public class IdentityManagerFactoryBeanDefinition implements Bean<PartitionManag
     public Set<InjectionPoint> getInjectionPoints() {
         return this.injectionTarget.getInjectionPoints();
     }
-    
+
     /**
-     * <p>
-     * Resolves the {@link IdentityConfiguration} instance to be used during the {@link PicketBoxManager} creation.
+     * <p> Resolves the {@link IdentityConfiguration} instance to be used during the {@link PicketBoxManager} creation.
      * </p>
-     * 
+     *
      * @return
      */
-    @SuppressWarnings({ "unchecked", "serial" })
-    private IdentityConfiguration resolveIdentityConfiguration() {
-        Set<Bean<?>> beans = this.beanManager.getBeans(IdentityConfiguration.class, new AnnotationLiteral<Any>() {
-        });
+    @SuppressWarnings({"unchecked", "serial"})
+    private List<IdentityConfiguration> resolveIdentityConfiguration() {
+        List<IdentityConfiguration> configurations = new ArrayList<IdentityConfiguration>();
+
+        Set<Bean<?>> beans = this.beanManager.getBeans(IdentityConfiguration.class, new AnnotationLiteral<Any>() {});
 
         if (beans.isEmpty()) {
             throw MESSAGES.idmNoConfigurationProvided();
         }
 
-        Bean<IdentityConfiguration> bean = (Bean<IdentityConfiguration>) beans.iterator().next();
+        for (Bean<?> bean : beans) {
+            Bean<IdentityConfiguration> configBean = (Bean<IdentityConfiguration>) bean;
+            CreationalContext<IdentityConfiguration> createCreationalContext = this.beanManager.createCreationalContext(configBean);
+            configurations.add(configBean.create(createCreationalContext));
 
-        CreationalContext<IdentityConfiguration> createCreationalContext = this.beanManager.createCreationalContext(bean);
+        }
 
-        return bean.create(createCreationalContext);
+        return configurations;
     }
 
 }

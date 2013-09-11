@@ -26,7 +26,6 @@ import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
@@ -53,15 +52,7 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
             ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition REALMS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.REALMS.getName(), ModelType.STRING, true).setDefaultValue(new ModelNode().set("default"))
-            .setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition TIERS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.TIERS.getName(), ModelType.STRING, true)
-            .setAllowExpression(false).build();
-    
-    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition(DATA_SOURCE, ENTITY_MODULE, ENTITY_MODULE_UNIT_NAME,ENTITY_MANAGER_FACTORY, REALMS, TIERS);
+    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition(DATA_SOURCE, ENTITY_MODULE, ENTITY_MODULE_UNIT_NAME,ENTITY_MANAGER_FACTORY);
 
     private JPAStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.JPA_STORE, new IDMConfigAddStepHandler(attributes), attributes);
@@ -69,8 +60,7 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
     
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
-        addChildResourceDefinition(FeatureSetResourceDefinition.INSTANCE, resourceRegistration);
-        addChildResourceDefinition(RelationshipResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(SupportedTypesResourceDefinition.INSTANCE, resourceRegistration);
     }
     
     @Override

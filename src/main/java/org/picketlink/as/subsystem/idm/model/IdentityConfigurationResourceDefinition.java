@@ -34,21 +34,23 @@ import org.picketlink.as.subsystem.model.ModelElement;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 16, 2012
  */
-public class FeatureSetResourceDefinition extends AbstractResourceDefinition {
+public class IdentityConfigurationResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition SUPPORTS_ALL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_SUPPORTS_ALL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set("true"))
+    public static final SimpleAttributeDefinition NAME = new SimpleAttributeDefinitionBuilder(
+            ModelElement.COMMON_NAME.getName(), ModelType.STRING, false)
             .setAllowExpression(false).build();
 
-    public static final FeatureSetResourceDefinition INSTANCE = new FeatureSetResourceDefinition(SUPPORTS_ALL);
-    
-    private FeatureSetResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.FEATURES, new IDMConfigAddStepHandler(attributes), attributes);
+    public static final IdentityConfigurationResourceDefinition INSTANCE = new IdentityConfigurationResourceDefinition(NAME);
+
+    private IdentityConfigurationResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.IDENTITY_CONFIGURATION, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
-        addChildResourceDefinition(FeatureResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(JPAStoreResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(FileStoreResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(LDAPStoreResourceDefinition.INSTANCE, resourceRegistration);
     }
     
 }

@@ -32,20 +32,16 @@ import org.picketlink.as.subsystem.model.ModelElement;
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 16, 2012
  */
-public class FeatureResourceDefinition extends AbstractResourceDefinition {
+public class SupportedTypeResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition FEATURE_GROUP = new SimpleAttributeDefinitionBuilder(
-            ModelElement.FEATURE_GROUP.getName(), ModelType.STRING, false)
+    public static final SimpleAttributeDefinition COMMON_CLASS = new SimpleAttributeDefinitionBuilder(
+            ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false)
             .setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition FEATURE_OPERATION = new SimpleAttributeDefinitionBuilder(
-            ModelElement.FEATURE_OPERATION.getName(), ModelType.STRING, false)
-            .setAllowExpression(false).build();
-
-    public static final FeatureResourceDefinition INSTANCE = new FeatureResourceDefinition(FEATURE_GROUP, FEATURE_OPERATION);
+    public static final SupportedTypeResourceDefinition INSTANCE = new SupportedTypeResourceDefinition(COMMON_CLASS);
     
-    private FeatureResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.FEATURE, new IDMConfigAddStepHandler(attributes), attributes);
+    private SupportedTypeResourceDefinition(SimpleAttributeDefinition... attributes) {
+        super(ModelElement.SUPPORTED_TYPE, new IDMConfigAddStepHandler(attributes), attributes);
     }
     
 }

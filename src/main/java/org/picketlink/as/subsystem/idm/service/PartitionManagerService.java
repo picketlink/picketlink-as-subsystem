@@ -43,11 +43,6 @@ import org.picketlink.as.subsystem.PicketLinkExtension;
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.config.IdentityConfigurationBuilder;
 import org.picketlink.idm.internal.DefaultPartitionManager;
-import org.picketlink.idm.model.Partition;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.*;
 
@@ -92,14 +87,12 @@ public class PartitionManagerService implements Service<PartitionManager> {
         this.partitionManager = new DefaultPartitionManager(this.configurationBuilder.buildAll());
 
         publishIdentityManagerFactory(context);
-        publishIdentityManagers(context);
     }
 
     @Override
     public void stop(StopContext context) {
         ROOT_LOGGER.debugf("Stopping PartitionManagerService for [%s]", this.alias);
-        unpublishIdentityManagerFactory(context);
-        unpublishIdentityManagers(context);
+        unpublishPartitionManager(context);
         this.partitionManager = null;
     }
 
@@ -113,18 +106,6 @@ public class PartitionManagerService implements Service<PartitionManager> {
 
     protected String getAlias() {
         return this.alias;
-    }
-
-    private Set<String> getConfiguredRealms() {
-        HashSet<String> realms = new HashSet<String>();
-
-        List<Partition> partitions = this.partitionManager.getPartitions(Partition.class);
-
-        for (Partition partition: partitions) {
-            realms.add(partition.getName());
-        }
-
-        return realms;
     }
 
     private void publishIdentityManagerFactory(StartContext context) {
@@ -156,52 +137,7 @@ public class PartitionManagerService implements Service<PartitionManager> {
         ROOT_LOGGER.boundToJndi("PartitionManager " + this.alias, bindInfo.getAbsoluteJndiName());
     }
 
-    private void publishIdentityManagers(StartContext context) {
-        Set<String> configuredRealms = getConfiguredRealms();
-
-        for (final String realmName : configuredRealms) {
-            BindInfo bindInfo = createJndiIdentityManagerBindInfo(realmName);
-            ServiceName serviceName = bindInfo.getBinderServiceName();
-
-            ROOT_LOGGER.boundToJndi("IdentityManager", bindInfo.getAbsoluteJndiName());
-
-            final BinderService binderService = new BinderService(serviceName.getCanonicalName());
-
-            final ServiceBuilder<ManagedReferenceFactory> builder = context
-                    .getController()
-                    .getServiceContainer()
-                    .addService(serviceName, binderService);
-
-            builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
-                    binderService.getNamingStoreInjector());
-            builder.addDependency(createIdentityManagerFactoryBindInfo().getBinderServiceName(), ManagedReferenceFactory.class,
-                    new Injector<ManagedReferenceFactory>() {
-                        @Override
-                        public void inject(final ManagedReferenceFactory value) throws InjectionException {
-                            binderService.getManagedObjectInjector().inject(new IdentityManagerManagedReferenceFactory(realmName, getValue()));
-                        }
-
-                        @Override
-                        public void uninject() {
-                            binderService.getManagedObjectInjector().uninject();
-                        }
-                    });
-
-            builder.setInitialMode(Mode.PASSIVE).install();
-        }
-    }
-
-    private void unpublishIdentityManagers(StopContext context) {
-        for (String realmName : getConfiguredRealms()) {
-            ServiceController<?> service = context.getController().getServiceContainer()
-                    .getService(createJndiIdentityManagerBindInfo(realmName).getBinderServiceName());
-            if (service != null) {
-                service.setMode(Mode.REMOVE);
-            }
-        }
-    }
-
-    private void unpublishIdentityManagerFactory(StopContext context) {
+    private void unpublishPartitionManager(StopContext context) {
         ServiceController<?> service = context.getController().getServiceContainer()
                 .getService(createIdentityManagerFactoryBindInfo().getBinderServiceName());
         if (service != null) {

@@ -17,7 +17,7 @@
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.as.extension">
   <resources>
-    <resource-root path="picketlink-as7-extension-2.5.0-SNAPSHOT.jar"/>
+    <resource-root path="picketlink-as-extension-2.5.0-SNAPSHOT.jar"/>
   </resources>
 
   <dependencies>

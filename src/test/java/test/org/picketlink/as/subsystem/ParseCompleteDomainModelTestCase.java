@@ -22,7 +22,6 @@
 package test.org.picketlink.as.subsystem;
 
 import junit.framework.Assert;
-
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
 

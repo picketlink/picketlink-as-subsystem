@@ -55,6 +55,7 @@ public enum ModelElement {
      * Identity Management model elements
      */
     IDENTITY_MANAGEMENT ("identity-management"),
+    IDENTITY_CONFIGURATION ("identity-configuration"),
     IDENTITY_MANAGEMENT_JNDI_NAME ("jndi-name"),
     JPA_STORE ("jpa-store"),
     JPA_STORE_DATASOURCE ("data-source"),
@@ -75,14 +76,8 @@ public enum ModelElement {
     LDAP_STORE_AGENT_DN_SUFFIX ("agent-dn-suffix"),
     LDAP_STORE_ROLE_DN_SUFFIX ("role-dn-suffix"),
     LDAP_STORE_GROUP_DN_SUFFIX ("group-dn-suffix"),
-    REALMS ("realms"),
-    TIERS ("tiers"),
-    FEATURES ("features"),
-    FEATURE ("feature"),
-    FEATURE_GROUP ("group"),
-    FEATURE_OPERATION ("group-operation"),
-    RELATIONSHIPS ("relationships"),
-    RELATIONSHIP ("relationship"),
+    SUPPORTED_TYPES("supportedTypes"),
+    SUPPORTED_TYPE("supportedType"),
 
     /*
      * Federation model elements

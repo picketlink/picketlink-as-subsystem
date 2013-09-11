@@ -35,7 +35,7 @@ public class JPAStoreWriteAttributeHandler extends AbstractWriteAttributeHandler
     public static final JPAStoreWriteAttributeHandler INSTANCE = new JPAStoreWriteAttributeHandler();
 
     private JPAStoreWriteAttributeHandler() {
-        super(JPAStoreResourceDefinition.ENTITY_MANAGER_FACTORY, JPAStoreResourceDefinition.DATA_SOURCE, JPAStoreResourceDefinition.ENTITY_MODULE, JPAStoreResourceDefinition.REALMS, JPAStoreResourceDefinition.TIERS);
+        super(JPAStoreResourceDefinition.ENTITY_MANAGER_FACTORY, JPAStoreResourceDefinition.DATA_SOURCE, JPAStoreResourceDefinition.ENTITY_MODULE);
     }
 
     @Override
