@@ -21,46 +21,44 @@
  */
 package org.picketlink.as.subsystem.idm.deployment;
 
-import static org.jboss.as.weld.WeldDeploymentMarker.isWeldDeployment;
-import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isIDMDeployment;
-
-import javax.enterprise.inject.spi.Extension;
-
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
-import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
-import org.jboss.as.weld.deployment.WeldAttachments;
-import org.jboss.weld.bootstrap.spi.Metadata;
-import org.jboss.weld.metadata.MetadataImpl;
+import org.picketlink.as.subsystem.deployment.AbstractCDIDeploymentUnitProcessor;
 import org.picketlink.as.subsystem.idm.PicketLinkIDMSubsystemExtension;
+
+import static org.picketlink.as.subsystem.PicketLinkLogger.*;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
-public class PicketLinkIDMDeploymentProcessor implements DeploymentUnitProcessor {
+public class PicketLinkIDMDeploymentProcessor extends AbstractCDIDeploymentUnitProcessor {
 
     public static final Phase PHASE = Phase.POST_MODULE;
-
     public static final int PRIORITY = Phase.POST_MODULE_WELD_BEAN_ARCHIVE;
 
     @Override
-    public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
-        DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
+    public void doDeploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
+        DeploymentUnit deployment = phaseContext.getDeploymentUnit();
 
-        if (isIDMDeployment(deploymentUnit) && isWeldDeployment(deploymentUnit)) {
-            if (deploymentUnit.getParent() != null) {
-                deploymentUnit = deploymentUnit.getParent();
+        if (isIDMDeployment(deployment)) {
+            if (deployment.getParent() != null) {
+                deployment = deployment.getParent();
             }
 
-            Metadata<Extension> metadata = new MetadataImpl<Extension>(new PicketLinkIDMSubsystemExtension(), deploymentUnit.getName());
-            deploymentUnit.addToAttachmentList(WeldAttachments.PORTABLE_EXTENSIONS, metadata);
-            
-            ROOT_LOGGER.configuringDeployment("PicketLink IDM CDI Extension", deploymentUnit.getName());
+            addExtension(deployment, new PicketLinkIDMSubsystemExtension());
+
+            ROOT_LOGGER.configuringDeployment("PicketLink IDM CDI Extension", deployment.getName());
         }
     }
+
+    @Override
+    protected boolean isAlreadyConfigured(DeploymentUnit deployment) {
+        return hasExtension(deployment, PicketLinkIDMSubsystemExtension.class);
+    }
+
 
     @Override
     public void undeploy(DeploymentUnit context) {

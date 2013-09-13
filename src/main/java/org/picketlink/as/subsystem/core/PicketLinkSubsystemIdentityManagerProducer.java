@@ -1,4 +1,4 @@
-package org.picketlink.as.subsystem.core.deployment;
+package org.picketlink.as.subsystem.core;
 
 import org.jboss.as.naming.deployment.ContextNames;
 import org.picketlink.annotations.PicketLink;
@@ -33,7 +33,7 @@ public class PicketLinkSubsystemIdentityManagerProducer {
     private PicketLinkCoreSubsystemExtension extension;
 
     @Inject
-    public void init() {
+    public void lookupPartitionManager() {
         String partitionManagerJNDIUrl = this.extension.getPartitionManagerJNDIUrl();
 
         try {
@@ -41,7 +41,7 @@ public class PicketLinkSubsystemIdentityManagerProducer {
 
             this.partitionManager = (PartitionManager) new InitialContext().lookup(formattedJNDIName);
         } catch (NamingException e) {
-            throw new RuntimeException("Error looking up IdentityManager from [" + partitionManagerJNDIUrl + "]", e);
+            throw new RuntimeException("Error looking up PartitionManager from [" + partitionManagerJNDIUrl + "]", e);
         }
     }
 

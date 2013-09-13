@@ -36,7 +36,7 @@ import javax.enterprise.inject.spi.Extension;
  */
 public class PicketLinkIDMSubsystemExtension implements Extension {
 
-    public void registerIdentityManagerFactoryBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
+    public void installPartitionManagerBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
         event.addBean(new PartitionManagerBeanDefinition(beanManager));
     }
 

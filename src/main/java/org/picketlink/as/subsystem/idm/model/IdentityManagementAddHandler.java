@@ -48,6 +48,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import static org.picketlink.as.subsystem.idm.model.IdentityManagementConfiguration.configureStore;
+
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
@@ -78,7 +80,21 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         Resource identityManagementResource = context.readResource(PathAddress.EMPTY_ADDRESS);
         IdentityConfigurationBuilder builder = new IdentityConfigurationBuilder();
 
-        fromResource(identityManagementResource, builder);
+        Iterator<ResourceEntry> identityConfigurationResourceIterator = identityManagementResource.getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
+
+        while (identityConfigurationResourceIterator.hasNext()) {
+            ResourceEntry identityConfigurationResource = identityConfigurationResourceIterator.next();
+
+            NamedIdentityConfigurationBuilder namedIdentityConfigurationBuilder = builder.named(identityConfigurationResource.getName());
+
+            Set<String> identityStoreTypes = identityConfigurationResource.getChildTypes();
+
+            for (String storeType : identityStoreTypes) {
+                for (ResourceEntry identityStoreResource : identityConfigurationResource.getChildren(storeType)) {
+                    configureStore(storeType, identityStoreResource, namedIdentityConfigurationBuilder);
+                }
+            }
+        }
 
         PartitionManagerService partitionManagerService = null;
 
@@ -170,24 +186,6 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         newControllers.add(controller);
 
         return jpaBasedIdentityManagerFactory;
-    }
-
-    private void fromResource(Resource resource, IdentityConfigurationBuilder builder) {
-        Iterator<ResourceEntry> iterator = resource.getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
-
-        while (iterator.hasNext()) {
-            ResourceEntry configuration = iterator.next();
-
-            NamedIdentityConfigurationBuilder namedIdentityConfigurationBuilder = builder.named(configuration.getName());
-
-            Set<String> storeTypes = configuration.getChildTypes();
-
-            for (String storeType : storeTypes) {
-                for (ResourceEntry storeResource : configuration.getChildren(storeType)) {
-                    IdentityManagementConfiguration.configureStore(storeType, storeResource, namedIdentityConfigurationBuilder);
-                }
-            }
-        }
     }
 
     private String toJndiName(String jndiName) {

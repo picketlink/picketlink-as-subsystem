@@ -90,6 +90,7 @@ public class JPABasedIdentityManagerFactoryService extends PartitionManagerServi
         }
 
         ModuleLoader moduleLoader = Module.getContextModuleLoader();
+
         try {
             this.entitiesModule = moduleLoader.loadModule(ModuleIdentifier.create(entityModuleName));
         } catch (ModuleLoadException e) {

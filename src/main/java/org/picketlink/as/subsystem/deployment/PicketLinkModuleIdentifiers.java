@@ -22,17 +22,17 @@
 
 package org.picketlink.as.subsystem.deployment;
 
-import org.jboss.as.server.deployment.AttachmentKey;
-import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
+import org.jboss.modules.ModuleIdentifier;
 
 /**
  * @author Pedro Igor
- * 
  */
-public interface PicketLinkAttachments {
+public interface PicketLinkModuleIdentifiers {
 
-    AttachmentKey<PicketLinkFederationService<?>> FEDERATION_ATTACHMENT_KEY = AttachmentKey.create(PicketLinkFederationService.class);
-    AttachmentKey<Boolean> IDM_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
-    AttachmentKey<Boolean> CORE_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
+    ModuleIdentifier ORG_PICKETLINK_MODULE = ModuleIdentifier.create("org.picketlink");
+    ModuleIdentifier ORG_PICKETLINK_IDM_API_MODULE = ModuleIdentifier.create("org.picketlink.idm.api");
+    ModuleIdentifier ORG_PICKETLINK_IDM_MODULE = ModuleIdentifier.create("org.picketlink.idm");
+    ModuleIdentifier ORG_PICKETLINK_CORE_API_MODULE = ModuleIdentifier.create("org.picketlink.core.api");
+    ModuleIdentifier ORG_PICKETLINK_CORE_MODULE = ModuleIdentifier.create("org.picketlink.core");
 
 }
