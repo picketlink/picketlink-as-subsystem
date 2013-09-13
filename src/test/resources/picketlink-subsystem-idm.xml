@@ -2,11 +2,17 @@
 
 	<identity-management jndi-name="picketlink/FileBasedCompleteIdentityManager"
 		alias="file-based-complete">
-		<file-store realms="default" working-dir="/tmp/pl-idm-complete"
-			always-create-files="true" async-write="true"
-			async-write-thread-pool="10">
-			<features supportsAll="true" />
-		</file-store>
+
+    <configuration name="">
+      <file-store realms="default" working-dir="/tmp/pl-idm-complete"
+                  always-create-files="true" async-write="true"
+                  async-write-thread-pool="10">
+        <supportedTypes supportsAll="true">
+          <supportedType type="" />
+        </supportedTypes>
+      </file-store>
+    </configuration>
+
 	</identity-management>
 
 	<identity-management jndi-name="picketlink/FileBasedSimpleIdentityManager"

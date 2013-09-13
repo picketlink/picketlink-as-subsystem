@@ -21,20 +21,17 @@
  */
 package test.org.picketlink.as.subsystem.federation;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
-import static junit.framework.Assert.assertTrue;
-
-import java.util.List;
-
 import junit.framework.Assert;
-
 import org.jboss.dmr.ModelNode;
 import org.junit.Test;
 import org.picketlink.as.subsystem.federation.service.FederationService;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.identity.federation.core.config.AuthPropertyType;
+import org.picketlink.config.federation.AuthPropertyType;
 import org.picketlink.identity.federation.core.impl.KeyStoreKeyManager;
+
+import java.util.List;
+
+import static junit.framework.Assert.*;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

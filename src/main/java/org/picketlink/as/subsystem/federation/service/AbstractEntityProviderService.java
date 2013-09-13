@@ -21,12 +21,6 @@
  */
 package org.picketlink.as.subsystem.federation.service;
 
-import static org.picketlink.identity.federation.core.config.PicketLinkConfigUtil.addHandler;
-import static org.picketlink.identity.federation.core.config.PicketLinkConfigUtil.createSTSType;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.web.deployment.WarMetaData;
@@ -37,24 +31,29 @@ import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.picketlink.as.subsystem.PicketLinkLogger;
 import org.picketlink.as.subsystem.federation.metrics.PicketLinkSubsystemMetrics;
-import org.picketlink.identity.federation.core.config.KeyValueType;
-import org.picketlink.identity.federation.core.config.PicketLinkType;
+import org.picketlink.common.constants.GeneralConstants;
+import org.picketlink.common.constants.JBossSAMLURIConstants;
+import org.picketlink.common.exceptions.ConfigurationException;
+import org.picketlink.config.federation.KeyValueType;
+import org.picketlink.config.federation.PicketLinkType;
+import org.picketlink.config.federation.ProviderType;
+import org.picketlink.config.federation.TokenProviderType;
+import org.picketlink.config.federation.handler.Handler;
+import org.picketlink.config.federation.handler.Handlers;
 import org.picketlink.identity.federation.core.config.ProviderConfiguration;
-import org.picketlink.identity.federation.core.config.ProviderType;
 import org.picketlink.identity.federation.core.config.STSConfiguration;
-import org.picketlink.identity.federation.core.config.TokenProviderType;
-import org.picketlink.identity.federation.core.exceptions.ConfigurationException;
-import org.picketlink.identity.federation.core.handler.config.Handler;
-import org.picketlink.identity.federation.core.handler.config.Handlers;
-import org.picketlink.identity.federation.core.saml.v2.constants.JBossSAMLURIConstants;
 import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler;
-import org.picketlink.identity.federation.web.constants.GeneralConstants;
 import org.picketlink.identity.federation.web.handlers.saml2.RolesGenerationHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2AuthenticationHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2EncryptionHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2IssuerTrustHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2LogOutHandler;
 import org.picketlink.identity.federation.web.handlers.saml2.SAML2SignatureValidationHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.picketlink.identity.federation.core.config.PicketLinkConfigUtil.*;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

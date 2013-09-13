@@ -26,7 +26,7 @@ import org.jboss.as.server.deployment.AttachmentKey;
 import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 
 /**
- * @author Pedro Silva
+ * @author Pedro Igor
  * 
  */
 public interface PicketLinkAttachments {

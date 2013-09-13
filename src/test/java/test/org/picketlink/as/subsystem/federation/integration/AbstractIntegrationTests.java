@@ -21,17 +21,23 @@
  */
 package test.org.picketlink.as.subsystem.federation.integration;
 
-import java.net.URL;
-
-import org.jboss.arquillian.drone.api.annotation.Drone;
+import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
+import com.gargoylesoftware.htmlunit.html.HtmlElement;
+import com.gargoylesoftware.htmlunit.html.HtmlForm;
+import com.gargoylesoftware.htmlunit.html.HtmlPage;
+import com.gargoylesoftware.htmlunit.html.HtmlPasswordInput;
+import com.gargoylesoftware.htmlunit.html.HtmlSubmitInput;
+import com.gargoylesoftware.htmlunit.html.HtmlTextInput;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Assert;
 import org.junit.runner.RunWith;
 
-import com.thoughtworks.selenium.DefaultSelenium;
+import java.net.URL;
+
+import static org.junit.Assert.*;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -44,10 +50,10 @@ public class AbstractIntegrationTests {
     private static final String IDP_DEPLOYMENT_ROOT_DIR = DEPLOYMENT_ROOT_DIR + "/idp";
     private static final String SP_DEPLOYMENT_ROOT_DIR = DEPLOYMENT_ROOT_DIR + "/sp";
 
-    
-    @Drone DefaultSelenium browser;
-    @ArquillianResource URL deploymentURL;
-    
+
+    @ArquillianResource
+    private URL contextPath;
+
     /**
      * <p>
      * Creates an Identity Provider {@link WebArchive} instance. The contents used are located at <code>IDP_DEPLOYMENT_ROOT_DIR</code>
@@ -57,7 +63,7 @@ public class AbstractIntegrationTests {
      * @return
      */
     protected static WebArchive createIdentityProviderWebArchive(String warName) {
-        return ShrinkWrap
+        WebArchive webArchive = ShrinkWrap
                 .create(WebArchive.class, warName).setWebXML(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/web.xml")
                 .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/jboss-web.xml", "WEB-INF/jboss-web.xml")
                 .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/classes/users.properties", "WEB-INF/classes/users.properties")
@@ -66,6 +72,8 @@ public class AbstractIntegrationTests {
                 .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/jsp/login.jsp", "jsp/login.jsp")
                 .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/jsp/error.jsp", "jsp/error.jsp")
                 .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/index.jsp", "index.jsp");
+
+        return webArchive;
     }
 
     /**
@@ -77,13 +85,15 @@ public class AbstractIntegrationTests {
      * @return
      */
     protected static WebArchive createServiceProviderWebArchive(String warName) {
-        return ShrinkWrap
+        WebArchive webArchive = ShrinkWrap
                 .create(WebArchive.class, warName).setWebXML(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/web.xml")
                 .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/jboss-web.xml", "WEB-INF/jboss-web.xml")
                 .addAsWebResource(DEPLOYMENT_ROOT_DIR + "/jbid_test_keystore.jks", "WEB-INF/classes/jbid_test_keystore.jks")
                 .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/index.jsp", "index.jsp")
                 .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/customErrorPage.jsp", "customErrorPage.jsp")
                 .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/logout.jsp", "logout.jsp");
+
+        return webArchive;
     }
 
     /**
@@ -94,21 +104,30 @@ public class AbstractIntegrationTests {
      * 
      * @throws InterruptedException
      */
-    protected void assertLoginAndLogout() throws InterruptedException {
-        login();
-    
-        Assert.assertTrue("Service Provider welcomePage page should be presented",
-                browser.isElementPresent("xpath=//h1[@id='welcomePage']"));
-        
-        logout();
-        
-        Thread.sleep(2000l);
+    protected void assertLoginAndLogout() throws Exception {
+        WebClient client = new WebClient();
+
+        client.setThrowExceptionOnFailingStatusCode(false);
+
+        HtmlPage welcomePage = login(client);
+
+        HtmlElement welcomeMessage = welcomePage.getElementById("welcomePage");
+
+        assertNotNull("Service Provider welcomePage welcomePage should be presented", welcomeMessage);
+
+        logout(welcomePage);
     }
 
-    private void logout() {
-        if (browser.isElementPresent("xpath=//h1[@id='welcomePage']")) {
-            browser.click("id=logoutLink");
+    private HtmlPage logout(HtmlPage page) throws Exception {
+        HtmlAnchor logoutLink = page.getAnchorByName("logoutLink");
+
+        if (logoutLink != null) {
+            return logoutLink.click();
         }
+
+        fail("Current pages does not have a logout link.");
+
+        return null;
     }
 
     /**
@@ -118,19 +137,24 @@ public class AbstractIntegrationTests {
      * 
      * @throws InterruptedException
      */
-    protected void login() throws InterruptedException {
-        browser.open(deploymentURL.toString());
-        
-        Thread.sleep(2000l);
-        
-        Assert.assertTrue("IDP login page should be presented",
-                browser.isElementPresent("xpath=//input[@type='submit' and @value='login']"));
-        
-        browser.type("id=usernameText", "tomcat");
-        browser.type("id=passwordText", "tomcat");
-        browser.click("id=loginButton");
-        
-        Thread.sleep(2000l);
+    protected HtmlPage login(WebClient client) throws Exception {
+        HtmlPage loginPage = client.getPage(this.contextPath);
+
+        HtmlForm loginForm = loginPage.getFormByName("loginForm");
+
+        HtmlSubmitInput loginButton = loginForm.getElementById("loginButton");
+
+        assertNotNull("IDP login page should be presented", loginButton);
+
+        HtmlTextInput userNameText = loginForm.getElementById("usernameText");
+
+        userNameText.setValueAttribute("tomcat");
+
+        HtmlPasswordInput passwordText = loginForm.getElementById("passwordText");
+
+        passwordText.setValueAttribute("tomcat");
+
+        return (HtmlPage) loginButton.click();
     }
 
 }

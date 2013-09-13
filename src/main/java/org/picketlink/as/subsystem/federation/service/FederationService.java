@@ -30,7 +30,7 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.picketlink.as.subsystem.model.ModelUtils;
-import org.picketlink.identity.federation.core.config.KeyProviderType;
+import org.picketlink.config.federation.KeyProviderType;
 import org.picketlink.identity.federation.core.config.STSConfiguration;
 
 /**

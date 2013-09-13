@@ -48,26 +48,19 @@ public class LDAPStoreResourceDefinition extends AbstractResourceDefinition {
     public static final SimpleAttributeDefinition BASE_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(
             ModelElement.LDAP_STORE_BASE_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition AGENT_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_AGENT_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(false).build();
+    public static final SimpleAttributeDefinition MODULE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.COMMON_MODULE.getName(), ModelType.STRING, true).setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition USER_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_USER_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(false).build();
+    public static final SimpleAttributeDefinition SUPPORT_ATTRIBUTE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.IDENTITY_STORE_SUPPORT_ATTRIBUTE.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
+            .setAllowExpression(false).build();
 
-    public static final SimpleAttributeDefinition ROLE_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_ROLE_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition GROUP_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_GROUP_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition REALMS = new SimpleAttributeDefinitionBuilder(ModelElement.REALMS.getName(),
-            ModelType.STRING, true).setDefaultValue(new ModelNode().set("default")).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition TIERS = new SimpleAttributeDefinitionBuilder(ModelElement.TIERS.getName(),
-            ModelType.STRING, true).setAllowExpression(false).build();
+    public static final SimpleAttributeDefinition SUPPORT_CREDENTIAL = new SimpleAttributeDefinitionBuilder(
+            ModelElement.IDENTITY_STORE_SUPPORT_CREDENTIAL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
+            .setAllowExpression(false).build();
 
     public static final LDAPStoreResourceDefinition INSTANCE = new LDAPStoreResourceDefinition(URL, BIND_DN, BIND_CREDENTIAL,
-            BASE_DN_SUFFIX, AGENT_DN_SUFFIX, USER_DN_SUFFIX, ROLE_DN_SUFFIX,GROUP_DN_SUFFIX, REALMS,TIERS);
+            BASE_DN_SUFFIX, MODULE, SUPPORT_ATTRIBUTE, SUPPORT_CREDENTIAL);
 
     private LDAPStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.LDAP_STORE, new IDMConfigAddStepHandler(attributes), attributes);
@@ -75,8 +68,9 @@ public class LDAPStoreResourceDefinition extends AbstractResourceDefinition {
 
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
-        addChildResourceDefinition(FeatureSetResourceDefinition.INSTANCE, resourceRegistration);
-        addChildResourceDefinition(RelationshipResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(LDAPStoreMappingResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(SupportedTypesResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(CredentialHandlerResourceDefinition.INSTANCE, resourceRegistration);
     }
 
 }

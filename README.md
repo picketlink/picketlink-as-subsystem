@@ -1,4 +1,4 @@
-# PicketLink 3 Subsystem for JBoss Application Server #
+# PicketLink 2.5 Subsystem for JBoss Application Server #
 
 This project is an extension for the JBoss Application Server that enables PicketLink for deployments.
 

@@ -2,7 +2,7 @@
 <body>
 <font size='5' color='blue'>Please Login</font><hr>
 
-<form id="loginForm" action='j_security_check' method='post'>
+<form name="loginForm" id="loginForm" action='j_security_check' method='post'>
 <table>
  <tr><td>Name:</td>
    <td><input type='text' id="usernameText" name='j_username'></td></tr>

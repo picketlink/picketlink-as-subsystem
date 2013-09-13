@@ -26,7 +26,7 @@ import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.dmr.ModelNode;
-import org.picketlink.as.subsystem.idm.service.IdentityManagerFactoryService;
+import org.picketlink.as.subsystem.idm.service.PartitionManagerService;
 import org.picketlink.as.subsystem.model.ModelElement;
 
 /**
@@ -50,7 +50,7 @@ public class IdentityManagementRemoveHandler extends AbstractRemoveStepHandler {
             throws OperationFailedException {
         String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
-        context.removeService(IdentityManagerFactoryService.createServiceName(alias));
+        context.removeService(PartitionManagerService.createServiceName(alias));
     }
 
 }

@@ -133,7 +133,7 @@ public class ServiceProviderService extends AbstractEntityProviderService<Servic
     }
 
     /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#getConfiguration()
+     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#getConfigurationBuilder()
      */
     @Override
     public SPConfiguration getConfiguration() {

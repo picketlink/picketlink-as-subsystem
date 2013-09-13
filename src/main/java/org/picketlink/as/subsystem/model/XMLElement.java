@@ -35,7 +35,12 @@ import java.util.Map;
  */
 public enum XMLElement {
 
-    TRUST("trust"), SERVICE_PROVIDERS("service-providers"), HANDLERS ("handlers"), RELATIONSHIPS ("relationships");
+    TRUST("trust"),
+    SERVICE_PROVIDERS("service-providers"),
+    HANDLERS ("handlers"),
+    RELATIONSHIPS ("relationships"),
+    LDAP_MAPPINGS ("mappings"),
+    IDENTITY_STORE_CREDENTIAL_HANDLERS ("credential-handlers");
 
     private static final Map<String, XMLElement> xmlElements = new HashMap<String, XMLElement>();
 

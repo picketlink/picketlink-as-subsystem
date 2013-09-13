@@ -1,11 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.1">
-	<deployment>
-		<dependencies>
-            <module name="org.picketlink.idm" />
-            
-            <!-- We only need this dependency because we want to use the built-in schema -->
-            <module name="org.picketlink.idm.schema" />
-		</dependencies>
-	</deployment>
+  <deployment>
+    <dependencies>
+      <module name="org.picketlink.idm"/>
+      <module name="org.picketlink.idm.schema"/>
+      <module name="org.picketlink.test"/>
+    </dependencies>
+  </deployment>
 </jboss-deployment-structure>

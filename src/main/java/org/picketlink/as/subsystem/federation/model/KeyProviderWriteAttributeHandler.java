@@ -28,7 +28,7 @@ import org.jboss.as.controller.PathAddress;
 import org.jboss.dmr.ModelNode;
 import org.picketlink.as.subsystem.federation.service.FederationService;
 import org.picketlink.as.subsystem.model.ModelUtils;
-import org.picketlink.identity.federation.core.config.KeyProviderType;
+import org.picketlink.config.federation.KeyProviderType;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>

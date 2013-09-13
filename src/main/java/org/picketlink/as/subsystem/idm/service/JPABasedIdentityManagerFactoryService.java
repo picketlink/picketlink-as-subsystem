@@ -21,23 +21,6 @@
  */
 package org.picketlink.as.subsystem.idm.service;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
-
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.metamodel.EntityType;
-import javax.transaction.Status;
-import javax.transaction.Transaction;
-import javax.transaction.TransactionManager;
-
 import org.hibernate.cfg.AvailableSettings;
 import org.jboss.as.jpa.hibernate4.JBossAppServerJtaPlatform;
 import org.jboss.as.jpa.transaction.JtaManagerImpl;
@@ -51,27 +34,54 @@ import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.InjectedValue;
 import org.picketlink.common.util.StringUtil;
-import org.picketlink.idm.config.IdentityConfiguration;
-import org.picketlink.idm.config.IdentityStoreConfiguration;
-import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
-import org.picketlink.idm.jpa.annotations.IDMEntity;
-import org.picketlink.idm.jpa.internal.JPAContextInitializer;
+import org.picketlink.idm.config.IdentityConfigurationBuilder;
+import org.picketlink.idm.config.JPAStoreConfigurationBuilder;
+import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
+import org.picketlink.idm.jpa.internal.JPAIdentityStore;
+import org.picketlink.idm.spi.ContextInitializer;
+import org.picketlink.idm.spi.IdentityContext;
+import org.picketlink.idm.spi.IdentityStore;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.metamodel.EntityType;
+import javax.transaction.Status;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.lang.reflect.Modifier.*;
+import static org.picketlink.as.subsystem.PicketLinkLogger.*;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
-public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactoryService {
+public class JPABasedIdentityManagerFactoryService extends PartitionManagerService {
+
+    private static final String JPA_ANNOTATION_PACKAGE = "org.picketlink.idm.jpa.annotations";
 
     private final InjectedValue<ValueManagedReferenceFactory> providedEntityManagerFactory = new InjectedValue<ValueManagedReferenceFactory>();
     private final InjectedValue<TransactionManager> transactionManager = new InjectedValue<TransactionManager>();
+    private final NamedIdentityConfigurationBuilder namedBuilder;
     private EntityManagerFactory emf;
     private final String jpaStoreDataSource;
     private String jpaStoreEntityModuleUnitName = "identity";
     private Module entitiesModule;
 
     public JPABasedIdentityManagerFactoryService(String alias, String jndiName, String dataSourceJndiName,
-            String entityModuleName, String entityModuleUnitName, IdentityConfiguration configuration) {
-        super(alias, jndiName, configuration);
+            String entityModuleName, String entityModuleUnitName, NamedIdentityConfigurationBuilder namedBuilder, IdentityConfigurationBuilder builder) {
+        super(alias, jndiName, builder);
+        this.namedBuilder = namedBuilder;
         this.jpaStoreDataSource = dataSourceJndiName;
         this.jpaStoreEntityModuleUnitName = entityModuleUnitName;
 
@@ -80,6 +90,7 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
         }
 
         ModuleLoader moduleLoader = Module.getContextModuleLoader();
+
         try {
             this.entitiesModule = moduleLoader.loadModule(ModuleIdentifier.create(entityModuleName));
         } catch (ModuleLoadException e) {
@@ -110,7 +121,7 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
     }
 
     private void configureJPAIdentityStore() {
-        JPAIdentityStoreConfiguration jpaConfig = getJPAIdentityStoreConfiguration();
+        JPAStoreConfigurationBuilder jpaConfig = getJPAIdentityStoreConfiguration();
 
         if (!hasEmbeddedEntityManagerFactory()) {
             this.emf = (EntityManagerFactory) this.providedEntityManagerFactory.getValue().getReference().getInstance();
@@ -125,8 +136,15 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
         configureIDMEntities(jpaConfig);
 
-        jpaConfig.addContextInitializer(new JPAContextInitializer(emf) {
+        jpaConfig.addContextInitializer(new ContextInitializer() {
             @Override
+            public void initContextForStore(IdentityContext context, IdentityStore<?> store) {
+                if (store instanceof JPAIdentityStore) {
+                    if (!context.isParameterSet(JPAIdentityStore.INVOCATION_CTX_ENTITY_MANAGER)) {
+                        context.setParameter(JPAIdentityStore.INVOCATION_CTX_ENTITY_MANAGER, getEntityManager());
+                    }
+                }
+            }
             public EntityManager getEntityManager() {
                 return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                         new Class<?>[] { EntityManager.class }, new EntityManagerInvocationHandler(emf.createEntityManager(),
@@ -135,53 +153,23 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
         });
     }
 
-    private JPAIdentityStoreConfiguration getJPAIdentityStoreConfiguration() {
-        JPAIdentityStoreConfiguration jpaConfig = null;
-
-        for (IdentityStoreConfiguration identityStoreConfiguration : getIdentityConfiguration().getConfiguredStores()) {
-            if (JPAIdentityStoreConfiguration.class.isInstance(identityStoreConfiguration)) {
-                jpaConfig = (JPAIdentityStoreConfiguration) identityStoreConfiguration;
-                break;
-            }
-        }
-        return jpaConfig;
+    private JPAStoreConfigurationBuilder getJPAIdentityStoreConfiguration() {
+        return namedBuilder.stores().jpa();
     }
 
-    private void configureIDMEntities(JPAIdentityStoreConfiguration jpaConfig) {
-        Set<EntityType<?>> entities = this.emf.getMetamodel().getEntities();
+    private void configureIDMEntities(JPAStoreConfigurationBuilder jpaConfig) {
+        Set<EntityType<?>> mappedEntities = this.emf.getMetamodel().getEntities();
+        List<Class<?>> entities = new ArrayList<Class<?>>();
 
-        for (EntityType<?> entity : entities) {
+        for (EntityType<?> entity : mappedEntities) {
             Class<?> javaType = entity.getJavaType();
-            IDMEntity idmEntity = javaType.getAnnotation(IDMEntity.class);
-            if (idmEntity != null) {
-                switch (idmEntity.value()) {
-                    case CREDENTIAL_ATTRIBUTE:
-                        jpaConfig.setCredentialAttributeClass(javaType);
-                        break;
-                    case IDENTITY_ATTRIBUTE:
-                        jpaConfig.setAttributeClass(javaType);
-                        break;
-                    case IDENTITY_CREDENTIAL:
-                        jpaConfig.setCredentialClass(javaType);
-                        break;
-                    case IDENTITY_TYPE:
-                        jpaConfig.setIdentityClass(javaType);
-                        break;
-                    case PARTITION:
-                        jpaConfig.setPartitionClass(javaType);
-                        break;
-                    case RELATIONSHIP:
-                        jpaConfig.setRelationshipClass(javaType);
-                        break;
-                    case RELATIONSHIP_ATTRIBUTE:
-                        jpaConfig.setRelationshipAttributeClass(javaType);
-                        break;
-                    case RELATIONSHIP_IDENTITY:
-                        jpaConfig.setRelationshipIdentityClass(javaType);
-                        break;
-                }
+
+            if (!isAbstract(javaType.getModifiers()) && isIdentityEntity(javaType)) {
+                entities.add(javaType);
             }
         }
+
+        jpaConfig.mappedEntity(entities.toArray(new Class<?>[entities.size()]));
     }
 
     private boolean hasEmbeddedEntityManagerFactory() {
@@ -281,4 +269,27 @@ public class JPABasedIdentityManagerFactoryService extends IdentityManagerFactor
 
     }
 
+    private boolean isIdentityEntity(Class<?> cls) {
+        while (!cls.equals(Object.class)) {
+            for (Annotation a : cls.getAnnotations()) {
+                if (a.annotationType().getName().startsWith(JPA_ANNOTATION_PACKAGE)) {
+                    return true;
+                }
+            }
+
+            // No class annotation was found, check the fields
+            for (Field f : cls.getDeclaredFields()) {
+                for (Annotation a : f.getAnnotations()) {
+                    if (a.annotationType().getName().startsWith(JPA_ANNOTATION_PACKAGE)) {
+                        return true;
+                    }
+                }
+            }
+
+            // Check the superclass
+            cls = cls.getSuperclass();
+        }
+
+        return false;
+    }
 }

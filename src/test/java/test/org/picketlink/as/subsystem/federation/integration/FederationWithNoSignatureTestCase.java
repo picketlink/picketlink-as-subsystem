@@ -69,13 +69,13 @@ public class FederationWithNoSignatureTestCase extends AbstractIntegrationTests 
     
     @Test
     @OperateOnDeployment("sales-post")
-    public void testSalesPost() throws InterruptedException {
+    public void testSalesPost() throws Exception {
         assertLoginAndLogout();
     }
     
     @Test
     @OperateOnDeployment("sales-redirect")
-    public void testSalesRedirect() throws InterruptedException {
+    public void testSalesRedirect() throws Exception {
         assertLoginAndLogout();
     }
     

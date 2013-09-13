@@ -22,14 +22,17 @@
 
 package org.picketlink.identity.federation.core.config;
 
+import org.picketlink.config.federation.KeyValueType;
+import org.picketlink.config.federation.PicketLinkType;
+import org.picketlink.config.federation.STSType;
+import org.picketlink.config.federation.handler.Handler;
+import org.picketlink.config.federation.parsers.STSConfigParser;
+import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
-
-import org.picketlink.identity.federation.core.handler.config.Handler;
-import org.picketlink.identity.federation.core.parsers.sts.STSConfigParser;
-import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
