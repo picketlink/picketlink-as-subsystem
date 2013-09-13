@@ -190,10 +190,6 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
         }
     }
 
-    private static final ModelElement[] getSupportedStoreTypes() {
-        return new ModelElement[]{ModelElement.JPA_STORE, ModelElement.FILE_STORE, ModelElement.LDAP_STORE};
-    }
-
     private String toJndiName(String jndiName) {
         if (jndiName != null) {
             if (jndiName.startsWith("java:")) {

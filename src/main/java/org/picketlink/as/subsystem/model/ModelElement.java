@@ -50,12 +50,17 @@ public enum ModelElement {
     COMMON_HANDLER_PARAMETER ("handler-parameter"),
 
     COMMON_SUPPORTS_ALL ("supportsAll"),
+
+    COMMON_MODULE ("module"),
     
     /*
      * Identity Management model elements
      */
     IDENTITY_MANAGEMENT ("identity-management"),
     IDENTITY_CONFIGURATION ("identity-configuration"),
+    IDENTITY_STORE_CREDENTIAL_HANDLER ("credential-handler"),
+    IDENTITY_STORE_SUPPORT_ATTRIBUTE ("support-attribute"),
+    IDENTITY_STORE_SUPPORT_CREDENTIAL ("support-credential"),
     IDENTITY_MANAGEMENT_JNDI_NAME ("jndi-name"),
     JPA_STORE ("jpa-store"),
     JPA_STORE_DATASOURCE ("data-source"),
@@ -72,10 +77,17 @@ public enum ModelElement {
     LDAP_STORE_BIND_DN ("bind-dn"),
     LDAP_STORE_BIND_CREDENTIAL ("bind-credential"),
     LDAP_STORE_BASE_DN_SUFFIX ("base-dn-suffix"),
-    LDAP_STORE_USER_DN_SUFFIX ("user-dn-suffix"),
-    LDAP_STORE_AGENT_DN_SUFFIX ("agent-dn-suffix"),
-    LDAP_STORE_ROLE_DN_SUFFIX ("role-dn-suffix"),
-    LDAP_STORE_GROUP_DN_SUFFIX ("group-dn-suffix"),
+    LDAP_STORE_MAPPING ("mapping"),
+    LDAP_STORE_MAPPING_CLASS (COMMON_CLASS.getName()),
+    LDAP_STORE_MAPPING_BASE_DN (LDAP_STORE_BASE_DN_SUFFIX.getName()),
+    LDAP_STORE_MAPPING_OBJECT_CLASSES ("object-classes"),
+    LDAP_STORE_MAPPING_PARENT_ATTRIBUTE_NAME ("parent-membership-attribute-name"),
+    LDAP_STORE_MAPPING_RELATES_TO ("relates-to"),
+    LDAP_STORE_ATTRIBUTE ("attribute"),
+    LDAP_STORE_ATTRIBUTE_NAME (COMMON_NAME.getName()),
+    LDAP_STORE_ATTRIBUTE_LDAP_NAME ("ldap-name"),
+    LDAP_STORE_ATTRIBUTE_IS_IDENTIFIER ("is-identifier"),
+    LDAP_STORE_ATTRIBUTE_READ_ONLY("read-only"),
     SUPPORTED_TYPES("supportedTypes"),
     SUPPORTED_TYPE("supportedType"),
 

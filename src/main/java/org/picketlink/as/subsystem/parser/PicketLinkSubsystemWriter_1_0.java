@@ -55,8 +55,11 @@ public class PicketLinkSubsystemWriter_1_0 implements XMLStreamConstants, XMLEle
         writers.put(ModelElement.JPA_STORE.getName(), new GenericModelElementWriter(ModelElement.JPA_STORE, writers));
         writers.put(ModelElement.FILE_STORE.getName(), new GenericModelElementWriter(ModelElement.FILE_STORE, writers));
         writers.put(ModelElement.LDAP_STORE.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE, writers));
+        writers.put(ModelElement.LDAP_STORE_MAPPING.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE_MAPPING, XMLElement.LDAP_MAPPINGS, writers));
+        writers.put(ModelElement.LDAP_STORE_ATTRIBUTE.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE_ATTRIBUTE, writers));
         writers.put(ModelElement.SUPPORTED_TYPES.getName(), new GenericModelElementWriter(ModelElement.SUPPORTED_TYPES, writers));
         writers.put(ModelElement.SUPPORTED_TYPE.getName(), new GenericModelElementWriter(ModelElement.SUPPORTED_TYPE, writers));
+        writers.put(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER, XMLElement.IDENTITY_STORE_CREDENTIAL_HANDLERS, writers));
         writers.put(ModelElement.FEDERATION.getName(), new GenericModelElementWriter(ModelElement.FEDERATION, writers));
         writers.put(ModelElement.IDENTITY_PROVIDER.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_PROVIDER, writers));
         writers.put(ModelElement.KEY_STORE.getName(), new GenericModelElementWriter(ModelElement.KEY_STORE, writers));

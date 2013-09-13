@@ -126,7 +126,7 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
         final ModuleSpecification moduleSpec = deploymentUnit.getAttachment(Attachments.MODULE_SPECIFICATION);
         final ModuleLoader moduleLoader = deploymentUnit.getAttachment(Attachments.SERVICE_MODULE_LOADER);
 
-        ModuleDependency dependency = new ModuleDependency(moduleLoader, moduleIdentifier, false, true, false, false);
+        ModuleDependency dependency = new ModuleDependency(moduleLoader, moduleIdentifier, false, true, true, false);
 
         dependency.addImportFilter(PathFilters.getMetaInfFilter(), true);
 

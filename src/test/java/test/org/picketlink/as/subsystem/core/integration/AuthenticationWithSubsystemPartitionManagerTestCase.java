@@ -72,7 +72,7 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
     }
 
     @Test
-    public void testAuthentication() {
+    public void testAuthentication() throws Exception {
         User user = new User("johny");
 
         this.identityManager.add(user);
@@ -97,9 +97,10 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
         IdentityManager identityManager = this.partitionManager.createIdentityManager();
         RelationshipManager relationshipManager = this.partitionManager.createRelationshipManager();
 
-
         user = BasicModel.getUser(identityManager, "johny");
         role = BasicModel.getRole(identityManager, "admin");
+
+        Thread.sleep(1000);
 
         assertTrue(BasicModel.hasRole(relationshipManager, user, role));
     }

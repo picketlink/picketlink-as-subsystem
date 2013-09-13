@@ -37,7 +37,7 @@ public class IdentityConfigurationProducerTestCase {
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsManifestResource(IdentityConfigurationProducerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                 .addClass(IdentityConfigurationProducerTestCase.class)
-                .addClass(MyIdentityConfigurationProducer.class);;
+                .addClass(MyIdentityConfigurationProducer.class);
 
         return deployment;
     }

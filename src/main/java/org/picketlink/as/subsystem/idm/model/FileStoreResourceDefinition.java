@@ -25,6 +25,7 @@ package org.picketlink.as.subsystem.idm.model;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
@@ -51,7 +52,18 @@ public class FileStoreResourceDefinition extends AbstractResourceDefinition {
             ModelElement.FILE_STORE_ASYNC_THREAD_POOL.getName(), ModelType.INT, true)
             .setAllowExpression(false).build();
 
-    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition(WORKING_DIR, ALWAYS_CREATE_FILE, ASYNC_WRITE, ASYNC_WRITE_THREAD_POOL);
+    public static final SimpleAttributeDefinition SUPPORT_ATTRIBUTE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.IDENTITY_STORE_SUPPORT_ATTRIBUTE.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
+            .setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition SUPPORT_CREDENTIAL = new SimpleAttributeDefinitionBuilder(
+            ModelElement.IDENTITY_STORE_SUPPORT_CREDENTIAL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
+            .setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition MODULE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.COMMON_MODULE.getName(), ModelType.STRING, true).setAllowExpression(false).build();
+
+    public static final FileStoreResourceDefinition INSTANCE = new FileStoreResourceDefinition(WORKING_DIR, ALWAYS_CREATE_FILE, ASYNC_WRITE, ASYNC_WRITE_THREAD_POOL, MODULE, SUPPORT_ATTRIBUTE, SUPPORT_CREDENTIAL);
 
     private FileStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.FILE_STORE, new IDMConfigAddStepHandler(attributes), attributes);
@@ -60,6 +72,7 @@ public class FileStoreResourceDefinition extends AbstractResourceDefinition {
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(SupportedTypesResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(CredentialHandlerResourceDefinition.INSTANCE, resourceRegistration);
     }
     
 }

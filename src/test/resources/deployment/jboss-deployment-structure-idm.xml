@@ -4,6 +4,7 @@
     <dependencies>
       <module name="org.picketlink.idm"/>
       <module name="org.picketlink.idm.schema"/>
+      <module name="org.picketlink.test"/>
     </dependencies>
   </deployment>
 </jboss-deployment-structure>

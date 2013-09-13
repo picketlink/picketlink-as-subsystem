@@ -38,10 +38,13 @@ import org.picketlink.as.subsystem.federation.model.idp.IdentityProviderResource
 import org.picketlink.as.subsystem.federation.model.idp.TrustDomainResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
 import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.CredentialHandlerResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.FileStoreResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityConfigurationResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.JPAStoreResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.LDAPStoreAttributeResourceDefinition;
+import org.picketlink.as.subsystem.idm.model.LDAPStoreMappingResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.LDAPStoreResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.SupportedTypeResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.SupportedTypesResourceDefinition;
@@ -110,6 +113,7 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
         ModelNode identityManagementNode = null;
         ModelNode identityConfigurationNode = null;
         ModelNode lastIdentityStoreNode = null;
+        ModelNode lastLDAPMappingNode = null;
         ModelNode lastFeatures = null;
 
         while (reader.hasNext() && reader.nextTag() != END_DOCUMENT) {
@@ -167,6 +171,15 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                     break;
                 case LDAP_STORE:
                     lastIdentityStoreNode = parseLDAPStoreConfig(reader, list, identityConfigurationNode);
+                    break;
+                case LDAP_STORE_MAPPING:
+                    lastLDAPMappingNode = parseLDAPMappingConfig(reader, list, lastIdentityStoreNode);
+                    break;
+                case LDAP_STORE_ATTRIBUTE:
+                    parseLDAPAttributeConfig(reader, list, lastLDAPMappingNode);
+                    break;
+                case IDENTITY_STORE_CREDENTIAL_HANDLER:
+                    parseCredentialHandlerConfig(reader, list, lastIdentityStoreNode);
                     break;
                 case SUPPORTED_TYPES:
                     lastFeatures = parseSupportedTypesConfig(reader, list, lastIdentityStoreNode);
@@ -277,6 +290,24 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
     private ModelNode parseLDAPStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityManagementNode)
             throws XMLStreamException {
         return parseConfig(reader, ModelElement.LDAP_STORE, null, list, identityManagementNode, LDAPStoreResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseLDAPMappingConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityProviderNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.LDAP_STORE_MAPPING, LDAPStoreMappingResourceDefinition.CLASS.getName(), list, identityProviderNode,
+                LDAPStoreMappingResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseCredentialHandlerConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityProviderNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER, CredentialHandlerResourceDefinition.CLASS.getName(), list, identityProviderNode,
+                CredentialHandlerResourceDefinition.INSTANCE.getAttributes());
+    }
+
+    private ModelNode parseLDAPAttributeConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityProviderNode)
+            throws XMLStreamException {
+        return parseConfig(reader, ModelElement.LDAP_STORE_ATTRIBUTE, LDAPStoreAttributeResourceDefinition.NAME.getName(), list, identityProviderNode,
+                LDAPStoreAttributeResourceDefinition.INSTANCE.getAttributes());
     }
 
     private ModelNode parseSupportedTypesConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityStoreNode)

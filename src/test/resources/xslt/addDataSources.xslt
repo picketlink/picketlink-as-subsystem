@@ -23,15 +23,33 @@
 					<password>sa</password>
 				</security>
 			</datasource>
-			<datasource jndi-name="java:jboss/datasources/ExampleDS2"
-				pool-name="ExampleDS2" enabled="true" use-java-context="true">
-				<connection-url>jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1</connection-url>
-				<driver>h2</driver>
-				<security>
-					<user-name>sa</user-name>
-					<password>sa</password>
-				</security>
-			</datasource>
+      <datasource jndi-name="java:jboss/datasources/ExampleDS2"
+                  pool-name="ExampleDS2" enabled="true" use-java-context="true">
+        <connection-url>jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1</connection-url>
+        <driver>h2</driver>
+        <security>
+          <user-name>sa</user-name>
+          <password>sa</password>
+        </security>
+      </datasource>
+      <datasource jndi-name="java:jboss/datasources/ExampleDS3"
+                  pool-name="ExampleDS3" enabled="true" use-java-context="true">
+        <connection-url>jdbc:h2:mem:test3;DB_CLOSE_DELAY=-1</connection-url>
+        <driver>h2</driver>
+        <security>
+          <user-name>sa</user-name>
+          <password>sa</password>
+        </security>
+      </datasource>
+      <datasource jndi-name="java:jboss/datasources/ExampleDS4"
+                  pool-name="ExampleDS4" enabled="true" use-java-context="true">
+        <connection-url>jdbc:h2:mem:test4;DB_CLOSE_DELAY=-1</connection-url>
+        <driver>h2</driver>
+        <security>
+          <user-name>sa</user-name>
+          <password>sa</password>
+        </security>
+      </datasource>
 			<xsl:apply-templates select="@* | *" />
 		</datasources>
 	</xsl:template>

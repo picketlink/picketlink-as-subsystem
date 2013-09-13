@@ -26,6 +26,7 @@ import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
@@ -52,17 +53,29 @@ public class JPAStoreResourceDefinition extends AbstractResourceDefinition {
             ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName(), ModelType.STRING, true)
             .setAllowExpression(false).build();
 
-    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition(DATA_SOURCE, ENTITY_MODULE, ENTITY_MODULE_UNIT_NAME,ENTITY_MANAGER_FACTORY);
+    public static final SimpleAttributeDefinition MODULE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.COMMON_MODULE.getName(), ModelType.STRING, true).setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition SUPPORT_ATTRIBUTE = new SimpleAttributeDefinitionBuilder(
+            ModelElement.IDENTITY_STORE_SUPPORT_ATTRIBUTE.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
+            .setAllowExpression(false).build();
+
+    public static final SimpleAttributeDefinition SUPPORT_CREDENTIAL = new SimpleAttributeDefinitionBuilder(
+            ModelElement.IDENTITY_STORE_SUPPORT_CREDENTIAL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
+            .setAllowExpression(false).build();
+
+    public static final JPAStoreResourceDefinition INSTANCE = new JPAStoreResourceDefinition(DATA_SOURCE, ENTITY_MODULE, ENTITY_MODULE_UNIT_NAME, ENTITY_MANAGER_FACTORY, MODULE, SUPPORT_ATTRIBUTE, SUPPORT_CREDENTIAL);
 
     private JPAStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.JPA_STORE, new IDMConfigAddStepHandler(attributes), attributes);
     }
-    
+
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(SupportedTypesResourceDefinition.INSTANCE, resourceRegistration);
+        addChildResourceDefinition(CredentialHandlerResourceDefinition.INSTANCE, resourceRegistration);
     }
-    
+
     @Override
     protected OperationStepHandler doGetAttributeWriterHandler() {
         return JPAStoreWriteAttributeHandler.INSTANCE;

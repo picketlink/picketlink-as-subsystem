@@ -16,14 +16,14 @@
 	http://www.fsf.org. -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.test">
-	<resources>
-		<resource-root path="picketlink-as7-extension-3.0.0-SNAPSHOT-tests.jar" />
-	</resources>
-	<dependencies>
-		<module name="javax.api" />
-		<module name="javax.persistence.api" />
-		<module name="org.hibernate" />
-		<module name="org.javassist" />
-		<module name="org.picketlink.idm" />
-	</dependencies>
+  <resources>
+    <resource-root path="picketlink-as-extension-1.1.0-SNAPSHOT-test-module.jar"/>
+  </resources>
+  <dependencies>
+    <module name="javax.api"/>
+    <module name="javax.persistence.api"/>
+    <module name="org.hibernate"/>
+    <module name="org.javassist"/>
+    <module name="org.picketlink.idm.api"/>
+  </dependencies>
 </module>

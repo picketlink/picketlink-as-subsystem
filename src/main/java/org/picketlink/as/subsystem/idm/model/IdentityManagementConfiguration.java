@@ -22,17 +22,21 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.registry.Resource;
 import org.jboss.as.controller.registry.Resource.ResourceEntry;
 import org.jboss.dmr.ModelNode;
+import org.jboss.modules.Module;
+import org.jboss.modules.ModuleIdentifier;
+import org.jboss.modules.ModuleLoadException;
+import org.jboss.modules.ModuleLoader;
 import org.picketlink.as.subsystem.PicketLinkMessages;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.idm.config.FileStoreConfigurationBuilder;
 import org.picketlink.idm.config.IdentityStoreConfigurationBuilder;
-import org.picketlink.idm.config.JPAIdentityStoreConfiguration;
-import org.picketlink.idm.config.LDAPIdentityStoreConfiguration;
+import org.picketlink.idm.config.LDAPMappingConfigurationBuilder;
+import org.picketlink.idm.config.LDAPStoreConfigurationBuilder;
 import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
 import org.picketlink.idm.model.AttributedType;
+import org.picketlink.idm.model.Relationship;
 
 import java.util.Set;
 
@@ -43,49 +47,107 @@ import java.util.Set;
  */
 public class IdentityManagementConfiguration {
 
-    public static void configureStore(String storeType, Resource resource, final NamedIdentityConfigurationBuilder builder) {
+    public static void configureStore(String storeType, ResourceEntry resource, final NamedIdentityConfigurationBuilder builder) {
         IdentityStoreConfigurationBuilder storeConfig = null;
+        ModelNode modelNode = resource.getModel();
+        ModelNode alternativeModuleNode = modelNode.get(ModelElement.COMMON_MODULE.getName());
+        Module alternativeModule = null;
+
+        if (alternativeModuleNode.isDefined()) {
+            ModuleLoader moduleLoader = Module.getContextModuleLoader();
+            try {
+                alternativeModule = moduleLoader.loadModule(ModuleIdentifier.create(alternativeModuleNode.asString()));
+            } catch (ModuleLoadException e) {
+                throw new IllegalStateException("Could not load module [" + alternativeModuleNode.asString() + "].");
+            }
+        } else {
+            alternativeModule = Module.getCallerModule();
+        }
 
         if (storeType.equals(ModelElement.JPA_STORE.getName())) {
             storeConfig = builder.stores().jpa();
         } else if (storeType.equals(ModelElement.FILE_STORE.getName())) {
-            storeConfig = configureFileIdentityStore(resource.getModel(), builder);
+            storeConfig = configureFileIdentityStore(alternativeModule, resource, builder);
         } else if (storeType.equals(ModelElement.LDAP_STORE.getName())) {
+            storeConfig = configureLDAPIdentityStore(alternativeModule, resource, builder);
         } else {
             throw PicketLinkMessages.MESSAGES.idmNoConfigurationProvided();
         }
 
+        ModelNode supportAttributeNode = modelNode.get(ModelElement.IDENTITY_STORE_SUPPORT_ATTRIBUTE.getName());
+
+        storeConfig.supportAttributes(true);
+
+        if (supportAttributeNode.isDefined()) {
+            storeConfig.supportAttributes(supportAttributeNode.asBoolean());
+        }
+
+        ModelNode supportCredentialNode = modelNode.get(ModelElement.IDENTITY_STORE_SUPPORT_CREDENTIAL.getName());
+
+        storeConfig.supportCredentials(true);
+
+        if (supportCredentialNode.isDefined()) {
+            storeConfig.supportCredentials(supportCredentialNode.asBoolean());
+        }
+
         Set<ResourceEntry> featuresSetEntries = resource.getChildren(ModelElement.SUPPORTED_TYPES.getName());
-        
+
         if (featuresSetEntries != null && !featuresSetEntries.isEmpty()) {
             ResourceEntry featuresSet = featuresSetEntries.iterator().next();
-            
+
             configureAllFeatures(featuresSet.getModel(), storeConfig);
-            
+
             Set<ResourceEntry> featuresList = featuresSet.getChildren(ModelElement.SUPPORTED_TYPE.getName());
-            
+
             for (ResourceEntry feature : featuresList) {
                 String typeName = feature.getModel().get(ModelElement.COMMON_CLASS.getName()).asString();
 
                 try {
-                    storeConfig.supportType((Class<? extends AttributedType>) Class.forName(typeName));
+                    Class<? extends AttributedType> attributedTypeClass = (Class<? extends AttributedType>) loadClass(alternativeModule, typeName);
+
+                    if (Relationship.class.isAssignableFrom(attributedTypeClass)) {
+                        storeConfig.supportGlobalRelationship((Class<? extends Relationship>) attributedTypeClass);
+                    } else {
+                        storeConfig.supportType(attributedTypeClass);
+                    }
                 } catch (ClassNotFoundException e) {
                     throw new RuntimeException("Could not find type [" + typeName + "].", e);
                 }
             }
         }
+
+        Set<ResourceEntry> featuresList = resource.getChildren(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER.getName());
+
+        for (ResourceEntry feature : featuresList) {
+            String typeName = feature.getModel().get(ModelElement.COMMON_CLASS.getName()).asString();
+
+            try {
+                storeConfig.addCredentialHandler(loadClass(alternativeModule, typeName));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Could not find type [" + typeName + "].", e);
+            }
+        }
+
     }
 
-    private static  void configureAllFeatures(ModelNode operation, IdentityStoreConfigurationBuilder storeConfig) {
+    private static Class<?> loadClass(final Module module, final String typeName) throws ClassNotFoundException {
+        if (module != null) {
+            return (Class<?>) module.getClassLoader().loadClass(typeName);
+        }
+
+        return (Class<?>) Class.forName(typeName);
+    }
+
+    private static void configureAllFeatures(ModelNode operation, IdentityStoreConfigurationBuilder storeConfig) {
         ModelNode supportsAll = operation.get(ModelElement.COMMON_SUPPORTS_ALL.getName());
-        
+
         if (supportsAll.isDefined() && supportsAll.asBoolean()) {
-            storeConfig.supportAllFeatures();            
+            storeConfig.supportAllFeatures();
         }
     }
- 
-    private static IdentityStoreConfigurationBuilder configureFileIdentityStore(ModelNode modelNode, final NamedIdentityConfigurationBuilder builder) {
 
+    private static IdentityStoreConfigurationBuilder configureFileIdentityStore(Module alternativeModule, ResourceEntry resource, final NamedIdentityConfigurationBuilder builder) {
+        ModelNode modelNode = resource.getModel();
         FileStoreConfigurationBuilder fileStoreBuilder = builder.stores().file();
 
         ModelNode workingDir = modelNode.get(ModelElement.FILE_STORE_WORKING_DIR.getName());
@@ -112,56 +174,99 @@ public class IdentityManagementConfiguration {
         return fileStoreBuilder;
     }
 
-    private static  LDAPIdentityStoreConfiguration configureLDAPIdentityStore(ModelNode modelNode) {
-//        LDAPIdentityStoreConfiguration storeConfig = new LDAPIdentityStoreConfiguration();
-//
-//        ModelNode url = modelNode.get(ModelElement.LDAP_STORE_URL.getName());
-//        ModelNode bindDn = modelNode.get(ModelElement.LDAP_STORE_BIND_DN.getName());
-//        ModelNode bindCredential = modelNode.get(ModelElement.LDAP_STORE_BIND_CREDENTIAL.getName());
-//        ModelNode baseDn = modelNode.get(ModelElement.LDAP_STORE_BASE_DN_SUFFIX.getName());
-//        ModelNode userDn = modelNode.get(ModelElement.LDAP_STORE_USER_DN_SUFFIX.getName());
-//        ModelNode agentDn = modelNode.get(ModelElement.LDAP_STORE_AGENT_DN_SUFFIX.getName());
-//        ModelNode groupDn = modelNode.get(ModelElement.LDAP_STORE_GROUP_DN_SUFFIX.getName());
-//        ModelNode roleDn = modelNode.get(ModelElement.LDAP_STORE_ROLE_DN_SUFFIX.getName());
-//
-//        if (url.isDefined()) {
-//            storeConfig.setLdapURL(url.asString());
-//        }
-//
-//        if (bindDn.isDefined()) {
-//            storeConfig.setBindDN(bindDn.asString());
-//        }
-//
-//        if (bindCredential.isDefined()) {
-//            storeConfig.setBindCredential(bindCredential.asString());
-//        }
-//
-//        if (baseDn.isDefined()) {
-//            storeConfig.setBaseDN(baseDn.asString());
-//        }
-//
-//        if (userDn.isDefined()) {
-//            storeConfig.setUserDNSuffix(userDn.asString());
-//        }
-//
-//        if (agentDn.isDefined()) {
-//            storeConfig.setAgentDNSuffix(agentDn.asString());
-//        }
-//
-//        if (roleDn.isDefined()) {
-//            storeConfig.setRoleDNSuffix(roleDn.asString());
-//        }
-//
-//        if (groupDn.isDefined()) {
-//            storeConfig.setGroupDNSuffix(groupDn.asString());
-//        }
-//
-//        return storeConfig;
-        return null;
+    private static LDAPStoreConfigurationBuilder configureLDAPIdentityStore(Module alternativeModule, ResourceEntry resource, NamedIdentityConfigurationBuilder builder) {
+        ModelNode modelNode = resource.getModel();
+        LDAPStoreConfigurationBuilder storeConfig = builder.stores().ldap();
+
+        ModelNode url = modelNode.get(ModelElement.LDAP_STORE_URL.getName());
+        ModelNode bindDn = modelNode.get(ModelElement.LDAP_STORE_BIND_DN.getName());
+        ModelNode bindCredential = modelNode.get(ModelElement.LDAP_STORE_BIND_CREDENTIAL.getName());
+        ModelNode baseDn = modelNode.get(ModelElement.LDAP_STORE_BASE_DN_SUFFIX.getName());
+
+        if (url.isDefined()) {
+            storeConfig.url(url.asString());
+        }
+
+        if (bindDn.isDefined()) {
+            storeConfig.bindDN(bindDn.asString());
+        }
+
+        if (bindCredential.isDefined()) {
+            storeConfig.bindCredential(bindCredential.asString());
+        }
+
+        if (baseDn.isDefined()) {
+            storeConfig.baseDN(baseDn.asString());
+        }
+
+        Set<ResourceEntry> mappings = resource.getChildren(ModelElement.LDAP_STORE_MAPPING.getName());
+
+        for (ResourceEntry mapping : mappings) {
+            ModelNode mappingModelNode = mapping.getModel();
+            String mappingClass = mappingModelNode.get(ModelElement.LDAP_STORE_MAPPING_CLASS.getName()).asString();
+            LDAPMappingConfigurationBuilder storeMapping;
+
+            try {
+                storeMapping = storeConfig.mapping((Class<? extends AttributedType>) loadClass(alternativeModule, mappingClass));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Could not load LDAP mapped class [" + mappingClass + "].", e);
+            }
+
+            ModelNode relatesTo = mappingModelNode.get(ModelElement.LDAP_STORE_MAPPING_RELATES_TO.getName());
+
+            if (relatesTo.isDefined()) {
+                try {
+                    storeMapping.forMapping((Class<? extends AttributedType>) loadClass(alternativeModule, relatesTo.asString()));
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException("Could not load LDAP mapped class [" + mappingClass + "].", e);
+                }
+            } else {
+                String baseDN = mappingModelNode.get(ModelElement.LDAP_STORE_MAPPING_BASE_DN.getName()).asString();
+
+                storeMapping.baseDN(baseDN);
+
+                String objectClasses = mappingModelNode.get(ModelElement.LDAP_STORE_MAPPING_OBJECT_CLASSES.getName()).asString();
+
+                for (String objClass: objectClasses.split(",")) {
+                    if (!objClass.trim().isEmpty()) {
+                        storeMapping.objectClasses(objClass);
+                    }
+                }
+
+                ModelNode parentAttributeName = mappingModelNode.get(ModelElement.LDAP_STORE_MAPPING_PARENT_ATTRIBUTE_NAME.getName());
+
+                if (parentAttributeName.isDefined()) {
+                    storeMapping.parentMembershipAttributeName(parentAttributeName.asString());
+                }
+            }
+
+            Set<ResourceEntry> attributes = mapping.getChildren(ModelElement.LDAP_STORE_ATTRIBUTE.getName());
+
+            for (ResourceEntry attribute : attributes) {
+                ModelNode attributeModel = attribute.getModel();
+
+                String name = attributeModel.get(ModelElement.LDAP_STORE_ATTRIBUTE_NAME.getName()).asString();
+
+                String ldapName = attributeModel.get(ModelElement.LDAP_STORE_ATTRIBUTE_LDAP_NAME.getName()).asString();
+
+                ModelNode readOnlyModelNode = attributeModel.get(ModelElement.LDAP_STORE_ATTRIBUTE_READ_ONLY.getName());
+
+                if (readOnlyModelNode.isDefined() && readOnlyModelNode.asBoolean()) {
+                    storeMapping.readOnlyAttribute(name, ldapName);
+                } else {
+                    ModelNode identifierModelNode = attributeModel.get(ModelElement.LDAP_STORE_ATTRIBUTE_IS_IDENTIFIER.getName());
+                    boolean isIdentifier = false;
+
+                    if (identifierModelNode.isDefined()) {
+                        isIdentifier = identifierModelNode.asBoolean();
+                    }
+
+                    storeMapping.attribute(name, ldapName, isIdentifier);
+                }
+            }
+        }
+
+        return storeConfig;
     }
-    
-    private static  JPAIdentityStoreConfiguration configureJPAIdentityStore(ModelNode modelNode) {
-        return null;
-    }
-    
+
 }
