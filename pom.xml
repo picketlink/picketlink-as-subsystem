@@ -587,17 +587,16 @@
                     <property name="picketlink.version" value="${version.picketlink}" />
                     <property name="picketlink.as.extension.version" value="${project.version}" />
 
+                    <!-- Use the PicketLink Installer to configure EAP for testing. -->
                     <ant antfile="target/picketlink-installer-${version.picketlink}/build.xml" target="install-picketlink" />
 
+                    <!-- Install the test module. Used during the tests. -->
                     <property name="test.module.base.dir" value="target/test-classes/module"/>
-
-                    <property name="modules.dir"
-                              value="${jboss.as.home}/modules/system/layers/base/org/picketlink"/>
-
                     <copy file="target/${project.artifactId}-${project.version}-test-module.jar" todir="${modules.dir}/org/picketlink/test/main/"/>
-
                     <copy file="${test.module.base.dir}/test/main/module.xml" todir="${modules.dir}/org/picketlink/test/main"/>
 
+                    <!-- Update the extension module. -->
+                    <copy file="target/${project.artifactId}-${project.version}.jar" todir="${modules.dir}/org/picketlink/as/extension/main"/>
                   </target>
                 </configuration>
               </execution>

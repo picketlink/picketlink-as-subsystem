@@ -26,7 +26,6 @@ import org.jboss.as.naming.ServiceBasedNamingStore;
 import org.jboss.as.naming.ValueManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
 import org.jboss.as.naming.deployment.ContextNames.BindInfo;
-import org.jboss.as.naming.deployment.JndiName;
 import org.jboss.as.naming.service.BinderService;
 import org.jboss.msc.inject.InjectionException;
 import org.jboss.msc.inject.Injector;
@@ -40,7 +39,6 @@ import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.ImmediateValue;
 import org.jboss.msc.value.InjectedValue;
-import org.picketlink.as.subsystem.PicketLinkExtension;
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.config.IdentityConfigurationBuilder;
 import org.picketlink.idm.internal.DefaultPartitionManager;
@@ -71,12 +69,6 @@ public class PartitionManagerService implements Service<PartitionManager> {
 
     public PartitionManagerService(String alias, String jndiName, IdentityConfigurationBuilder configurationBuilder) {
         this.alias = alias;
-
-        // if not jndi name was provide defaults to bellow
-        if (jndiName == null) {
-            jndiName = JndiName.of(PicketLinkExtension.SUBSYSTEM_NAME).append(this.alias).getAbsoluteName();
-        }
-
         this.jndiName = jndiName;
         this.configurationBuilder = configurationBuilder;
     }
@@ -100,16 +92,12 @@ public class PartitionManagerService implements Service<PartitionManager> {
         this.partitionManager = null;
     }
 
-    public IdentityConfigurationBuilder getConfigurationBuilder() {
-        return this.configurationBuilder;
+    public InjectedValue<TransactionManager> getTransactionManager() {
+        return this.transactionManager;
     }
 
     public static ServiceName createServiceName(String alias) {
         return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
-    }
-
-    protected String getAlias() {
-        return this.alias;
     }
 
     private void publishPartitionManager(StartContext context) {
@@ -122,7 +110,7 @@ public class PartitionManagerService implements Service<PartitionManager> {
         builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
                 binderService.getNamingStoreInjector());
 
-        builder.addDependency(createServiceName(getAlias()), PartitionManager.class,
+        builder.addDependency(createServiceName(this.alias), PartitionManager.class,
                 new Injector<PartitionManager>() {
                     @Override
                     public void inject(final PartitionManager value) throws InjectionException {
@@ -153,7 +141,4 @@ public class PartitionManagerService implements Service<PartitionManager> {
         return ContextNames.bindInfoFor(this.jndiName);
     }
 
-    public InjectedValue<TransactionManager> getTransactionManager() {
-        return this.transactionManager;
-    }
 }
