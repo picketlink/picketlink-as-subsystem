@@ -39,10 +39,13 @@ import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
 import org.jboss.msc.value.ImmediateValue;
+import org.jboss.msc.value.InjectedValue;
 import org.picketlink.as.subsystem.PicketLinkExtension;
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.config.IdentityConfigurationBuilder;
 import org.picketlink.idm.internal.DefaultPartitionManager;
+
+import javax.transaction.TransactionManager;
 
 import static org.picketlink.as.subsystem.PicketLinkLogger.*;
 
@@ -58,6 +61,8 @@ import static org.picketlink.as.subsystem.PicketLinkLogger.*;
 public class PartitionManagerService implements Service<PartitionManager> {
 
     private static String SERVICE_NAME_PREFIX = "PartitionManagerService";
+
+    private final InjectedValue<TransactionManager> transactionManager = new InjectedValue<TransactionManager>();
 
     private final String jndiName;
     private final String alias;
@@ -85,8 +90,7 @@ public class PartitionManagerService implements Service<PartitionManager> {
     public void start(StartContext context) throws StartException {
         ROOT_LOGGER.debugf("Starting PartitionManagerService for [%s]", this.alias);
         this.partitionManager = new DefaultPartitionManager(this.configurationBuilder.buildAll());
-
-        publishIdentityManagerFactory(context);
+        publishPartitionManager(context);
     }
 
     @Override
@@ -108,8 +112,8 @@ public class PartitionManagerService implements Service<PartitionManager> {
         return this.alias;
     }
 
-    private void publishIdentityManagerFactory(StartContext context) {
-        BindInfo bindInfo = createIdentityManagerFactoryBindInfo();
+    private void publishPartitionManager(StartContext context) {
+        BindInfo bindInfo = createPartitionManagerBindInfo();
         ServiceName serviceName = bindInfo.getBinderServiceName();
         final BinderService binderService = new BinderService(serviceName.getCanonicalName());
         final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
@@ -139,18 +143,17 @@ public class PartitionManagerService implements Service<PartitionManager> {
 
     private void unpublishPartitionManager(StopContext context) {
         ServiceController<?> service = context.getController().getServiceContainer()
-                .getService(createIdentityManagerFactoryBindInfo().getBinderServiceName());
+                .getService(createPartitionManagerBindInfo().getBinderServiceName());
         if (service != null) {
             service.setMode(Mode.REMOVE);
         }
     }
 
-    private BindInfo createIdentityManagerFactoryBindInfo() {
+    private BindInfo createPartitionManagerBindInfo() {
         return ContextNames.bindInfoFor(this.jndiName);
     }
 
-    private BindInfo createJndiIdentityManagerBindInfo(String realmName) {
-        return ContextNames.bindInfoFor(this.jndiName + "/" + realmName);
+    public InjectedValue<TransactionManager> getTransactionManager() {
+        return this.transactionManager;
     }
-
 }

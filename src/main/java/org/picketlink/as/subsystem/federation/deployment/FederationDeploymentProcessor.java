@@ -21,8 +21,6 @@
  */
 package org.picketlink.as.subsystem.federation.deployment;
 
-import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.FEDERATION_ATTACHMENT_KEY;
-
 import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
@@ -31,10 +29,10 @@ import org.jboss.as.server.deployment.Phase;
 import org.picketlink.as.subsystem.PicketLinkLogger;
 import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.*;
+
 /**
- * <p>
- * Abstract class for PicketLink deployment unit processors.
- * </p>
+ * <p>{@link DeploymentUnitProcessor} that configures a {@link PicketLinkFederationService} associated with deployments..</p>
  * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * 
@@ -42,14 +40,8 @@ import org.picketlink.as.subsystem.federation.service.PicketLinkFederationServic
 public class FederationDeploymentProcessor implements DeploymentUnitProcessor {
 
     public static final Phase PHASE = Phase.INSTALL;
-
     public static final int PRIORITY = 1;
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.server.deployment.DeploymentUnitProcessor#deploy(org.jboss.as.server.deployment.DeploymentPhaseContext)
-     */
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
@@ -66,11 +58,6 @@ public class FederationDeploymentProcessor implements DeploymentUnitProcessor {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.server.deployment.DeploymentUnitProcessor#undeploy(org.jboss.as.server.deployment.DeploymentUnit)
-     */
     @Override
     public void undeploy(DeploymentUnit context) {
     }

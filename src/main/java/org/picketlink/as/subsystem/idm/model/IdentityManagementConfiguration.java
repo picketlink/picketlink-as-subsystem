@@ -29,6 +29,9 @@ import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
 import org.jboss.modules.ModuleLoader;
 import org.picketlink.as.subsystem.PicketLinkMessages;
+import org.picketlink.as.subsystem.idm.config.JPAStoreSubsystemConfiguration;
+import org.picketlink.as.subsystem.idm.config.JPAStoreSubsystemConfigurationBuilder;
+import org.picketlink.as.subsystem.idm.service.PartitionManagerService;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.idm.config.FileStoreConfigurationBuilder;
 import org.picketlink.idm.config.IdentityStoreConfigurationBuilder;
@@ -47,7 +50,7 @@ import java.util.Set;
  */
 public class IdentityManagementConfiguration {
 
-    public static void configureStore(String storeType, ResourceEntry resource, final NamedIdentityConfigurationBuilder builder) {
+    public static IdentityStoreConfigurationBuilder configureStore(String storeType, ResourceEntry resource, final NamedIdentityConfigurationBuilder builder, final PartitionManagerService partitionManagerService) {
         IdentityStoreConfigurationBuilder storeConfig = null;
         ModelNode modelNode = resource.getModel();
         ModelNode alternativeModuleNode = modelNode.get(ModelElement.COMMON_MODULE.getName());
@@ -65,9 +68,9 @@ public class IdentityManagementConfiguration {
         }
 
         if (storeType.equals(ModelElement.JPA_STORE.getName())) {
-            storeConfig = builder.stores().jpa();
+            storeConfig = configureJPAIdentityStore(resource, builder, partitionManagerService);
         } else if (storeType.equals(ModelElement.FILE_STORE.getName())) {
-            storeConfig = configureFileIdentityStore(alternativeModule, resource, builder);
+            storeConfig = configureFileIdentityStore(resource, builder);
         } else if (storeType.equals(ModelElement.LDAP_STORE.getName())) {
             storeConfig = configureLDAPIdentityStore(alternativeModule, resource, builder);
         } else {
@@ -128,6 +131,38 @@ public class IdentityManagementConfiguration {
             }
         }
 
+        return storeConfig;
+    }
+
+    private static JPAStoreSubsystemConfigurationBuilder configureJPAIdentityStore(final ResourceEntry resource, final NamedIdentityConfigurationBuilder builder, final PartitionManagerService partitionManagerService) {
+        JPAStoreSubsystemConfigurationBuilder storeConfig = builder.stores().add(JPAStoreSubsystemConfiguration.class, JPAStoreSubsystemConfigurationBuilder.class);
+
+        ModelNode jpaDataSourceNode = resource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
+        ModelNode jpaEntityModule = resource.getModel().get(ModelElement.JPA_STORE_ENTITY_MODULE.getName());
+        ModelNode jpaEntityModuleUnitName = resource.getModel().get(
+                ModelElement.JPA_STORE_ENTITY_MODULE_UNIT_NAME.getName());
+        ModelNode jpaEntityManagerFactoryNode = resource.getModel().get(
+                ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
+
+        if (jpaEntityModule.isDefined()) {
+            storeConfig.entityModule(jpaEntityModule.asString());
+        }
+
+        if (jpaEntityModuleUnitName.isDefined()) {
+            storeConfig.entityModuleUnitName(jpaEntityModuleUnitName.asString());
+        }
+
+        if (jpaDataSourceNode.isDefined()) {
+            storeConfig.dataSourceJndiUrl(toJndiName(jpaDataSourceNode.asString()));
+        }
+
+        if (jpaEntityManagerFactoryNode.isDefined()) {
+            storeConfig.entityManagerFactoryJndiName(jpaEntityManagerFactoryNode.asString());
+        }
+
+        storeConfig.transactionManager(partitionManagerService.getTransactionManager());
+
+        return storeConfig;
     }
 
     private static Class<?> loadClass(final Module module, final String typeName) throws ClassNotFoundException {
@@ -146,7 +181,7 @@ public class IdentityManagementConfiguration {
         }
     }
 
-    private static IdentityStoreConfigurationBuilder configureFileIdentityStore(Module alternativeModule, ResourceEntry resource, final NamedIdentityConfigurationBuilder builder) {
+    private static IdentityStoreConfigurationBuilder configureFileIdentityStore(ResourceEntry resource, final NamedIdentityConfigurationBuilder builder) {
         ModelNode modelNode = resource.getModel();
         FileStoreConfigurationBuilder fileStoreBuilder = builder.stores().file();
 
@@ -269,4 +304,13 @@ public class IdentityManagementConfiguration {
         return storeConfig;
     }
 
+    public static String toJndiName(String jndiName) {
+        if (jndiName != null) {
+            if (jndiName.startsWith("java:")) {
+                jndiName = jndiName.substring(jndiName.indexOf(":") + 1);
+            }
+        }
+
+        return jndiName;
+    }
 }

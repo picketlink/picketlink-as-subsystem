@@ -26,7 +26,6 @@ import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.as.controller.registry.Resource;
 import org.jboss.as.controller.registry.Resource.ResourceEntry;
 import org.jboss.as.naming.ValueManagedReferenceFactory;
 import org.jboss.as.naming.deployment.ContextNames;
@@ -35,12 +34,14 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
-import org.picketlink.as.subsystem.idm.service.JPABasedIdentityManagerFactoryService;
+import org.jboss.msc.value.InjectedValue;
+import org.picketlink.as.subsystem.idm.config.JPAStoreSubsystemConfigurationBuilder;
 import org.picketlink.as.subsystem.idm.service.PartitionManagerService;
 import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
 import org.picketlink.as.subsystem.model.ModelElement;
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.config.IdentityConfigurationBuilder;
+import org.picketlink.idm.config.IdentityStoreConfigurationBuilder;
 import org.picketlink.idm.config.NamedIdentityConfigurationBuilder;
 
 import javax.transaction.TransactionManager;
@@ -48,7 +49,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static org.picketlink.as.subsystem.idm.model.IdentityManagementConfiguration.configureStore;
+import static org.picketlink.as.subsystem.idm.model.IdentityManagementConfiguration.*;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -69,18 +70,24 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
         ModelNode jndiNameNode = operation.get(ModelElement.IDENTITY_MANAGEMENT_JNDI_NAME.getName());
 
-        String jndiName = null;
+        final String jndiName;
 
         if (jndiNameNode.isDefined()) {
-            jndiName = jndiNameNode.asString();
+            jndiName = toJndiName(jndiNameNode.asString());
+        } else {
+            jndiName = null;
         }
 
-        jndiName = toJndiName(jndiName);
-
-        Resource identityManagementResource = context.readResource(PathAddress.EMPTY_ADDRESS);
         IdentityConfigurationBuilder builder = new IdentityConfigurationBuilder();
 
-        Iterator<ResourceEntry> identityConfigurationResourceIterator = identityManagementResource.getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
+        PartitionManagerService partitionManagerService = new PartitionManagerService(alias, jndiName, builder);
+
+        ServiceBuilder<PartitionManager> serviceBuilder = context.getServiceTarget().addService(
+                PartitionManagerService.createServiceName(alias), partitionManagerService);
+
+        configureDependencies(partitionManagerService, serviceBuilder);
+
+        Iterator<ResourceEntry> identityConfigurationResourceIterator = context.readResource(PathAddress.EMPTY_ADDRESS).getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
 
         while (identityConfigurationResourceIterator.hasNext()) {
             ResourceEntry identityConfigurationResource = identityConfigurationResourceIterator.next();
@@ -91,52 +98,32 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
             for (String storeType : identityStoreTypes) {
                 for (ResourceEntry identityStoreResource : identityConfigurationResource.getChildren(storeType)) {
-                    configureStore(storeType, identityStoreResource, namedIdentityConfigurationBuilder);
+                    IdentityStoreConfigurationBuilder storeConfig = configureStore(storeType, identityStoreResource, namedIdentityConfigurationBuilder, partitionManagerService);
+
+                    if (isJPAIdentityStoreConfiguration(storeConfig)) {
+                        configureJPAStoreDependencies(serviceBuilder, identityStoreResource);
+                    }
                 }
             }
         }
 
-        PartitionManagerService partitionManagerService = null;
+        ServiceController<PartitionManager> controller = serviceBuilder.addListener(verificationHandler)
+                .setInitialMode(Mode.PASSIVE).install();
 
-        Iterator<ResourceEntry> iterator = identityManagementResource.getChildren(ModelElement.IDENTITY_CONFIGURATION.getName()).iterator();
-
-        while (iterator.hasNext()) {
-            ResourceEntry configuration = iterator.next();
-
-            NamedIdentityConfigurationBuilder namedIdentityConfigurationBuilder = builder.named(configuration.getName());
-
-            Set<ResourceEntry> children = configuration.getChildren(ModelElement.JPA_STORE.getName());
-
-            if (!children.isEmpty()) {
-                partitionManagerService = installJPABasedIdentityManagerFactory(context, verificationHandler, newControllers,
-                        alias, jndiName, namedIdentityConfigurationBuilder, builder, children);
-            }
-        }
-
-        if (partitionManagerService == null) {
-            partitionManagerService = new PartitionManagerService(alias, jndiName, builder);
-
-            ServiceBuilder<PartitionManager> serviceBuilder = context.getServiceTarget().addService(
-                    PartitionManagerService.createServiceName(alias), partitionManagerService);
-
-            ServiceController<PartitionManager> controller = serviceBuilder.addListener(verificationHandler)
-                    .setInitialMode(Mode.PASSIVE).install();
-
-            newControllers.add(controller);
-        }
+        newControllers.add(controller);
     }
 
-    private PartitionManagerService installJPABasedIdentityManagerFactory(OperationContext context,
-                                                                          final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers,
-                                                                          final String alias, String jndiName, NamedIdentityConfigurationBuilder namedBuilder, IdentityConfigurationBuilder builder, Set<ResourceEntry> jpaStoreResources) {
-        ResourceEntry jpaStoreResource = jpaStoreResources.iterator().next();
+    private boolean isJPAIdentityStoreConfiguration(final IdentityStoreConfigurationBuilder storeConfig) {
+        return JPAStoreSubsystemConfigurationBuilder.class.isInstance(storeConfig);
+    }
 
-        ModelNode jpaDataSourceNode = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
-        ModelNode jpaEntityModule = jpaStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MODULE.getName());
-        ModelNode jpaEntityModuleUnitName = jpaStoreResource.getModel().get(
-                ModelElement.JPA_STORE_ENTITY_MODULE_UNIT_NAME.getName());
-        ModelNode jpaEntityManagerFactoryNode = jpaStoreResource.getModel().get(
-                ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
+    private void configureDependencies(final PartitionManagerService partitionManagerService, final ServiceBuilder<PartitionManager> serviceBuilder) {
+        serviceBuilder.addDependency(TxnServices.JBOSS_TXN_TRANSACTION_MANAGER, TransactionManager.class, partitionManagerService.getTransactionManager());
+    }
+
+    private void configureJPAStoreDependencies(final ServiceBuilder<PartitionManager> serviceBuilder, final ResourceEntry identityStoreResource) {
+        ModelNode jpaDataSourceNode = identityStoreResource.getModel().get(ModelElement.JPA_STORE_DATASOURCE.getName());
+        ModelNode jpaEntityManagerFactoryNode = identityStoreResource.getModel().get(ModelElement.JPA_STORE_ENTITY_MANAGER_FACTORY.getName());
 
         String dataSourceJndiName = null;
 
@@ -146,10 +133,8 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
 
         dataSourceJndiName = toJndiName(dataSourceJndiName);
 
-        String entityModuleName = null;
-
-        if (jpaEntityModule.isDefined()) {
-            entityModuleName = jpaEntityModule.asString();
+        if (dataSourceJndiName != null) {
+            serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(dataSourceJndiName.split("/")));
         }
 
         String emfJndiName = null;
@@ -158,44 +143,9 @@ public class IdentityManagementAddHandler extends AbstractResourceAddStepHandler
             emfJndiName = jpaEntityManagerFactoryNode.asString();
         }
 
-        String entityModuleUnitName = null;
-
-        if (jpaEntityModuleUnitName.isDefined()) {
-            entityModuleUnitName = jpaEntityModuleUnitName.asString();
-        }
-
-        JPABasedIdentityManagerFactoryService jpaBasedIdentityManagerFactory = new JPABasedIdentityManagerFactoryService(alias, jndiName, dataSourceJndiName,
-                entityModuleName, entityModuleUnitName, namedBuilder, builder);
-
-        ServiceBuilder<PartitionManager> serviceBuilder = context.getServiceTarget().addService(
-                JPABasedIdentityManagerFactoryService.createServiceName(alias), jpaBasedIdentityManagerFactory);
-
-        serviceBuilder.addDependency(TxnServices.JBOSS_TXN_TRANSACTION_MANAGER, TransactionManager.class, jpaBasedIdentityManagerFactory.getTransactionManager());
-
-        if (dataSourceJndiName != null) {
-            serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(dataSourceJndiName.split("/")));
-        }
-
         if (emfJndiName != null) {
-            serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(emfJndiName.split("/")), ValueManagedReferenceFactory.class, jpaBasedIdentityManagerFactory.getProvidedEntityManagerFactory());
+            serviceBuilder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(emfJndiName.split("/")), ValueManagedReferenceFactory.class, new InjectedValue<ValueManagedReferenceFactory>());
         }
-
-        ServiceController<PartitionManager> controller = serviceBuilder.addListener(verificationHandler)
-                .setInitialMode(Mode.PASSIVE).install();
-
-        newControllers.add(controller);
-
-        return jpaBasedIdentityManagerFactory;
-    }
-
-    private String toJndiName(String jndiName) {
-        if (jndiName != null) {
-            if (jndiName.startsWith("java:")) {
-                jndiName = jndiName.substring(jndiName.indexOf(":") + 1);
-            }
-        }
-
-        return jndiName;
     }
 
 }
