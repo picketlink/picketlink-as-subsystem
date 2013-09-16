@@ -1,8 +1,4 @@
 <subsystem xmlns="urn:jboss:picketlink:1.0">
-	<federation alias="federation-ws-trust-enabled">
-		<security-token-service alias="PicketLinkSTS"
-			endpoint="http://localhost:8080/picketlink-sts2" security-domain="picketlink-sts" />
-	</federation>
 	<federation alias="federation-without-signatures">
 		<saml token-timeout="4000" clock-skew="0" />
 		<identity-provider alias="idp.war" security-domain="idp"
@@ -27,9 +23,9 @@
 		</service-providers>
 	</federation>
 	<federation alias="federation-with-signatures">
-		<key-store passwd="changeit" sign-key-alias="localhost"
+    <saml token-timeout="4000" clock-skew="0" />
+    <key-store passwd="changeit" sign-key-alias="localhost"
 			sign-key-passwd="changeit" url="/jbid_test_keystore.jks" />
-		<saml token-timeout="4000" clock-skew="0" />
 		<identity-provider alias="idp-sig.war"
 			security-domain="idp" supportsSignatures="true"
 			url="http://localhost:8080/idp-sig/" strict-post-binding="false">
@@ -67,6 +63,9 @@
 		<identity-provider alias="unit-test-fake-idp.war"
 			security-domain="idp" supportsSignatures="true"
 			url="http://localhost:8080/idp-sig/" strict-post-binding="false">
+      <trust>
+        <trust-domain name="localhost" />
+      </trust>
 			<handlers>
 				<handler class="org.picketlink.NonExistentHandler">
 					<handler-parameter name="param1" value="paramValue1" />
@@ -119,14 +118,14 @@
           alias="jpa.custom.entity.based.partition.manager">
     <identity-configuration name="jpa.config">
       <jpa-store entity-module="org.picketlink.test" entity-module-unit-name="custom-pu" module="org.picketlink.test">
-        <credential-handlers>
-          <credential-handler class="test.org.picketlink.as.subsystem.module.idm.SaleAgentPasswordCredentialHandler" />
-        </credential-handlers>
         <supportedTypes>
           <supportedType class="org.picketlink.idm.model.Partition"/>
           <supportedType class="org.picketlink.idm.model.IdentityType"/>
           <supportedType class="org.picketlink.idm.model.Relationship"/>
         </supportedTypes>
+        <credential-handlers>
+          <credential-handler class="test.org.picketlink.as.subsystem.module.idm.SaleAgentPasswordCredentialHandler" />
+        </credential-handlers>
       </jpa-store>
     </identity-configuration>
   </identity-management>
@@ -134,7 +133,10 @@
   <identity-management jndi-name="picketlink/LDAPBasedPartitionManager" alias="ldap.based.partition.manager">
     <identity-configuration name="ldap.config">
       <ldap-store url="ldap://localhost:10389" bind-dn="uid=admin,ou=system" bind-credential="secret" base-dn-suffix="dc=jboss,dc=org">
-
+        <supportedTypes>
+          <supportedType class="org.picketlink.idm.model.IdentityType"/>
+          <supportedType class="org.picketlink.idm.model.Relationship"/>
+        </supportedTypes>
         <mappings>
           <mapping class="org.picketlink.idm.model.basic.Agent" base-dn-suffix="ou=Agent,dc=jboss,dc=org" object-classes="account">
             <attribute name="loginName" ldap-name="uid" is-identifier="true" />
@@ -159,11 +161,6 @@
             <attribute name="assignee" ldap-name="member" />
           </mapping>
         </mappings>
-
-        <supportedTypes>
-          <supportedType class="org.picketlink.idm.model.IdentityType"/>
-          <supportedType class="org.picketlink.idm.model.Relationship"/>
-        </supportedTypes>
       </ldap-store>
     </identity-configuration>
   </identity-management>
@@ -178,6 +175,9 @@
     </identity-configuration>
     <identity-configuration name="ldap.config">
       <ldap-store url="ldap://localhost:10389" bind-dn="uid=admin,ou=system" bind-credential="secret" base-dn-suffix="dc=jboss,dc=org">
+        <supportedTypes>
+          <supportedType class="org.picketlink.idm.model.IdentityType"/>
+        </supportedTypes>
         <mappings>
           <mapping class="org.picketlink.idm.model.basic.Agent" base-dn-suffix="ou=Agent,dc=jboss,dc=org" object-classes="account">
             <attribute name="loginName" ldap-name="uid" is-identifier="true"/>
@@ -202,9 +202,6 @@
             <attribute name="assignee" ldap-name="member"/>
           </mapping>
         </mappings>
-        <supportedTypes>
-          <supportedType class="org.picketlink.idm.model.IdentityType"/>
-        </supportedTypes>
       </ldap-store>
     </identity-configuration>
   </identity-management>

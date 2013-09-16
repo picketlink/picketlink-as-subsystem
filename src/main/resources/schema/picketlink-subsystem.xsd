@@ -14,308 +14,562 @@
 	Franklin St, Fifth Floor, Boston, MA ~ 02110-1301 USA, or see the FSF site: 
 	http://www.fsf.org. -->
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
-	targetNamespace="urn:jboss:picketlink:1.0" xmlns="urn:jboss:picketlink:1.0"
-	elementFormDefault="qualified" attributeFormDefault="unqualified"
-	version="1.0">
+            targetNamespace="urn:jboss:picketlink:1.0" xmlns="urn:jboss:picketlink:1.0"
+            elementFormDefault="qualified" attributeFormDefault="unqualified"
+            version="1.0">
 
-	<!-- The subsystem root element -->
-	<xsd:element name="subsystem" type="subsystemType" />
+  <!-- The subsystem root element -->
+  <xsd:element name="subsystem" type="subsystemType"/>
 
-	<xsd:complexType name="subsystemType">
-		<xsd:sequence>
-			<xsd:element name="federation" type="federationType"
-				minOccurs="0" maxOccurs="*" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="subsystemType">
+    <xsd:sequence>
+      <xsd:element name="federation" type="federationType" minOccurs="0" maxOccurs="unbounded"/>
+      <xsd:element name="identity-management" type="identityManagementType" minOccurs="0" maxOccurs="unbounded"/>
+    </xsd:sequence>
+  </xsd:complexType>
 
-	<xsd:complexType name="federationType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the Federation type.</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="alias" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Alias for this instance.</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:element name="saml" type="samlType" minOccurs="0"
-				maxOccurs="1" />
-			<xsd:element name="key-store" type="keyStoreType"
-				minOccurs="0" maxOccurs="1" />
-			<xsd:element name="identity-provider" type="identityProviderType"
-				minOccurs="0" maxOccurs="1" />
-			<xsd:element name="service-providers" type="serviceProvidersType"
-				minOccurs="0" maxOccurs="1" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <!-- Federation Domain Model -->
 
-	<xsd:complexType name="samlType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the SAML type. This type defines all
-				configurations about how SAML assertions are processed and created.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="token-timeout" type="xsd:int"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the timeout for SAML assertions. The
-						value must be specified in miliseconds.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="clock-skew" type="xsd:int"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the clockskew for SAML assertions. The
-						value must be specified in miliseconds.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="federationType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Federation type.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="saml" type="samlType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="key-store" type="keyStoreType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="identity-provider" type="identityProviderType" minOccurs="0" maxOccurs="1"/>
+      <xsd:element name="service-providers" type="serviceProvidersType" minOccurs="0" maxOccurs="1"/>
+    </xsd:sequence>
+    <xsd:attribute name="alias" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Alias for this instance.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
-	<xsd:complexType name="keyStoreType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the KeyStore type. This type defines how
-				key stores are configured.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="passwd" type="xsd:string"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the password for the key store.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="sign-key-alias" type="xsd:string"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the alias to be used when signing
-						documents.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="sign-key-passwd" type="xsd:string"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the password for the sign-key-alias.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="url" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the key store location.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="samlType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the SAML type. This type defines all
+        configurations about how SAML assertions are processed and created.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="clock-skew" type="xsd:int" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the clock skew for SAML assertions. The value must be specified in milliseconds.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="token-timeout" type="xsd:int" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the timeout for SAML assertions. The value must be specified in milliseconds.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
-	<xsd:complexType name="identityProviderType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the Identity Provider type.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="alias" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Alias for this instance. This alias must be the
-						deployment unit name.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="url" type="xsd:string" minOccurs="1"
-				maxOccurs="1" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>URL for this Identity Provider.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:element name="trust" type="trustType" minOccurs="1"
-				maxOccurs="1" nillable="true" />
-			<xsd:attribute name="supportsSignatures" type="xsd:boolean"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Indicates if signature is supported.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="security-domain" type="xsd:boolean"
-				minOccurs="1" nillable="false" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Security Domain name used to authenticate users.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="strict-post-binding" type="xsd:boolean"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Indicates if the the IDP should always respond
-						using HTTP POST binding.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:element name="handlers" type="handlersType"
-				minOccurs="1" maxOccurs="*" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="keyStoreType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the KeyStore type. This type defines how key stores are configured.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="passwd" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the password for the key store.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="sign-key-alias" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the alias to be used when signing
+          documents.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="sign-key-passwd" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the password for the sign-key-alias.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="url" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the key store location.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
-	<xsd:complexType name="serviceProvidersType">
-		<xsd:annotation>
-			<xsd:documentation>Groups Service Provider types.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:element name="service-provider" type="serviceProviderType"
-				minOccurs="1" maxOccurs="*" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="identityProviderType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Identity Provider type.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="trust" type="trustType" minOccurs="1" maxOccurs="1" nillable="false"/>
+      <xsd:element name="handlers" type="handlersType" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </xsd:sequence>
+    <xsd:attribute name="alias" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Alias for this instance. This alias must be the
+          deployment unit name.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="url" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>URL for this Identity Provider.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="supportsSignatures" type="xsd:boolean" default="false" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>Indicates if signature is supported.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="security-domain" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Security Domain name used to authenticate users.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="strict-post-binding" type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation>Indicates if the the IDP should always respond
+          using HTTP POST binding.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
-	<xsd:complexType name="serviceProviderType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the Service Provider type.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="alias" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Alias for this instance. This alias must be the
-						deployment unit name.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="url" type="xsd:string" minOccurs="1"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>URL for this Service Provider.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="post-binding" type="xsd:boolean"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Indicates which SAML Binding to use. If is true
-						HTTP POST binding will be used. Othwerwise HTTP REDIRECT binding
-						will be used.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="supportsSignatures" type="xsd:boolean"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Indicates if signature is supported.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="security-domain" type="xsd:string"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Security Domain name used to authenticate users.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="strict-post-binding" type="xsd:boolean"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Indicates if the Service Provider should expect
-						always a HTTP POST binding response from the IDP.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="error-page" type="xsd:string"
-				minOccurs="1" nillable="true" default="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines a custom error page location.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:element name="handlers" type="handlersType"
-				minOccurs="1" maxOccurs="*" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="serviceProvidersType">
+    <xsd:annotation>
+      <xsd:documentation>Groups Service Provider types.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="service-provider" type="serviceProviderType" minOccurs="1" maxOccurs="unbounded"
+                   nillable="false"/>
+    </xsd:sequence>
+  </xsd:complexType>
 
-	<xsd:complexType name="trustType">
-		<xsd:annotation>
-			<xsd:documentation>Groups Trusted Domain Types.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:element name="domain" type="trustedDomainType"
-				minOccurs="1" maxOccurs="*" nillable="false" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="serviceProviderType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Service Provider type.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="handlers" type="handlersType" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </xsd:sequence>
+    <xsd:attribute name="alias" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Alias for this instance. This alias must be the
+          deployment unit name.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="url" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>URL for this Service Provider.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="post-binding" type="xsd:boolean" use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>Indicates which SAML Binding to use. If is true
+          HTTP POST binding will be used. Othwerwise HTTP REDIRECT binding
+          will be used.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="strict-post-binding" type="xsd:boolean" use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>Indicates which SAML Binding to use. If is true
+          HTTP POST binding will be used. Othwerwise HTTP REDIRECT binding
+          will be used.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="supportsSignatures" type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation>Indicates if signature is supported.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="security-domain" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Security Domain name used to authenticate users.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="error-page" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>Defines a custom error page location.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
-	<xsd:complexType name="trustedDomainType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the Truted Domain Type.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="name" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the domain name.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="cert-alias" type="xsd:string"
-				nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the certificate alias for this domain.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="trustType">
+    <xsd:annotation>
+      <xsd:documentation>Groups Trusted Domain Types.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="trust-domain" type="trustedDomainType" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xsd:sequence>
+  </xsd:complexType>
 
-	<xsd:complexType name="handlersType">
-		<xsd:annotation>
-			<xsd:documentation>Groups Handler Types.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:element name="handler" type="handlerType" minOccurs="1"
-				maxOccurs="*" nillable="false" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="trustedDomainType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Truted Domain Type.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the domain name.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="cert-alias" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>Defines the certificate alias for this domain.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
-	<xsd:complexType name="handlerType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the Handler Type.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="class" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the handler class name.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:element name="handler-parameter" type="handlerParameterType"
-				minOccurs="1" maxOccurs="*" nillable="false" />
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="handlersType">
+    <xsd:annotation>
+      <xsd:documentation>Groups Handler Types.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="handler" type="handlerType" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xsd:sequence>
+  </xsd:complexType>
 
-	<xsd:complexType name="handlerParameterType">
-		<xsd:annotation>
-			<xsd:documentation>Defines the Handler Parameter Type.
-			</xsd:documentation>
-		</xsd:annotation>
-		<xsd:sequence>
-			<xsd:attribute name="name" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the parameter name.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-			<xsd:attribute name="value" type="xsd:string" nillable="false">
-				<xsd:annotation>
-					<xsd:documentation>Defines the parameter value.
-					</xsd:documentation>
-				</xsd:annotation>
-			</xsd:attribute>
-		</xsd:sequence>
-	</xsd:complexType>
+  <xsd:complexType name="handlerType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Handler Type.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="handler-parameter" type="handlerParameterType" minOccurs="0" maxOccurs="unbounded"
+                   nillable="true"/>
+    </xsd:sequence>
+    <xsd:attribute name="class" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the handler class name.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 
+  <xsd:complexType name="handlerParameterType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Handler Parameter Type.
+      </xsd:documentation>
+    </xsd:annotation>
+    <xsd:attribute name="name" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the parameter name.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="value" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines the parameter value.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <!-- Identity Management Domain Model -->
+  <xsd:complexType name="identityManagementType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Identity Management type.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="identity-configuration" type="identityConfigurationType" minOccurs="1" maxOccurs="unbounded"
+                   nillable="false"/>
+    </xsd:sequence>
+    <xsd:attribute name="alias" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Alias for this instance.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="jndi-name" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>JNDI name to bind this instance.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="identityConfigurationType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the Identity Management type.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence minOccurs="1" maxOccurs="unbounded">
+      <xsd:element name="jpa-store" type="jpaIdentityStoreType" minOccurs="0" maxOccurs="1" nillable="true"/>
+      <xsd:element name="file-store" type="fileIdentityStoreType" minOccurs="0" maxOccurs="1" nillable="true"/>
+      <xsd:element name="ldap-store" type="ldapIdentityStoreType" minOccurs="0" maxOccurs="1" nillable="true"/>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Name for this configuration.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="identityStoreType" abstract="true">
+    <xsd:annotation>
+      <xsd:documentation>Base schema for identity store elements.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="supportedTypes" type="supportedTypesType" minOccurs="1" maxOccurs="1" nillable="false"/>
+      <xsd:element name="credential-handlers" type="credentialHandlersType" minOccurs="0" maxOccurs="1"
+                   nillable="true"/>
+    </xsd:sequence>
+    <xsd:attribute name="module" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>The name of the module from where the types should be loaded from.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="support-credential" type="xsd:boolean" use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>Indicates if the store should support credentials management.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="support-attribute" type="xsd:boolean" use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>Indicates if the store should support attributes management.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="supportedTypesType">
+    <xsd:annotation>
+      <xsd:documentation>The supportedTypes element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="supportedType" type="supportedTypeType" minOccurs="0" maxOccurs="unbounded" nillable="false"/>
+    </xsd:sequence>
+    <xsd:attribute name="supportsAll" type="xsd:boolean" use="optional" default="true">
+      <xsd:annotation>
+        <xsd:documentation>Defines if all types and configurations are supported.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="supportedTypeType">
+    <xsd:annotation>
+      <xsd:documentation>The supportedType element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+    </xsd:sequence>
+    <xsd:attribute name="class" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines a type that should be supported by a identity store.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="credentialHandlersType">
+    <xsd:annotation>
+      <xsd:documentation>The credential-handlers element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="credential-handler" type="credentialHandlerType" minOccurs="0" maxOccurs="unbounded"
+                   nillable="false"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="credentialHandlerType">
+    <xsd:annotation>
+      <xsd:documentation>The credential-handler element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+    </xsd:sequence>
+    <xsd:attribute name="class" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines a credential handler type that should be supported by a identity store.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="jpaIdentityStoreType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the schema for the JPA identity store configuration.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="identityStoreType">
+        <xsd:attribute name="entity-manager-factory" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>The JNDI url of the EntityManagerFactory that should be used, instead of the default
+              factory.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="data-source" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>The JNDI url of data source that should be used to create the default
+              EntityManagerFactory.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="entity-module" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>The name of the module where the JPA entities are located. Those entities will be used to
+              initialize the JPA store.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="entity-module-unit-name" type="xsd:string" use="optional" default="identity">
+          <xsd:annotation>
+            <xsd:documentation>The name of the persistence unit name, if the entity-module attribute is present.
+            </xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="fileIdentityStoreType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the schema for the File identity store configuration.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="identityStoreType">
+        <xsd:attribute name="working-dir" type="xsd:string" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>The working directory where data is located.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="always-create-files" type="xsd:boolean" use="optional" default="true">
+          <xsd:annotation>
+            <xsd:documentation>Defines if data should be always re-created between initializations.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="async-write" type="xsd:boolean" use="optional" default="false">
+          <xsd:annotation>
+            <xsd:documentation>Defines if asynchronous write is enabled.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="async-write-thread-pool" type="xsd:int" use="optional">
+          <xsd:annotation>
+            <xsd:documentation>The size of the thread pool if asynchronous writing is enabled.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="ldapIdentityStoreType">
+    <xsd:annotation>
+      <xsd:documentation>Defines the schema for the LDAP identity store configuration.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:complexContent>
+      <xsd:extension base="identityStoreType">
+        <xsd:sequence>
+          <xsd:element name="mappings" type="mappingsType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </xsd:sequence>
+        <xsd:attribute name="url" type="xsd:string" use="required">
+          <xsd:annotation>
+            <xsd:documentation>The working directory where data is located.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="bind-dn" type="xsd:string" use="required">
+          <xsd:annotation>
+            <xsd:documentation>Defines if data should be always re-created between initializations.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="bind-credential" type="xsd:string" use="required">
+          <xsd:annotation>
+            <xsd:documentation>Defines if asynchronous write is enabled.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+        <xsd:attribute name="base-dn-suffix" type="xsd:string" use="required">
+          <xsd:annotation>
+            <xsd:documentation>The size of the thread pool if asynchronous writing is enabled.</xsd:documentation>
+          </xsd:annotation>
+        </xsd:attribute>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+
+  <xsd:complexType name="mappingsType">
+    <xsd:annotation>
+      <xsd:documentation>The mappings element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="mapping" type="mappingType" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xsd:sequence>
+  </xsd:complexType>
+
+  <xsd:complexType name="mappingType">
+    <xsd:annotation>
+      <xsd:documentation>The mapping element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+      <xsd:element name="attribute" type="attributeType" minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+    </xsd:sequence>
+    <xsd:attribute name="class" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>Defines a type that should be supported by a identity store.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="base-dn-suffix" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>Defines a base DN suffix where entries are located.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="object-classes" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>A comma separated list of object classes for entries.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="relates-to" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>Tells that this mapping is related with another mapped type. Useful for relationship
+          mappings.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="parent-membership-attribute-name" type="xsd:string" use="optional">
+      <xsd:annotation>
+        <xsd:documentation>The name of the LDAP attribute used to map parent-child relationships of the same type.
+        </xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
+
+  <xsd:complexType name="attributeType">
+    <xsd:annotation>
+      <xsd:documentation>The attribute element schema.</xsd:documentation>
+    </xsd:annotation>
+    <xsd:sequence>
+    </xsd:sequence>
+    <xsd:attribute name="name" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>The name of the property of the type mapped to a LDAP attribute.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="ldap-name" type="xsd:string" use="required">
+      <xsd:annotation>
+        <xsd:documentation>The name of the LDAP attribute mapped to a type's property.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="is-identifier" type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation>Indicates if this attribute is an identifier.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+    <xsd:attribute name="read-only" type="xsd:boolean" use="optional" default="false">
+      <xsd:annotation>
+        <xsd:documentation>Marks an attribute as read only.</xsd:documentation>
+      </xsd:annotation>
+    </xsd:attribute>
+  </xsd:complexType>
 </xsd:schema>
