@@ -28,16 +28,16 @@ import static org.picketlink.idm.credential.Credentials.*;
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
-public class JPAEntityModuleBasedPartitionManagerTestCase {
+public class JPACustomTypeBasedPartitionManagerTestCase {
 
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(JPAEntityModuleBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                .addAsManifestResource(JPAEntityModuleBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(JPAEntityModuleBasedPartitionManagerTestCase.class)
+                .addAsResource(JPACustomTypeBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                .addAsManifestResource(JPACustomTypeBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                .addClass(JPACustomTypeBasedPartitionManagerTestCase.class)
                 .addClass(SaleAgent.class);
 
         return deployment;
