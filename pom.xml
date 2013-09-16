@@ -23,13 +23,11 @@
 
   <name>JBoss Application Server: PicketLink Subsystem</name>
 
-  <description>PicketLink Extension for the JBoss Application Server v7</description>
+  <description>PicketLink Extension and Subsystem for the JBoss EAP 6</description>
 
   <packaging>jar</packaging>
 
-  <url>
-    https://github.com/picketlink/as-subsystem
-  </url>
+  <url>http://www.picketlink.org</url>
 
   <scm>
     <connection>scm:git:${picketlink.extension.scm.connection}</connection>
@@ -79,7 +77,7 @@
     <!-- Current version of PicketLink libraries -->
     <version.picketlink>2.5.2-SNAPSHOT</version.picketlink>
 
-    <htmlunit.version>2.4</htmlunit.version>
+    <version.htmlunit>2.4</version.htmlunit>
   </properties>
 
   <dependencyManagement>
@@ -153,7 +151,7 @@
       <dependency>
         <groupId>net.sourceforge.htmlunit</groupId>
         <artifactId>htmlunit</artifactId>
-        <version>${htmlunit.version}</version>
+        <version>${version.htmlunit}</version>
         <scope>test</scope>
       </dependency>
 
@@ -293,7 +291,7 @@
       <scope>test</scope>
     </dependency>
 
-    <!-- LDAP Identity Store Dependencies -->
+    <!-- LDAP Identity Store Test Dependencies -->
     <dependency>
       <groupId>org.picketbox</groupId>
       <artifactId>picketbox-ldap</artifactId>
@@ -392,9 +390,6 @@
           <name>all-tests</name>
         </property>
       </activation>
-      <properties>
-        <jboss.as.home>${integration.tests.containers.dir}/${version.jboss_as.distribution}</jboss.as.home>
-      </properties>
       <build>
         <plugins>
           <!-- The tests are organized in Unit Tests and Integration Tests. -->
@@ -414,9 +409,6 @@
                 </goals>
                 <configuration>
                   <skip>false</skip>
-                  <systemPropertyVariables>
-                    <jbossHome>${jboss.as.home}</jbossHome>
-                  </systemPropertyVariables>
                   <includes>
                     <include>**/integration/*TestCase.java</include>
                   </includes>
@@ -427,18 +419,6 @@
                     </property>
                   </properties>
                 </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-jar-plugin</artifactId>
-            <version>2.2</version>
-            <executions>
-              <execution>
-                <goals>
-                  <goal>test-jar</goal>
-                </goals>
               </execution>
             </executions>
           </plugin>
@@ -462,12 +442,21 @@
       <build>
         <plugins>
           <plugin>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>2.12</version>
+            <configuration>
+              <systemPropertyVariables>
+                <jbossHome>${jboss.as.home}</jbossHome>
+              </systemPropertyVariables>
+            </configuration>
+          </plugin>
+          <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <version>2.4</version>
             <configuration>
               <descriptors>
-                <descriptor>custom-module-assembly.xml</descriptor>
-                <descriptor>multi-config-module-assembly.xml</descriptor>
+                <descriptor>test-module-assembly/custom-types-module.xml</descriptor>
+                <descriptor>test-module-assembly/multi-config-module.xml</descriptor>
               </descriptors>
             </configuration>
             <executions>
@@ -599,14 +588,14 @@
                     <ant antfile="target/picketlink-installer-${version.picketlink}/build.xml"
                          target="install-picketlink"/>
 
-                    <!-- Install the test module. Used during the tests. -->
+                    <!-- Install the test module for custom types tests. -->
                     <property name="test.module.base.dir" value="target/test-classes/module"/>
                     <copy file="target/${project.artifactId}-${project.version}-test-module.jar"
                           todir="${modules.dir}/org/picketlink/test/main/"/>
                     <copy file="${test.module.base.dir}/test/main/module.xml"
                           todir="${modules.dir}/org/picketlink/test/main"/>
 
-                    <!-- Install the test module. Used during the tests. -->
+                    <!-- Install the test module for the multi config tests. -->
                     <property name="test.module.base.dir" value="target/test-classes/module"/>
                     <copy file="target/${project.artifactId}-${project.version}-multi-config-module.jar"
                           todir="${modules.dir}/org/picketlink/test/multiconfig/main/"/>
@@ -614,8 +603,7 @@
                           todir="${modules.dir}/org/picketlink/test/multiconfig/main"/>
 
                     <!-- Update the extension module. -->
-                    <copy file="target/${project.artifactId}-${project.version}.jar"
-                          todir="${modules.dir}/org/picketlink/as/extension/main"/>
+                    <copy file="target/${project.artifactId}-${project.version}.jar" todir="${modules.dir}/org/picketlink/as/extension/main" />
                   </target>
                 </configuration>
               </execution>

@@ -35,10 +35,8 @@ public class JPACustomTypeBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(JPACustomTypeBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
                 .addAsManifestResource(JPACustomTypeBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(JPACustomTypeBasedPartitionManagerTestCase.class)
-                .addClass(SaleAgent.class);
+                .addClass(JPACustomTypeBasedPartitionManagerTestCase.class);
 
         return deployment;
     }

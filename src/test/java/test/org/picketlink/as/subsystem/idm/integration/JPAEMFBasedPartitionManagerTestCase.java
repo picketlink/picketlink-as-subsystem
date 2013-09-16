@@ -17,7 +17,6 @@ import org.picketlink.idm.model.basic.BasicModel;
 import org.picketlink.idm.model.basic.Realm;
 import org.picketlink.idm.model.basic.Role;
 import org.picketlink.idm.model.basic.User;
-import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 
 import javax.annotation.Resource;
 
@@ -38,8 +37,7 @@ public class JPAEMFBasedPartitionManagerTestCase {
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
                 .addAsResource(JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
                 .addAsManifestResource(JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(JPAEMFBasedPartitionManagerTestCase.class)
-                .addClass(SaleAgent.class);
+                .addClass(JPAEMFBasedPartitionManagerTestCase.class);
 
         return deployment;
     }

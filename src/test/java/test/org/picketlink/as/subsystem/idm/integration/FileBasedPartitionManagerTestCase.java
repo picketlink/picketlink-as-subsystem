@@ -17,7 +17,6 @@ import org.picketlink.idm.model.basic.BasicModel;
 import org.picketlink.idm.model.basic.Realm;
 import org.picketlink.idm.model.basic.Role;
 import org.picketlink.idm.model.basic.User;
-import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,8 @@ public class FileBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(FileBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
                 .addAsManifestResource(FileBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(FileBasedPartitionManagerTestCase.class)
-                .addClass(SaleAgent.class);
+                .addClass(FileBasedPartitionManagerTestCase.class);
 
         return deployment;
     }

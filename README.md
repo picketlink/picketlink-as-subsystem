@@ -44,15 +44,9 @@ Navigate to the <i>target/integration-tests/containers/jboss-eap-6.1/</i> direct
 
 ### Manual Installation
 
-Download and install [JBoss EAP 6.1.Alpha1](http://www.jboss.org/jbossas/downloads/ "JBoss AS Downloads").
+You can use the [PicketLink Installer](http://www.picketlink.org/getstarted.html "PicketLink Site"). Follow the instructions there.
 
-#### Installing the PicketLink Modules and Extension ####
-
-After downloading and extracting the file, execute the following comand to install/configure the PicketLink modules and extension:
-
-    mvn -Djboss.as.home=[JBOSS_HOME] -Pinstall-modules,install-subsystem clean install
-
-The command above should reconfigure the PicketLink modules shipped with your JBoss AS installation with the latest configuration and libraries. Including the extension.
+Important Note: Only versions 2.5.2.Final and later support the subsystem installation on EAP.
 
 #### Configuring your JBoss AS installation with the PicketLink Extension and Subsystem ####
 
@@ -92,7 +86,7 @@ Please, follow the documentation at https://docs.jboss.org/author/display/PLINK/
 
 ## Running and Debugging the Integration Tests in Eclipse ##
 
-First, import the project into your Eclipse.
+First, import the project into your IDE.
 
 Follow the instructions at [Using a Pre-configured JBoss AS Installation] (#) to get a pre-configured JBoss AS installation with all configuration required to run the integration tests.
 

@@ -12,7 +12,6 @@ import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.credential.Password;
 import org.picketlink.idm.credential.UsernamePasswordCredentials;
 import org.picketlink.idm.model.basic.User;
-import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 
 import javax.annotation.Resource;
 
@@ -31,10 +30,8 @@ public class LDAPBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(LDAPBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
                 .addAsManifestResource(LDAPBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(LDAPBasedPartitionManagerTestCase.class)
-                .addClass(SaleAgent.class);
+                .addClass(LDAPBasedPartitionManagerTestCase.class);
 
         return deployment;
     }

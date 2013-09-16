@@ -17,7 +17,6 @@ import org.picketlink.idm.model.basic.BasicModel;
 import org.picketlink.idm.model.basic.Realm;
 import org.picketlink.idm.model.basic.Role;
 import org.picketlink.idm.model.basic.User;
-import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 
 import javax.annotation.Resource;
 
@@ -36,10 +35,8 @@ public class JPADSBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(JPADSBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
                 .addAsManifestResource(JPADSBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(JPADSBasedPartitionManagerTestCase.class)
-                .addClass(SaleAgent.class);
+                .addClass(JPADSBasedPartitionManagerTestCase.class);
 
         return deployment;
     }
@@ -59,7 +56,13 @@ public class JPADSBasedPartitionManagerTestCase {
 
         IdentityManager identityManager = this.jpaDSBasedPartitionManager.createIdentityManager();
 
-        User user = new User("johny");
+        User user = BasicModel.getUser(identityManager, "johny");
+
+        if (user != null) {
+            identityManager.remove(user);
+        }
+
+        user = new User("johny");
 
         identityManager.add(user);
 
@@ -73,7 +76,13 @@ public class JPADSBasedPartitionManagerTestCase {
 
         assertEquals(Status.VALID, credentials.getStatus());
 
-        Role role = new Role("admin");
+        Role role = BasicModel.getRole(identityManager, "admin");
+
+        if (role != null) {
+            identityManager.remove(role);
+        }
+
+        role = new Role("admin");
 
         identityManager.add(role);
 

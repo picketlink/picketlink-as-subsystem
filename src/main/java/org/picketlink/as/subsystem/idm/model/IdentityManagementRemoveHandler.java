@@ -51,6 +51,8 @@ public class IdentityManagementRemoveHandler extends AbstractRemoveStepHandler {
         String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
 
         context.removeService(PartitionManagerService.createServiceName(alias));
+        context.reloadRequired();
+        context.completeStep(OperationContext.ResultHandler.NOOP_RESULT_HANDLER);
     }
 
 }

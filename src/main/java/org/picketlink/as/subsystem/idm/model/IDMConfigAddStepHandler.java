@@ -56,7 +56,6 @@ public class IDMConfigAddStepHandler extends AbstractAddStepHandler {
             ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
         super.performRuntime(context, operation, model, verificationHandler, newControllers);
-        // once we add a cache configuration, we need to restart all the services for the changes to take effect
         context.reloadRequired();
     }
 }
