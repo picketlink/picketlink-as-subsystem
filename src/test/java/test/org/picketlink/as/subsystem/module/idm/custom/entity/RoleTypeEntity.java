@@ -15,32 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package test.org.picketlink.as.subsystem.module.idm.entity;
+package test.org.picketlink.as.subsystem.module.idm.custom.entity;
 
-import org.picketlink.idm.jpa.annotations.RelationshipClass;
+import org.picketlink.idm.jpa.annotations.AttributeValue;
 import org.picketlink.idm.jpa.annotations.entity.IdentityManaged;
-import org.picketlink.idm.model.Relationship;
+import org.picketlink.idm.model.basic.Role;
 
 import javax.persistence.Entity;
 
 /**
  * @author pedroigor
  */
-@IdentityManaged(Relationship.class)
+@IdentityManaged(Role.class)
 @Entity
-public class RelationshipTypeEntity extends AttributedTypeEntity {
+public class RoleTypeEntity extends IdentityTypeEntity {
 
-    private static final long serialVersionUID = -3619372498444894118L;
+    private static final long serialVersionUID = -1111674876657091722L;
 
-    @RelationshipClass
-    private String typeName;
+    @AttributeValue
+    private String name;
 
-    public String getTypeName() {
-        return this.typeName;
+    public String getName() {
+        return this.name;
     }
 
-    public void setTypeName(String typeName) {
-        this.typeName = typeName;
+    public void setName(String name) {
+        this.name = name;
     }
-
 }

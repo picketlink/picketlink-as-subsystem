@@ -15,41 +15,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package test.org.picketlink.as.subsystem.module.idm.entity;
+package test.org.picketlink.as.subsystem.module.idm.multiconfig.entity;
 
-import org.picketlink.idm.jpa.annotations.AttributeValue;
-import org.picketlink.idm.jpa.annotations.PartitionClass;
-import org.picketlink.idm.jpa.annotations.entity.ConfigurationName;
+import org.picketlink.idm.jpa.annotations.RelationshipClass;
 import org.picketlink.idm.jpa.annotations.entity.IdentityManaged;
-import org.picketlink.idm.model.Partition;
+import org.picketlink.idm.model.Relationship;
 
 import javax.persistence.Entity;
 
 /**
  * @author pedroigor
  */
-@IdentityManaged(Partition.class)
+@IdentityManaged(Relationship.class)
 @Entity
-public class PartitionTypeEntity extends AttributedTypeEntity {
+public class RelationshipTypeEntity extends AttributedTypeEntity {
 
     private static final long serialVersionUID = -3619372498444894118L;
 
-    @AttributeValue
-    private String name;
-
-    @PartitionClass
+    @RelationshipClass
     private String typeName;
-
-    @ConfigurationName
-    private String configurationName;
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getTypeName() {
         return this.typeName;
@@ -59,11 +43,4 @@ public class PartitionTypeEntity extends AttributedTypeEntity {
         this.typeName = typeName;
     }
 
-    public String getConfigurationName() {
-        return configurationName;
-    }
-
-    public void setConfigurationName(String configurationName) {
-        this.configurationName = configurationName;
-    }
 }

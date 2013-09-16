@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package test.org.picketlink.as.subsystem.module.idm.entity;
+package test.org.picketlink.as.subsystem.module.idm.multiconfig.entity;
 
 import org.picketlink.idm.credential.storage.EncodedPasswordStorage;
 import org.picketlink.idm.jpa.annotations.CredentialProperty;

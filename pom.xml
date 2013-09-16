@@ -420,6 +420,12 @@
                   <includes>
                     <include>**/integration/*TestCase.java</include>
                   </includes>
+                  <properties>
+                    <property>
+                      <name>listener</name>
+                      <value>test.org.picketlink.as.subsystem.util.LDAPServerRunListener</value>
+                    </property>
+                  </properties>
                 </configuration>
               </execution>
             </executions>
@@ -460,7 +466,8 @@
             <version>2.4</version>
             <configuration>
               <descriptors>
-                <descriptor>test-module-assembly.xml</descriptor>
+                <descriptor>custom-module-assembly.xml</descriptor>
+                <descriptor>multi-config-module-assembly.xml</descriptor>
               </descriptors>
             </configuration>
             <executions>
@@ -579,24 +586,36 @@
                 <phase>package</phase>
                 <configuration>
                   <target>
-                    <property name="integration.tests.dir" value="${basedir}/target/integration-tests" />
-                    <property name="integration.tests.containers.dir" value="${integration.tests.dir}/containers" />
-                    <property name="jboss.as.dist.dir" value="${integration.tests.containers.dir}/${version.jboss_as.distribution}"/>
-                    <property name="modules.dir" value="${jboss.as.dist.dir}/modules/system/layers/base" />
-                    <property name="installer.dir" value="target/picketlink-installer-${version.picketlink}/" />
-                    <property name="picketlink.version" value="${version.picketlink}" />
-                    <property name="picketlink.as.extension.version" value="${project.version}" />
+                    <property name="integration.tests.dir" value="${basedir}/target/integration-tests"/>
+                    <property name="integration.tests.containers.dir" value="${integration.tests.dir}/containers"/>
+                    <property name="jboss.as.dist.dir"
+                              value="${integration.tests.containers.dir}/${version.jboss_as.distribution}"/>
+                    <property name="modules.dir" value="${jboss.as.dist.dir}/modules/system/layers/base"/>
+                    <property name="installer.dir" value="target/picketlink-installer-${version.picketlink}/"/>
+                    <property name="picketlink.version" value="${version.picketlink}"/>
+                    <property name="picketlink.as.extension.version" value="${project.version}"/>
 
                     <!-- Use the PicketLink Installer to configure EAP for testing. -->
-                    <ant antfile="target/picketlink-installer-${version.picketlink}/build.xml" target="install-picketlink" />
+                    <ant antfile="target/picketlink-installer-${version.picketlink}/build.xml"
+                         target="install-picketlink"/>
 
                     <!-- Install the test module. Used during the tests. -->
                     <property name="test.module.base.dir" value="target/test-classes/module"/>
-                    <copy file="target/${project.artifactId}-${project.version}-test-module.jar" todir="${modules.dir}/org/picketlink/test/main/"/>
-                    <copy file="${test.module.base.dir}/test/main/module.xml" todir="${modules.dir}/org/picketlink/test/main"/>
+                    <copy file="target/${project.artifactId}-${project.version}-test-module.jar"
+                          todir="${modules.dir}/org/picketlink/test/main/"/>
+                    <copy file="${test.module.base.dir}/test/main/module.xml"
+                          todir="${modules.dir}/org/picketlink/test/main"/>
+
+                    <!-- Install the test module. Used during the tests. -->
+                    <property name="test.module.base.dir" value="target/test-classes/module"/>
+                    <copy file="target/${project.artifactId}-${project.version}-multi-config-module.jar"
+                          todir="${modules.dir}/org/picketlink/test/multiconfig/main/"/>
+                    <copy file="${test.module.base.dir}/multiconfig/main/module.xml"
+                          todir="${modules.dir}/org/picketlink/test/multiconfig/main"/>
 
                     <!-- Update the extension module. -->
-                    <copy file="target/${project.artifactId}-${project.version}.jar" todir="${modules.dir}/org/picketlink/as/extension/main"/>
+                    <copy file="target/${project.artifactId}-${project.version}.jar"
+                          todir="${modules.dir}/org/picketlink/as/extension/main"/>
                   </target>
                 </configuration>
               </execution>

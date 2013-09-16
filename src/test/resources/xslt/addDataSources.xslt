@@ -50,6 +50,15 @@
           <password>sa</password>
         </security>
       </datasource>
+      <datasource jndi-name="java:jboss/datasources/ExampleDS5"
+                  pool-name="ExampleDS5" enabled="true" use-java-context="true">
+        <connection-url>jdbc:h2:mem:test5;DB_CLOSE_DELAY=-1</connection-url>
+        <driver>h2</driver>
+        <security>
+          <user-name>sa</user-name>
+          <password>sa</password>
+        </security>
+      </datasource>
 			<xsl:apply-templates select="@* | *" />
 		</datasources>
 	</xsl:template>

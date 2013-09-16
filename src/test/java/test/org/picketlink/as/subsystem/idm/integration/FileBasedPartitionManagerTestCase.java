@@ -5,13 +5,14 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.asset.EmptyAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.PartitionManager;
 import org.picketlink.idm.RelationshipManager;
 import org.picketlink.idm.credential.Password;
+import org.picketlink.idm.credential.UsernamePasswordCredentials;
+import org.picketlink.idm.model.Attribute;
 import org.picketlink.idm.model.basic.BasicModel;
 import org.picketlink.idm.model.basic.Realm;
 import org.picketlink.idm.model.basic.Role;
@@ -21,41 +22,42 @@ import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 import javax.annotation.Resource;
 
 import static org.junit.Assert.*;
+import static org.picketlink.idm.credential.Credentials.*;
 
 /**
  *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
-@Ignore
-public class MultiConfigurationPartitionManagerTestCase {
+public class FileBasedPartitionManagerTestCase {
 
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
                 .create(WebArchive.class, "test.war")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(MultiConfigurationPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(MultiConfigurationPartitionManagerTestCase.class)
+                .addAsResource(FileBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                .addAsManifestResource(FileBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                .addClass(FileBasedPartitionManagerTestCase.class)
                 .addClass(SaleAgent.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/MultiConfigBasedPartitionManager")
-    private PartitionManager partitionManager;
+    @Resource(mappedName="picketlink/FileBasedPartitionManager")
+    private PartitionManager fileBasedPartitionManager;
 
     @Test
     public void testPartitionManager() throws Exception {
-        Realm defaultRealm = this.partitionManager.getPartition(Realm.class, Realm.DEFAULT_REALM);
+        Realm defaultRealm = this.fileBasedPartitionManager.getPartition(Realm.class, Realm.DEFAULT_REALM);
 
         if (defaultRealm == null) {
             defaultRealm = new Realm(Realm.DEFAULT_REALM);
 
-            this.partitionManager.add(defaultRealm);
+            this.fileBasedPartitionManager.add(defaultRealm);
         }
 
-        IdentityManager identityManager = this.partitionManager.createIdentityManager();
+        IdentityManager identityManager = this.fileBasedPartitionManager.createIdentityManager();
 
         User user = new User("johny");
 
@@ -63,19 +65,19 @@ public class MultiConfigurationPartitionManagerTestCase {
 
         Password password = new Password("abcd1234");
 
-//        identityManager.updateCredential(user, password);
-//
-//        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
-//
-//        identityManager.validateCredentials(credentials);
-//
-//        assertEquals(Status.VALID, credentials.getStatus());
+        identityManager.updateCredential(user, password);
+
+        UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(user.getLoginName(), password);
+
+        identityManager.validateCredentials(credentials);
+
+        assertEquals(Status.VALID, credentials.getStatus());
 
         Role role = new Role("admin");
 
         identityManager.add(role);
 
-        RelationshipManager relationshipManager = this.partitionManager.createRelationshipManager();
+        RelationshipManager relationshipManager = this.fileBasedPartitionManager.createRelationshipManager();
 
         BasicModel.grantRole(relationshipManager, user, role);
 
@@ -85,6 +87,17 @@ public class MultiConfigurationPartitionManagerTestCase {
         Thread.sleep(1000);
 
         assertTrue(BasicModel.hasRole(relationshipManager, user, role));
+
+        user.setAttribute(new Attribute<String>("testAttribute", "value"));
+
+        identityManager.update(user);
+
+        Thread.sleep(1000);
+
+        user = BasicModel.getUser(identityManager, "johny");
+
+        assertNotNull(user.getAttribute("testAttribute"));
+        assertEquals("value", user.getAttribute("testAttribute").getValue());
     }
 
 }

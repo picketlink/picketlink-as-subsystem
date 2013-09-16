@@ -15,35 +15,70 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package test.org.picketlink.as.subsystem.module.idm.entity;
+package test.org.picketlink.as.subsystem.module.idm.multiconfig.entity;
 
-import org.picketlink.idm.jpa.annotations.Identifier;
+import org.picketlink.idm.jpa.annotations.OwnerReference;
+import org.picketlink.idm.jpa.annotations.RelationshipDescriptor;
+import org.picketlink.idm.jpa.annotations.RelationshipMember;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.Inheritance;
-import javax.persistence.InheritanceType;
+import javax.persistence.ManyToOne;
 import java.io.Serializable;
 
 /**
  * @author pedroigor
  */
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class AttributedTypeEntity implements Serializable {
+public class RelationshipIdentityTypeReferenceEntity implements Serializable {
 
-    private static final long serialVersionUID = 4307228478304485446L;
+    private static final long serialVersionUID = -3619372498444894118L;
 
     @Id
-    @Identifier
-    private String id;
+    @GeneratedValue
+    private Long id;
 
-    public String getId() {
-        return this.id;
+    @RelationshipDescriptor
+    private String descriptor;
+
+    @RelationshipMember
+    private String identityTypeId;
+
+    @OwnerReference
+    @ManyToOne
+    private RelationshipTypeEntity owner;
+
+    public Long getId() {
+        return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getDescriptor() {
+        return descriptor;
+    }
+
+    public void setDescriptor(String descriptor) {
+        this.descriptor = descriptor;
+    }
+
+    public String getIdentityTypeId() {
+        return identityTypeId;
+    }
+
+    public void setIdentityTypeId(String identityType) {
+        this.identityTypeId = identityType;
+    }
+
+    public RelationshipTypeEntity getOwner() {
+        return owner;
+    }
+
+    public void setOwner(RelationshipTypeEntity owner) {
+        this.owner = owner;
     }
 
     @Override
@@ -67,5 +102,4 @@ public abstract class AttributedTypeEntity implements Serializable {
         result = 31 * result + (getId() != null ? getId().hashCode() : 0);
         return result;
     }
-
 }

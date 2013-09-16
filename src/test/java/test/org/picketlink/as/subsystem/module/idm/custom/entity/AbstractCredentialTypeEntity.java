@@ -15,27 +15,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package test.org.picketlink.as.subsystem.module.idm.entity;
+package test.org.picketlink.as.subsystem.module.idm.custom.entity;
 
-import org.picketlink.idm.jpa.annotations.AttributeClass;
-import org.picketlink.idm.jpa.annotations.AttributeName;
-import org.picketlink.idm.jpa.annotations.AttributeValue;
+import org.picketlink.idm.jpa.annotations.CredentialClass;
+import org.picketlink.idm.jpa.annotations.EffectiveDate;
+import org.picketlink.idm.jpa.annotations.ExpiryDate;
 import org.picketlink.idm.jpa.annotations.OwnerReference;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
+ * <p>Base mapping for credentials.</p>
  * @author pedroigor
  */
-@Entity
-public class AttributeTypeEntity implements Serializable {
+@MappedSuperclass
+public abstract class AbstractCredentialTypeEntity implements Serializable {
 
-    private static final long serialVersionUID = 5255050503622214581L;
+    private static final long serialVersionUID = -8032908635337756851L;
 
     @Id
     @GeneratedValue
@@ -45,14 +46,14 @@ public class AttributeTypeEntity implements Serializable {
     @ManyToOne
     private AttributedTypeEntity owner;
 
-    @AttributeClass
+    @CredentialClass
     private String typeName;
 
-    @AttributeName
-    private String name;
+    @EffectiveDate
+    private Date effectiveDate;
 
-    @AttributeValue
-    @Column(length = 1024) private String value;
+    @ExpiryDate
+    private Date expiryDate;
 
     public Long getId() {
         return id;
@@ -78,42 +79,19 @@ public class AttributeTypeEntity implements Serializable {
         this.typeName = typeName;
     }
 
-    public String getName() {
-        return name;
+    public Date getEffectiveDate() {
+        return effectiveDate;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setEffectiveDate(Date effectiveDate) {
+        this.effectiveDate = effectiveDate;
     }
 
-    public String getValue() {
-        return value;
+    public Date getExpiryDate() {
+        return expiryDate;
     }
 
-    public void setValue(String value) {
-        this.value = value;
+    public void setExpiryDate(Date expiryDate) {
+        this.expiryDate = expiryDate;
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-
-        if (!getClass().isInstance(obj)) {
-            return false;
-        }
-
-        AttributedTypeEntity other = (AttributedTypeEntity) obj;
-
-        return getId() != null && other.getId() != null && getId().equals(other.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        int result = getId() != null ? getId().hashCode() : 0;
-        result = 31 * result + (getId() != null ? getId().hashCode() : 0);
-        return result;
-    }
-
 }

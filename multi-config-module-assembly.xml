@@ -1,0 +1,23 @@
+<assembly>
+<id>multi-config-module</id>
+<formats>
+  <format>jar</format>
+</formats>
+<includeBaseDirectory>false</includeBaseDirectory>
+<fileSets>
+  <fileSet>
+    <directory>${basedir}/target/test-classes/</directory>
+    <includes>
+      <include>**/test/org/picketlink/as/subsystem/module/idm/multiconfig/**</include>
+      <include>**/test/org/picketlink/as/subsystem/module/idm/*.class</include>
+    </includes>
+    <outputDirectory>/</outputDirectory>
+  </fileSet>
+</fileSets>
+<files>
+  <file>
+    <source>${basedir}/target/test-classes/META-INF-MULTI-ENTITIES/persistence.xml</source>
+    <outputDirectory>META-INF</outputDirectory>
+  </file>
+</files>
+</assembly>
