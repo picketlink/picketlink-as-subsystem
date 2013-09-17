@@ -584,6 +584,7 @@
                     <property name="installer.dir" value="target/picketlink-installer-${version.picketlink}/"/>
                     <property name="picketlink.version" value="${version.picketlink}"/>
                     <property name="picketlink.as.extension.version" value="${project.version}"/>
+                    <property name="EAP62" value="true"/>
 
                     <!-- Use the PicketLink Installer to configure EAP for testing. -->
                     <ant antfile="target/picketlink-installer-${version.picketlink}/build.xml"
