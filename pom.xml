@@ -70,9 +70,9 @@
     <maven.compiler.target>1.6</maven.compiler.target>
 
     <!-- Current version of JBoss AS7 supported by this subsystem. -->
-    <version.jboss_as>7.2.0.Final</version.jboss_as>
-    <version.jboss_as.dist>7.2.0.Alpha1-redhat-4</version.jboss_as.dist>
-    <version.jboss_as.distribution>jboss-eap-6.1</version.jboss_as.distribution>
+    <version.jboss_as>7.3.0.Final-redhat-SNAPSHOT</version.jboss_as>
+    <version.jboss_as.dist>7.3.0.Final-redhat-SNAPSHOT</version.jboss_as.dist>
+    <version.jboss_as.distribution>jboss-eap-6.2</version.jboss_as.distribution>
 
     <!-- Current version of PicketLink libraries -->
     <version.picketlink>2.5.2-SNAPSHOT</version.picketlink>
@@ -249,7 +249,8 @@
     <!-- Test Dependencies -->
     <dependency>
       <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-subsystem-test</artifactId>
+      <artifactId>jboss-as-subsystem-test-tests</artifactId>
+      <version>${version.jboss_as}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -682,6 +683,21 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>jboss-product-repository</id>
+      <name>JBoss Internal Product Repository</name>
+      <url>http://download.lab.bos.redhat.com/brewroot/repos/jb-eap-6-rhel-6-build/latest/maven/</url>
+      <layout>default</layout>
+      <releases>
+        <enabled>true</enabled>
+        <updatePolicy>never</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+        <updatePolicy>never</updatePolicy>
+      </snapshots>
+    </repository>
+
   </repositories>
 
 </project>
