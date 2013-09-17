@@ -75,7 +75,7 @@
     <version.jboss_as.distribution>jboss-eap-6.1</version.jboss_as.distribution>
 
     <!-- Current version of PicketLink libraries -->
-    <version.picketlink>2.5.2.Final</version.picketlink>
+    <version.picketlink>2.5.3-SNAPSHOT</version.picketlink>
 
     <!-- Current version of PicketLink Installer. Used to update the AS modules.-->
     <version.picketlink.installer>1.1.1-SNAPSHOT</version.picketlink.installer>
