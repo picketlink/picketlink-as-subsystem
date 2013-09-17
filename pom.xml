@@ -77,6 +77,9 @@
     <!-- Current version of PicketLink libraries -->
     <version.picketlink>2.5.2-SNAPSHOT</version.picketlink>
 
+    <!-- Current version PicketLink Installer. Used to update AS modules.-->
+    <version.picketlink.installer>1.2.0-SNAPSHOT</version.picketlink.installer>
+
     <version.htmlunit>2.4</version.htmlunit>
   </properties>
 
@@ -494,7 +497,7 @@
                     <artifactItem>
                       <groupId>org.picketlink</groupId>
                       <artifactId>picketlink-installer</artifactId>
-                      <version>${version.picketlink}</version>
+                      <version>${version.picketlink.installer}</version>
                       <type>zip</type>
                       <overWrite>false</overWrite>
                       <outputDirectory>${basedir}/target/</outputDirectory>
@@ -581,13 +584,13 @@
                     <property name="jboss.as.dist.dir"
                               value="${integration.tests.containers.dir}/${version.jboss_as.distribution}"/>
                     <property name="modules.dir" value="${jboss.as.dist.dir}/modules/system/layers/base"/>
-                    <property name="installer.dir" value="target/picketlink-installer-${version.picketlink}/"/>
+                    <property name="installer.dir" value="target/picketlink-installer-${version.picketlink.installer}/"/>
                     <property name="picketlink.version" value="${version.picketlink}"/>
                     <property name="picketlink.as.extension.version" value="${project.version}"/>
                     <property name="EAP62" value="true"/>
 
                     <!-- Use the PicketLink Installer to configure EAP for testing. -->
-                    <ant antfile="target/picketlink-installer-${version.picketlink}/build.xml"
+                    <ant antfile="target/picketlink-installer-${version.picketlink.installer}/build.xml"
                          target="install-picketlink"/>
 
                     <!-- Install the test module for custom types tests. -->
