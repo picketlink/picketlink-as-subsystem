@@ -19,7 +19,7 @@
 
   <groupId>org.picketlink</groupId>
   <artifactId>picketlink-as-extension</artifactId>
-  <version>1.1.0.Final</version>
+  <version>1.1.1-SNAPSHOT</version>
 
   <name>JBoss Application Server: PicketLink Subsystem</name>
 
@@ -78,7 +78,7 @@
     <version.picketlink>2.5.2.Final</version.picketlink>
 
     <!-- Current version of PicketLink Installer. Used to update the AS modules.-->
-    <version.picketlink.installer>1.1.0.Final</version.picketlink.installer>
+    <version.picketlink.installer>1.1.1-SNAPSHOT</version.picketlink.installer>
 
     <version.htmlunit>2.4</version.htmlunit>
   </properties>
