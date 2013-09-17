@@ -1,4 +1,4 @@
-# PicketLink 2.5 Subsystem for JBoss Application Server #
+# PicketLink 2.5 Subsystem for JBoss Enterprise Application Platform #
 
 This project is an extension for the JBoss Application Server that enables PicketLink for deployments.
 
@@ -13,7 +13,7 @@ The extension provides a set of services and deployment behaviours for most of t
 The extension is currently designed and implemented considering the following requirements:
 
 * Java 1.6
-* JBoss EAP 6.1.Alpha1 (AS 7.2.0.Alpha1-redhat-4)
+* JBoss EAP 6.2.Alpha1 (AS 7.3.0.Final-SNAPSHOT)
 * Maven 3.0.3 or newer, to build and install the extension
 
     <b>Important note</b>
