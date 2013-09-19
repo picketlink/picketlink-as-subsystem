@@ -26,8 +26,10 @@ import org.jboss.as.controller.ExtensionContext;
 import org.jboss.as.controller.SubsystemRegistration;
 import org.jboss.as.controller.descriptions.ResourceDescriptionResolver;
 import org.jboss.as.controller.descriptions.StandardResourceDescriptionResolver;
+import org.jboss.as.controller.operations.common.GenericSubsystemDescribeHandler;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
+import org.jboss.as.controller.registry.OperationEntry;
 import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 
@@ -79,7 +81,8 @@ public class PicketLinkExtension implements Extension {
         
         picketlink.registerSubModel(FederationResourceDefinition.INSTANCE);
         picketlink.registerSubModel(IdentityManagementResourceDefinition.INSTANCE);
-        
+        picketlink.registerOperationHandler(GenericSubsystemDescribeHandler.DEFINITION, GenericSubsystemDescribeHandler.INSTANCE);
+
         subsystem.registerXMLElementWriter(Namespace.CURRENT.getXMLWriter());
     }
 
