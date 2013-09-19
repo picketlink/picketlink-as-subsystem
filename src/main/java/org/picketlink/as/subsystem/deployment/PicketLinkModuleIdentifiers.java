@@ -29,6 +29,7 @@ import org.jboss.modules.ModuleIdentifier;
  */
 public interface PicketLinkModuleIdentifiers {
 
+    ModuleIdentifier ORG_PICKETLINK_AS_EXTENSION_MODULE = ModuleIdentifier.create("org.picketlink.as.extension");
     ModuleIdentifier ORG_PICKETLINK_MODULE = ModuleIdentifier.create("org.picketlink");
     ModuleIdentifier ORG_PICKETLINK_IDM_API_MODULE = ModuleIdentifier.create("org.picketlink.idm.api");
     ModuleIdentifier ORG_PICKETLINK_IDM_MODULE = ModuleIdentifier.create("org.picketlink.idm");

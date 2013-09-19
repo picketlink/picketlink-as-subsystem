@@ -72,7 +72,7 @@
     <!-- Current version of JBoss AS7 supported by this subsystem. -->
     <version.jboss_as>7.3.0.Final-redhat-SNAPSHOT</version.jboss_as>
     <version.jboss_as.dist>7.3.0.Final-redhat-SNAPSHOT</version.jboss_as.dist>
-    <version.jboss_as.distribution>jboss-eap-6.2</version.jboss_as.distribution>
+    <version.jboss_as.distribution>jboss-as-7.3.0.Final-redhat-SNAPSHOT</version.jboss_as.distribution>
 
     <!-- Current version of PicketLink libraries -->
     <version.picketlink>2.5.3-SNAPSHOT</version.picketlink>
