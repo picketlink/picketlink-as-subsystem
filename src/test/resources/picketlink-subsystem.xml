@@ -1,4 +1,4 @@
-<subsystem xmlns="urn:jboss:picketlink:1.0">
+<subsystem xmlns="urn:jboss:domain:picketlink:1.0">
   <federation alias="federation-without-signatures">
     <saml token-timeout="4000" clock-skew="0"/>
     <identity-provider alias="idp.war" security-domain="idp"

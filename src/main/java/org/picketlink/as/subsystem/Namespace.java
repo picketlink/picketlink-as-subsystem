@@ -49,7 +49,7 @@ public enum Namespace {
 
     PICKETLINK_1_0(1, 0, new PicketLinkSubsystemReader_1_0(), new PicketLinkSubsystemWriter_1_0());
 
-    private static final String BASE_URN = "urn:jboss:picketlink:";
+    private static final String BASE_URN = "urn:jboss:domain:picketlink:";
 
     /**
      * The current namespace version.
