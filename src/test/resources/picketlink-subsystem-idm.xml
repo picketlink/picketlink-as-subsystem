@@ -1,4 +1,4 @@
-<subsystem xmlns="urn:jboss:picketlink:1.0">
+<subsystem xmlns="urn:jboss:domain:picketlink:1.0">
 
 	<identity-management jndi-name="picketlink/FileBasedCompleteIdentityManager"
 		alias="file-based-complete">

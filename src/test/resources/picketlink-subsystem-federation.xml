@@ -1,4 +1,4 @@
-<subsystem xmlns="urn:jboss:picketlink:1.0">
+<subsystem xmlns="urn:jboss:domain:picketlink:1.0">
 
 	<federation alias="federation-ws-trust-enabled">
 		<security-token-service alias="PicketLinkSTS"

@@ -3,7 +3,7 @@
 	to the standalone.xml of the JBoss AS7 installation. -->
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 	xmlns:as="urn:jboss:domain:1.5"
-	xmlns:pl="urn:jboss:picketlink:1.0"
+	xmlns:pl="urn:jboss:domain:picketlink:1.0"
 	version="1.0">
 
 	<xsl:output method="xml" indent="yes" />
