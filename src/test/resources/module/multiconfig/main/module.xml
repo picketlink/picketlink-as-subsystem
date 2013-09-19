@@ -17,7 +17,7 @@
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.test.multiconfig">
   <resources>
-    <resource-root path="picketlink-as-extension-1.1.1-SNAPSHOT-multi-config-module.jar"/>
+    <resource-root path="picketlink-as-extension-1.1.1.Final-multi-config-module.jar"/>
   </resources>
   <dependencies>
     <module name="javax.api"/>
