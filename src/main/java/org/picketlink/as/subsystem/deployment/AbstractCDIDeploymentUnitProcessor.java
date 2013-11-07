@@ -9,7 +9,7 @@ import org.jboss.weld.bootstrap.spi.Metadata;
 
 import javax.enterprise.inject.spi.Extension;
 
-import static org.jboss.as.weld.WeldDeploymentMarker.*;
+import static org.jboss.as.ee.weld.WeldDeploymentMarker.isWeldDeployment;
 
 /**
  * @author Pedro Igor

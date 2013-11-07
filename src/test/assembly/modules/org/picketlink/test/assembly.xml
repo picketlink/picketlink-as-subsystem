@@ -1,0 +1,25 @@
+<assembly>
+  <id>test-module</id>
+  <formats>
+    <format>jar</format>
+  </formats>
+  <includeBaseDirectory>false</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <directory>${basedir}/target/test-classes/</directory>
+      <includes>
+        <include>**/test/org/picketlink/as/subsystem/module/idm/custom/**</include>
+        <include>**/test/org/picketlink/as/subsystem/module/idm/*.class</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/src/test/assembly/modules/org/picketlink/test/src/</directory>
+      <includes>
+        <include>**/**</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+
+  </fileSets>
+</assembly>

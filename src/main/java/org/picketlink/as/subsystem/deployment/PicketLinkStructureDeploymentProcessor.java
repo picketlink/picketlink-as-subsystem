@@ -31,14 +31,11 @@ import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.server.deployment.module.ModuleDependency;
 import org.jboss.as.server.deployment.module.ModuleSpecification;
 import org.jboss.modules.ModuleIdentifier;
-import org.jboss.msc.service.ServiceController;
-import org.jboss.msc.service.ServiceRegistry;
-import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
-import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
-import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 
-import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.*;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.CORE_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.IDM_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_IDM_MODULE;
 
 /**
  * <p>{@link DeploymentUnitProcessor} that marks PicketLink deployments according with structure of the deployment.</p>
@@ -54,26 +51,8 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        markFederationDeployment(phaseContext);
         markCoreDeployment(deploymentUnit);
         markIDMDeployment(deploymentUnit);
-    }
-
-    private void markFederationDeployment(DeploymentPhaseContext phaseContext) {
-        DeploymentUnit deployment = phaseContext.getDeploymentUnit();
-
-        ServiceRegistry serviceRegistry = phaseContext.getServiceRegistry();
-
-        ServiceController<?> federationService = serviceRegistry.getService(IdentityProviderService
-                .createServiceName(deployment.getName()));
-
-        if (federationService == null) {
-            federationService = serviceRegistry.getService(ServiceProviderService.createServiceName(deployment.getName()));
-        }
-        
-        if (federationService != null) {
-            deployment.putAttachment(FEDERATION_ATTACHMENT_KEY, (PicketLinkFederationService<?>) federationService.getValue());
-        }
     }
 
     private void markIDMDeployment(DeploymentUnit deployment) {
@@ -99,10 +78,6 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
 
     @Override
     public void undeploy(DeploymentUnit context) {
-    }
-    
-    public static boolean isFederationDeployment(DeploymentUnit deployment) {
-        return deployment.getAttachment(FEDERATION_ATTACHMENT_KEY) != null;
     }
     
     public static boolean isIDMDeployment(DeploymentUnit deployment) {

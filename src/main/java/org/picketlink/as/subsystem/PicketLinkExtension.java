@@ -29,8 +29,6 @@ import org.jboss.as.controller.descriptions.StandardResourceDescriptionResolver;
 import org.jboss.as.controller.operations.common.GenericSubsystemDescribeHandler;
 import org.jboss.as.controller.parsing.ExtensionParsingContext;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.as.controller.registry.OperationEntry;
-import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 
 /**
@@ -79,7 +77,6 @@ public class PicketLinkExtension implements Extension {
 
         ManagementResourceRegistration picketlink = subsystem.registerSubsystemModel(PicketLinkSubsystemRootResourceDefinition.INSTANCE);
         
-        picketlink.registerSubModel(FederationResourceDefinition.INSTANCE);
         picketlink.registerSubModel(IdentityManagementResourceDefinition.INSTANCE);
         picketlink.registerOperationHandler(GenericSubsystemDescribeHandler.DEFINITION, GenericSubsystemDescribeHandler.INSTANCE);
 

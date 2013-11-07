@@ -81,7 +81,5 @@ public class IdentityConfigurationProducerTestCase {
         public IdentityConfiguration produceIdentityConfiguration() {
             return new IdentityConfigurationBuilder().named("default").stores().file().supportAllFeatures().build();
         }
-
     }
-
 }

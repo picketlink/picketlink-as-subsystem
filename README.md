@@ -1,23 +1,22 @@
-# PicketLink 2.5 Subsystem for JBoss Enterprise Application Platform #
+# PicketLink 2.5 Subsystem for WildFly 8 #
 
-This project is an extension for the JBoss Application Server that enables PicketLink for deployments.
+This project is an extension for WildFly that enables PicketLink for deployments.
 
 The extension provides a set of services and deployment behaviours for most of the PicketLink projects, such as:
 
 * [PicketLink IDM](https://github.com/picketlink/picketlink/tree/master/idm "PicketLink IDM on Github"), for Identity Management related services
 * [PicketLink Core](https://github.com/picketlink/picketlink/tree/master/core "PicketLink Core on Github"), for Authentication and Authorization services for CDI applications
-+ [PicketLink Federation](https://github.com/picketlink/picketlink2/federation "PicketLink Federation on Github"), for Single Sign-On, SAML and WS-Trust services for JEE applications
 
 ## System Requirements ##
 
 The extension is currently designed and implemented considering the following requirements:
 
 * Java 1.6
-* JBoss EAP 6.2.Alpha1 (AS 7.3.0.Final-SNAPSHOT)
+* WindFly 8.0.0.Beta1
 * Maven 3.0.3 or newer, to build and install the extension
 
     <b>Important note</b>
-    The extension requires a specific organization for the PicketLink libraries inside the JBoss EAP modules directory. While the application server is not update, you must configure your installation in order to use the extension. See the [JBoss Application Server Configuration](#asInstallation) section for more details.
+    The extension requires a specific organization of PicketLink libraries inside the WildFly modules directory. While those modules are not update, you must configure your installation in order to use the extension. See the [WildFly Configuration](#asInstallation) section for more details.
 
 ## How to build ##
 
@@ -31,24 +30,18 @@ In this case, only the unit tests will be executed.
 
 If you want to perform a full build, running also the integration tests you need to execute the following command:
 
-    mvn -Dall-tests -Parquillian-managed clean install
+    mvn -Pintegration-tests clean install
     
-## JBoss Application Server Configuration ##
+## WildFly Configuration ##
 
-### Using a Pre-configured JBoss AS Installation
-The most simple and fast way to get the subsystem up and running is using the JBoss Application Server installation used during the integration tests. After executing the following command:
+### Using a Pre-configured WildFly Installation
+The most simple and fast way to get the subsystem up and running is using the WildFly installation used during the integration tests. After executing the following command:
 
-    mvn -Dall-tests -Parquillian-managed clean install
+    mvn -Pintegration-tests clean install
 
-Navigate to the <i>target/integration-tests/containers/jboss-eap-6.1/</i> directory and use this installation to deploy your applications.
+Navigate to the <i>target/integration-tests/containers/wildfly-8.0.0.Beta1/</i> directory and use this installation to deploy your applications.
 
-### Manual Installation
-
-You can use the [PicketLink Installer](http://www.picketlink.org/getstarted.html "PicketLink Site"). Follow the instructions there.
-
-Important Note: Only versions 2.5.2.Final and later support the subsystem installation on EAP.
-
-#### Configuring your JBoss AS installation with the PicketLink Extension and Subsystem ####
+#### Configuring your WildFly installation with the PicketLink Extension and Subsystem ####
 
 Change your standalone.xml to add an extension for the PicketLink module:
 
@@ -80,15 +73,11 @@ Please, follow the documentation at https://community.jboss.org/wiki/PicketLink3
 
 Please, follow the documentation at https://community.jboss.org/wiki/PicketLink3Subsystem#Authentication_and_Authorization_Services_PicketLink_Core.
 
-### Federation Services ###
-
-Please, follow the documentation at https://docs.jboss.org/author/display/PLINK/PicketLink+AS7+Subsystem.
-
 ## Running and Debugging the Integration Tests in Eclipse ##
 
 First, import the project into your IDE.
 
-Follow the instructions at [Using a Pre-configured JBoss AS Installation] (#) to get a pre-configured JBoss AS installation with all configuration required to run the integration tests.
+Follow the instructions at [Using a Pre-configured WildFly Installation] (#) to get a pre-configured WildFly installation with all configuration required to run the integration tests.
 
 Go to the Maven configurations for your Eclipse project and activate the following profile:
 

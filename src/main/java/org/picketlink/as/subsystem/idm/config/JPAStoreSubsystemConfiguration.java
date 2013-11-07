@@ -1,8 +1,7 @@
 package org.picketlink.as.subsystem.idm.config;
 
 import org.hibernate.cfg.AvailableSettings;
-import org.jboss.as.jpa.hibernate4.JBossAppServerJtaPlatform;
-import org.jboss.as.jpa.transaction.JtaManagerImpl;
+import org.hibernate.engine.transaction.jta.platform.internal.JBossAppServerJtaPlatform;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoadException;
@@ -36,8 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.lang.reflect.Modifier.*;
-import static org.picketlink.common.util.StringUtil.*;
+import static java.lang.reflect.Modifier.isAbstract;
+import static org.picketlink.common.util.StringUtil.isNullOrEmpty;
 
 /**
  * @author Pedro Igor
@@ -120,7 +119,7 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
                 properties.put("javax.persistence.jtaDataSource", this.dataSourceJndiUrl);
             }
 
-            properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform(JtaManagerImpl.getInstance()));
+            properties.put(AvailableSettings.JTA_PLATFORM, new JBossAppServerJtaPlatform());
 
             if (this.entityModule != null) {
                 Thread.currentThread().setContextClassLoader(this.entityModule.getClassLoader());

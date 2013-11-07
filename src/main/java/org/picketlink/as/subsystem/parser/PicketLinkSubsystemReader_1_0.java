@@ -30,14 +30,6 @@ import org.jboss.staxmapper.XMLElementReader;
 import org.jboss.staxmapper.XMLExtendedStreamReader;
 import org.picketlink.as.subsystem.Namespace;
 import org.picketlink.as.subsystem.PicketLinkExtension;
-import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.KeyProviderResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.handlers.HandlerParameterResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.handlers.HandlerResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.idp.IdentityProviderResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.idp.TrustDomainResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.saml.SAMLResourceDefinition;
-import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.CredentialHandlerResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.FileStoreResourceDefinition;
 import org.picketlink.as.subsystem.idm.model.IdentityConfigurationResourceDefinition;
@@ -55,9 +47,9 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import java.util.List;
 
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
-import static org.jboss.as.controller.parsing.ParseUtils.*;
-import static org.picketlink.as.subsystem.model.ModelElement.*;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
+import static org.jboss.as.controller.parsing.ParseUtils.requireNoAttributes;
+import static org.jboss.as.controller.parsing.ParseUtils.unexpectedElement;
 
 /**
  * <p>
@@ -133,30 +125,6 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
             }
 
             switch (modelKey) {
-                case FEDERATION:
-                    federationNode = parseFederationConfig(reader, list, parentNode);
-                    break;
-                case KEY_STORE:
-                    parseKeyStoreConfig(reader, list, federationNode);
-                    break;
-                case IDENTITY_PROVIDER:
-                    lastProviderNode = parseIdentityProviderConfig(reader, list, federationNode);
-                    break;
-                case IDENTITY_PROVIDER_TRUST_DOMAIN:
-                    parseTrustDomainConfig(reader, list, lastProviderNode);
-                    break;
-                case COMMON_HANDLER:
-                    lastHandlerNode = parseHandlerConfig(reader, list, lastProviderNode);
-                    break;
-                case COMMON_HANDLER_PARAMETER:
-                    parseHandlerParameterConfig(reader, list, lastHandlerNode);
-                    break;
-                case SERVICE_PROVIDER:
-                    lastProviderNode = parseServiceProviderConfig(reader, list, federationNode);
-                    break;
-                case SAML:
-                    parseSAMLConfig(reader, list, federationNode);
-                    break;
                 case IDENTITY_MANAGEMENT:
                     identityManagementNode = parseIdentityManagementConfig(reader, list, parentNode);
                     break;
@@ -191,80 +159,6 @@ public class PicketLinkSubsystemReader_1_0 implements XMLStreamConstants, XMLEle
                     unexpectedElement(reader);
             }
         }
-    }
-
-    private void parseKeyStoreConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode federationNode)
-            throws XMLStreamException {
-        parseConfig(reader, ModelElement.KEY_STORE, KeyProviderResourceDefinition.SIGN_KEY_ALIAS.getName(), list,
-                federationNode, KeyProviderResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    /**
-     * @param reader
-     * @param list
-     * @param federationNode
-     * @return 
-     * @throws XMLStreamException
-     */
-    private ModelNode parseServiceProviderConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode federationNode)
-            throws XMLStreamException {
-        return parseConfig(reader, SERVICE_PROVIDER, ServiceProviderResourceDefinition.ALIAS.getName(), list, federationNode,
-                ServiceProviderResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    private void parseSAMLConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode federationNode)
-            throws XMLStreamException {
-        parseConfig(reader, ModelElement.SAML, null, list, federationNode, SAMLResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    /**
-     * @param reader
-     * @param list
-     * @param identityProviderNode
-     * @throws XMLStreamException
-     */
-    private void parseTrustDomainConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityProviderNode)
-            throws XMLStreamException {
-        parseConfig(reader, IDENTITY_PROVIDER_TRUST_DOMAIN, TrustDomainResourceDefinition.NAME.getName(), list, identityProviderNode,
-                TrustDomainResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    private ModelNode parseHandlerConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityProviderNode)
-            throws XMLStreamException {
-        return parseConfig(reader, ModelElement.COMMON_HANDLER, HandlerResourceDefinition.CLASS.getName(), list, identityProviderNode,
-                HandlerResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    private ModelNode parseHandlerParameterConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode identityProviderNode)
-            throws XMLStreamException {
-        return parseConfig(reader, ModelElement.COMMON_HANDLER_PARAMETER, HandlerParameterResourceDefinition.NAME.getName(), list, identityProviderNode,
-                HandlerParameterResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    /**
-     * @param reader
-     * @param list
-     * @param federationNode
-     * @return
-     * @throws XMLStreamException
-     */
-    private ModelNode parseIdentityProviderConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode federationNode)
-            throws XMLStreamException {
-        return parseConfig(reader, IDENTITY_PROVIDER, IdentityProviderResourceDefinition.ALIAS.getName(), list, federationNode,
-                IdentityProviderResourceDefinition.INSTANCE.getAttributes());
-    }
-
-    /**
-     * @param reader
-     * @param list
-     * @param parentNode
-     * @return
-     * @throws XMLStreamException
-     */
-    private ModelNode parseFederationConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode parentNode)
-            throws XMLStreamException {
-        return parseConfig(reader, FEDERATION, FederationResourceDefinition.ALIAS.getName(), list, parentNode,
-                FederationResourceDefinition.INSTANCE.getAttributes());
     }
 
     private ModelNode parseIdentityManagementConfig(XMLExtendedStreamReader reader, List<ModelNode> list, ModelNode parentNode)

@@ -26,7 +26,7 @@ import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
-import org.jboss.as.web.deployment.WarMetaData;
+import org.jboss.as.web.common.WarMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
 import org.jboss.modules.Module;
@@ -38,9 +38,9 @@ import org.picketlink.idm.PartitionManager;
 import javax.enterprise.inject.spi.Extension;
 import java.util.Iterator;
 
-import static org.jboss.as.web.deployment.WarMetaData.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
+import static org.jboss.as.web.common.WarMetaData.ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
 
 /**
  * <p>{@link DeploymentUnitProcessor} that enables PicketLink Core functionality to deployments.</p>

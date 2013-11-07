@@ -19,11 +19,11 @@
 
   <groupId>org.picketlink</groupId>
   <artifactId>picketlink-as-extension</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
 
-  <name>JBoss Application Server: PicketLink Subsystem</name>
+  <name>Wildfly: PicketLink Extension</name>
 
-  <description>PicketLink Extension and Subsystem for the JBoss EAP 6</description>
+  <description>PicketLink Extension and Subsystem for Wildfly</description>
 
   <packaging>jar</packaging>
 
@@ -70,17 +70,18 @@
     <maven.compiler.target>1.6</maven.compiler.target>
 
     <!-- Current version of JBoss AS7 supported by this subsystem. -->
-    <version.jboss_as>7.3.0.Final-redhat-SNAPSHOT</version.jboss_as>
-    <version.jboss_as.dist>7.3.0.Final-redhat-SNAPSHOT</version.jboss_as.dist>
-    <version.jboss_as.distribution>jboss-as-7.3.0.Final-redhat-SNAPSHOT</version.jboss_as.distribution>
+    <version.jboss_as>8.0.0.Beta1</version.jboss_as>
+    <version.jboss_as.distribution>wildfly-8.0.0.Beta1</version.jboss_as.distribution>
 
     <!-- Current version of PicketLink libraries -->
     <version.picketlink>2.5.3-SNAPSHOT</version.picketlink>
 
-    <!-- Current version PicketLink Installer. Used to update AS modules.-->
-    <version.picketlink.installer>1.2.2-SNAPSHOT</version.picketlink.installer>
-
+    <!-- Version of libraries used for testing-->
     <version.htmlunit>2.4</version.htmlunit>
+    <version.shrinkwrap>2.0.0-alpha-5</version.shrinkwrap>
+    <version.picketbox.ldap>1.0.2.Final</version.picketbox.ldap>
+    <version.apacheds>1.5.7</version.apacheds>
+    <version.slf4j>1.5.7</version.slf4j>
   </properties>
 
   <dependencyManagement>
@@ -118,34 +119,22 @@
       </dependency>
       <dependency>
         <groupId>org.picketlink</groupId>
-        <artifactId>picketlink-federation</artifactId>
-        <version>${version.picketlink}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.picketlink.distribution</groupId>
-        <artifactId>picketlink-jbas7</artifactId>
-        <version>${version.picketlink}</version>
-        <scope>provided</scope>
-      </dependency>
-      <dependency>
-        <groupId>org.picketlink</groupId>
         <artifactId>picketlink-idm-simple-schema</artifactId>
         <version>${version.picketlink}</version>
         <scope>provided</scope>
       </dependency>
 
-      <!-- JBoss AS Dependencies -->
+      <!-- WildFly Dependencies -->
       <dependency>
-        <groupId>org.jboss.as</groupId>
-        <artifactId>jboss-as-parent</artifactId>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-parent</artifactId>
         <version>${version.jboss_as}</version>
         <type>pom</type>
         <scope>import</scope>
         <exclusions>
           <exclusion>
-            <groupId>org.jboss.as</groupId>
-            <artifactId>jboss-build-config</artifactId>
+            <groupId>org.wildfly</groupId>
+            <artifactId>wildfly-build-config</artifactId>
           </exclusion>
         </exclusions>
       </dependency>
@@ -157,40 +146,97 @@
         <version>${version.htmlunit}</version>
         <scope>test</scope>
       </dependency>
-
       <dependency>
-        <groupId>org.jboss.as</groupId>
-        <artifactId>jboss-as-arquillian-container-managed</artifactId>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-arquillian-container-managed</artifactId>
         <version>${version.jboss_as}</version>
         <scope>test</scope>
       </dependency>
-
       <dependency>
-        <groupId>org.jboss.as</groupId>
-        <artifactId>jboss-as-arquillian-container-remote</artifactId>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-arquillian-container-remote</artifactId>
         <version>${version.jboss_as}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.wildfly</groupId>
+        <artifactId>wildfly-subsystem-test-tests</artifactId>
+        <version>${version.jboss_as}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.shrinkwrap.resolver</groupId>
+        <artifactId>shrinkwrap-resolver-api</artifactId>
+        <version>${version.shrinkwrap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.shrinkwrap.resolver</groupId>
+        <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
+        <version>${version.shrinkwrap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.shrinkwrap.resolver</groupId>
+        <artifactId>shrinkwrap-resolver-api-maven</artifactId>
+        <version>${version.shrinkwrap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.picketbox</groupId>
+        <artifactId>picketbox-ldap</artifactId>
+        <version>${version.picketbox.ldap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.picketbox</groupId>
+        <artifactId>picketbox-ldap</artifactId>
+        <version>${version.picketbox.ldap}</version>
+        <scope>test</scope>
+        <type>test-jar</type>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.server</groupId>
+        <artifactId>apacheds-all</artifactId>
+        <version>${version.apacheds}</version>
+        <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <artifactId>shared-ldap</artifactId>
+            <groupId>org.apache.directory.shared</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>shared-ldap-schema</artifactId>
+            <groupId>org.apache.directory.shared</groupId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${version.slf4j}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
   </dependencyManagement>
 
   <dependencies>
-    <!-- JBoss AS Dependencies -->
+    <!-- WildFly Dependencies -->
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-server</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-server</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-controller</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-controller</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-web</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-web</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-jpa-hibernate4</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-jpa</artifactId>
     </dependency>
 
     <!-- CDI/Weld Dependencies -->
@@ -199,8 +245,8 @@
       <artifactId>cdi-api</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-weld</artifactId>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-weld</artifactId>
     </dependency>
 
     <!-- JPA/Hibernate Dependencies -->
@@ -215,7 +261,6 @@
       <artifactId>jboss-logging-processor</artifactId>
       <!-- This is a compile-time dependency of this project, but is not needed
         at compile or runtime by other projects that depend on this project. -->
-      <scope>provided</scope>
       <optional>true</optional>
     </dependency>
 
@@ -251,10 +296,8 @@
 
     <!-- Test Dependencies -->
     <dependency>
-      <groupId>org.jboss.as</groupId>
-      <artifactId>jboss-as-subsystem-test-tests</artifactId>
-      <version>${version.jboss_as}</version>
-      <scope>test</scope>
+      <groupId>org.wildfly</groupId>
+      <artifactId>wildfly-subsystem-test-tests</artifactId>
     </dependency>
     <dependency>
       <groupId>org.jboss.arquillian.junit</groupId>
@@ -269,44 +312,40 @@
     <dependency>
       <groupId>org.jboss.shrinkwrap.resolver</groupId>
       <artifactId>shrinkwrap-resolver-api</artifactId>
-      <version>2.0.0-alpha-5</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.shrinkwrap.resolver</groupId>
       <artifactId>shrinkwrap-resolver-impl-maven</artifactId>
-      <version>2.0.0-alpha-5</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.jboss.shrinkwrap.resolver</groupId>
       <artifactId>shrinkwrap-resolver-api-maven</artifactId>
-      <version>2.0.0-alpha-5</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>net.sourceforge.htmlunit</groupId>
       <artifactId>htmlunit</artifactId>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <scope>test</scope>
     </dependency>
 
     <!-- LDAP Identity Store Test Dependencies -->
     <dependency>
       <groupId>org.picketbox</groupId>
       <artifactId>picketbox-ldap</artifactId>
-      <version>1.0.2.Final</version>
-      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-all</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
     </dependency>
     <dependency>
       <groupId>org.picketbox</groupId>
       <artifactId>picketbox-ldap</artifactId>
-      <version>1.0.2.Final</version>
-      <scope>test</scope>
       <type>test-jar</type>
     </dependency>
   </dependencies>
@@ -323,29 +362,6 @@
             <goals>
               <goal>jar</goal>
             </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>1.0.1</version>
-        <executions>
-          <execution>
-            <id>enforce-versions</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>3.0.3</version>
-                </requireMavenVersion>
-                <requireJavaVersion>
-                  <version>1.6</version>
-                </requireJavaVersion>
-              </rules>
-            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -387,13 +403,20 @@
 
   <profiles>
     <profile>
-      <!-- This profiles executes all integration tests during the build process. -->
       <id>integration-tests</id>
-      <activation>
-        <property>
-          <name>all-tests</name>
-        </property>
-      </activation>
+      <properties>
+        <integration.tests.containers.dir>${basedir}/target/integration-tests/containers
+        </integration.tests.containers.dir>
+        <jboss.as.home>${integration.tests.containers.dir}/${version.jboss_as.distribution}</jboss.as.home>
+        <jboss.modules.dir>${jboss.as.home}/modules/system/layers/base</jboss.modules.dir>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.wildfly</groupId>
+          <artifactId>wildfly-arquillian-container-managed</artifactId>
+          <scope>test</scope>
+        </dependency>
+      </dependencies>
       <build>
         <plugins>
           <!-- The tests are organized in Unit Tests and Integration Tests. -->
@@ -413,6 +436,9 @@
                 </goals>
                 <configuration>
                   <skip>false</skip>
+                  <systemPropertyVariables>
+                    <jbossHome>${jboss.as.home}</jbossHome>
+                  </systemPropertyVariables>
                   <includes>
                     <include>**/integration/*TestCase.java</include>
                   </includes>
@@ -426,41 +452,14 @@
               </execution>
             </executions>
           </plugin>
-        </plugins>
-      </build>
-    </profile>
-    <profile>
-      <id>arquillian-managed</id>
-      <properties>
-        <integration.tests.dir>${basedir}/target/integration-tests</integration.tests.dir>
-        <integration.tests.containers.dir>${integration.tests.dir}/containers</integration.tests.containers.dir>
-        <jboss.as.home>${integration.tests.containers.dir}/${version.jboss_as.distribution}</jboss.as.home>
-      </properties>
-      <dependencies>
-        <dependency>
-          <groupId>org.jboss.as</groupId>
-          <artifactId>jboss-as-arquillian-container-managed</artifactId>
-          <scope>test</scope>
-        </dependency>
-      </dependencies>
-      <build>
-        <plugins>
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.12</version>
-            <configuration>
-              <systemPropertyVariables>
-                <jbossHome>${jboss.as.home}</jbossHome>
-              </systemPropertyVariables>
-            </configuration>
-          </plugin>
+          <!-- Create jars for custom modules used during the tests -->
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
             <version>2.4</version>
             <configuration>
               <descriptors>
-                <descriptor>test-module-assembly/custom-types-module.xml</descriptor>
-                <descriptor>test-module-assembly/multi-config-module.xml</descriptor>
+                <descriptor>${basedir}/src/test/assembly/modules/org/picketlink/test/assembly.xml</descriptor>
+                <descriptor>${basedir}/src/test/assembly/modules/org/picketlink/multiconfig/assembly.xml</descriptor>
               </descriptors>
             </configuration>
             <executions>
@@ -473,6 +472,7 @@
               </execution>
             </executions>
           </plugin>
+          <!-- Extract the AS distribution and update the PicketLink modules libraries-->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
@@ -487,20 +487,93 @@
                 <configuration>
                   <artifactItems>
                     <artifactItem>
-                      <groupId>org.jboss.as</groupId>
-                      <artifactId>jboss-as-dist</artifactId>
-                      <version>${version.jboss_as.dist}</version>
+                      <groupId>org.wildfly</groupId>
+                      <artifactId>wildfly-dist</artifactId>
+                      <version>${version.jboss_as}</version>
                       <type>zip</type>
                       <overWrite>false</overWrite>
                       <outputDirectory>${integration.tests.containers.dir}</outputDirectory>
                     </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+              <execution>
+                <id>copy</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>copy</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
                     <artifactItem>
                       <groupId>org.picketlink</groupId>
-                      <artifactId>picketlink-installer</artifactId>
-                      <version>${version.picketlink.installer}</version>
-                      <type>zip</type>
+                      <artifactId>picketlink-idm-simple-schema</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
                       <overWrite>false</overWrite>
-                      <outputDirectory>${basedir}/target/</outputDirectory>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/idm/schema/main
+                      </outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.picketlink</groupId>
+                      <artifactId>picketlink-idm-api</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/idm/api/main
+                      </outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.picketlink</groupId>
+                      <artifactId>picketlink-idm-impl</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/idm/main
+                      </outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.picketlink</groupId>
+                      <artifactId>picketlink-api</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/core/api/main
+                      </outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.picketlink</groupId>
+                      <artifactId>picketlink-impl</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/core/main
+                      </outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.picketlink</groupId>
+                      <artifactId>picketlink-config</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/config/main
+                      </outputDirectory>
+                    </artifactItem>
+                    <artifactItem>
+                      <groupId>org.picketlink</groupId>
+                      <artifactId>picketlink-common</artifactId>
+                      <version>${version.picketlink}</version>
+                      <type>jar</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>
+                        ${jboss.modules.dir}/org/picketlink/common/main
+                      </outputDirectory>
                     </artifactItem>
                   </artifactItems>
                 </configuration>
@@ -535,23 +608,7 @@
                       <includes>
                         <include>standalone.xml</include>
                       </includes>
-                      <stylesheet>src/test/resources/xslt/addPicketLinkLogging.xslt</stylesheet>
-                    </transformationSet>
-                    <transformationSet>
-                      <dir>${jboss.as.home}/standalone/configuration/</dir>
-                      <outputDir>${jboss.as.home}/standalone/configuration</outputDir>
-                      <includes>
-                        <include>standalone.xml</include>
-                      </includes>
                       <stylesheet>src/test/resources/xslt/addSubsystem.xslt</stylesheet>
-                    </transformationSet>
-                    <transformationSet>
-                      <dir>${jboss.as.home}/standalone/configuration/</dir>
-                      <outputDir>${jboss.as.home}/standalone/configuration</outputDir>
-                      <includes>
-                        <include>standalone.xml</include>
-                      </includes>
-                      <stylesheet>src/test/resources/xslt/addSecurityDomain.xslt</stylesheet>
                     </transformationSet>
                     <transformationSet>
                       <dir>${jboss.as.home}/standalone/configuration/</dir>
@@ -566,6 +623,7 @@
               </execution>
             </executions>
           </plugin>
+          <!-- Copy all module definitions and update the extension module with the packaged jar -->
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-antrun-plugin</artifactId>
@@ -579,36 +637,20 @@
                 <phase>package</phase>
                 <configuration>
                   <target>
-                    <property name="integration.tests.dir" value="${basedir}/target/integration-tests"/>
-                    <property name="integration.tests.containers.dir" value="${integration.tests.dir}/containers"/>
-                    <property name="jboss.as.dist.dir"
-                              value="${integration.tests.containers.dir}/${version.jboss_as.distribution}"/>
-                    <property name="modules.dir" value="${jboss.as.dist.dir}/modules/system/layers/base"/>
-                    <property name="installer.dir" value="target/picketlink-installer-${version.picketlink.installer}/"/>
-                    <property name="picketlink.version" value="${version.picketlink}"/>
-                    <property name="picketlink.as.extension.version" value="${project.version}"/>
-                    <property name="EAP62" value="true"/>
+                    <!-- Copy the extension jar -->
+                    <copy file="target/${project.artifactId}-${project.version}.jar"
+                          todir="${jboss.modules.dir}/org/picketlink/as/extension/main"/>
 
-                    <!-- Use the PicketLink Installer to configure EAP for testing. -->
-                    <ant antfile="target/picketlink-installer-${version.picketlink.installer}/build.xml"
-                         target="install-picketlink"/>
-
-                    <!-- Install the test module for custom types tests. -->
-                    <property name="test.module.base.dir" value="target/test-classes/module"/>
+                    <!-- Copy the modules used during the tests -->
                     <copy file="target/${project.artifactId}-${project.version}-test-module.jar"
-                          todir="${modules.dir}/org/picketlink/test/main/"/>
-                    <copy file="${test.module.base.dir}/test/main/module.xml"
-                          todir="${modules.dir}/org/picketlink/test/main"/>
-
-                    <!-- Install the test module for the multi config tests. -->
-                    <property name="test.module.base.dir" value="target/test-classes/module"/>
+                          todir="${jboss.modules.dir}/org/picketlink/test/main"/>
                     <copy file="target/${project.artifactId}-${project.version}-multi-config-module.jar"
-                          todir="${modules.dir}/org/picketlink/test/multiconfig/main/"/>
-                    <copy file="${test.module.base.dir}/multiconfig/main/module.xml"
-                          todir="${modules.dir}/org/picketlink/test/multiconfig/main"/>
+                          todir="${jboss.modules.dir}/org/picketlink/test/multiconfig/main"/>
 
-                    <!-- Update the extension module. -->
-                    <copy file="target/${project.artifactId}-${project.version}.jar" todir="${modules.dir}/org/picketlink/as/extension/main" />
+                    <!-- Copy all module definitions -->
+                    <copy todir="${jboss.modules.dir}/org/picketlink">
+                      <fileset dir="${basedir}/src/test/modules/org/picketlink"/>
+                    </copy>
                   </target>
                 </configuration>
               </execution>
@@ -621,8 +663,8 @@
       <id>arquillian-remote</id>
       <dependencies>
         <dependency>
-          <groupId>org.jboss.as</groupId>
-          <artifactId>jboss-as-arquillian-container-remote</artifactId>
+          <groupId>org.wildfly</groupId>
+          <artifactId>wildfly-arquillian-container-remote</artifactId>
           <scope>test</scope>
         </dependency>
       </dependencies>
@@ -678,30 +720,6 @@
         <enabled>false</enabled>
       </releases>
     </repository>
-    <repository>
-      <id>earlyaccess.repository.jboss.org</id>
-      <name>JBoss EarlyAccess Repository</name>
-      <layout>default</layout>
-      <url>http://maven.repository.redhat.com/earlyaccess/all/</url>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>jboss-product-repository</id>
-      <name>JBoss Internal Product Repository</name>
-      <url>http://download.lab.bos.redhat.com/brewroot/repos/jb-eap-6-rhel-6-build/latest/maven/</url>
-      <layout>default</layout>
-      <releases>
-        <enabled>true</enabled>
-        <updatePolicy>never</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>never</updatePolicy>
-      </snapshots>
-    </repository>
-
   </repositories>
 
 </project>

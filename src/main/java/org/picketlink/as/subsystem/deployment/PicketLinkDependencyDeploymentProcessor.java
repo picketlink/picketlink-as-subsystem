@@ -33,9 +33,14 @@ import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
 import org.jboss.modules.filter.PathFilters;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_AS_EXTENSION_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_API_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_IDM_API_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_IDM_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isIDMDeployment;
 
 /**
  * <p>
@@ -54,10 +59,6 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deployment = phaseContext.getDeploymentUnit();
 
-        if (isFederationDeployment(deployment)) {
-            configureFederationDependencies(deployment);
-        }
-
         if (isCoreDeployment(deployment)) {
             configureCoreDependencies(deployment);
         }
@@ -70,19 +71,6 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
     @Override
     public void undeploy(DeploymentUnit context) {
 
-    }
-
-    /**
-     * <p>
-     * Add the PicketLink Federation dependencies to the {@link DeploymentUnit}.
-     * </p>
-     *
-     * @param deployment
-     */
-    private void configureFederationDependencies(DeploymentUnit deployment) {
-        addModuleDependency(deployment, ORG_PICKETLINK_MODULE);
-        addModuleDependency(deployment, ORG_PICKETLINK_AS_EXTENSION_MODULE);
-        ROOT_LOGGER.configuringDeployment("PicketLink Federation Dependencies", deployment.getName());
     }
 
     /**
@@ -121,6 +109,6 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
 
         dependency.addImportFilter(PathFilters.getMetaInfFilter(), true);
 
-        moduleSpec.addSystemDependency(dependency);
+        moduleSpec.addUserDependency(dependency);
     }
 }

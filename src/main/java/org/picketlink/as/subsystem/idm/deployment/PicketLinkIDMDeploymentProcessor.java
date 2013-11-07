@@ -28,8 +28,8 @@ import org.jboss.as.server.deployment.Phase;
 import org.picketlink.as.subsystem.deployment.AbstractCDIDeploymentUnitProcessor;
 import org.picketlink.as.subsystem.idm.PicketLinkIDMSubsystemExtension;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isIDMDeployment;
 
 /**
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
