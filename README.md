@@ -1,6 +1,6 @@
-# PicketLink 2.5 Subsystem for JBoss Enterprise Application Platform #
+# PicketLink 2.5 Extension for JBoss Enterprise Application Platform #
 
-This project is an extension for the JBoss Application Server that enables PicketLink for deployments.
+This project is an extension for JBoss Enterprise Application Server that enables PicketLink for deployments.
 
 The extension provides a set of services and deployment behaviours for most of the PicketLink projects, such as:
 
@@ -13,7 +13,7 @@ The extension provides a set of services and deployment behaviours for most of t
 The extension is currently designed and implemented considering the following requirements:
 
 * Java 1.6
-* JBoss EAP 6.1.Alpha1 (AS 7.2.0.Alpha1-redhat-4)
+* JBoss EAP 6.1 (AS 7.2.0.Final-SNAPSHOT)
 * Maven 3.0.3 or newer, to build and install the extension
 
     <b>Important note</b>
@@ -31,14 +31,14 @@ In this case, only the unit tests will be executed.
 
 If you want to perform a full build, running also the integration tests you need to execute the following command:
 
-    mvn -Dall-tests -Parquillian-managed clean install
+    mvn -Pintegration-tests clean install
     
 ## JBoss Application Server Configuration ##
 
 ### Using a Pre-configured JBoss AS Installation
 The most simple and fast way to get the subsystem up and running is using the JBoss Application Server installation used during the integration tests. After executing the following command:
 
-    mvn -Dall-tests -Parquillian-managed clean install
+    mvn -Pintegration-tests clean install
 
 Navigate to the <i>target/integration-tests/containers/jboss-eap-6.1/</i> directory and use this installation to deploy your applications.
 

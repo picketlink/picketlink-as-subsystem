@@ -13,11 +13,13 @@
       </includes>
       <outputDirectory>/</outputDirectory>
     </fileSet>
+    <fileSet>
+      <directory>${basedir}/src/test/assembly/modules/org/picketlink/test/src/</directory>
+      <includes>
+        <include>**/**</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+    </fileSet>
+
   </fileSets>
-  <files>
-    <file>
-      <source>${basedir}/target/test-classes/META-INF-CUSTOM-ENTITIES/persistence.xml</source>
-      <outputDirectory>META-INF</outputDirectory>
-    </file>
-  </files>
 </assembly>
