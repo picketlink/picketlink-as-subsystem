@@ -74,7 +74,7 @@
     <version.jboss_as.distribution>wildfly-8.0.0.Beta1</version.jboss_as.distribution>
 
     <!-- Current version of PicketLink libraries -->
-    <version.picketlink>2.5.3-SNAPSHOT</version.picketlink>
+    <version.picketlink>2.5.2.Final</version.picketlink>
 
     <!-- Version of libraries used for testing-->
     <version.htmlunit>2.4</version.htmlunit>
