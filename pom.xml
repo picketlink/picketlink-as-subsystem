@@ -19,7 +19,7 @@
 
   <groupId>org.picketlink</groupId>
   <artifactId>picketlink-as-extension</artifactId>
-  <version>1.2.2-SNAPSHOT</version>
+  <version>1.2.2.Final</version>
 
   <name>JBoss EAP: PicketLink Extension</name>
 
@@ -74,7 +74,7 @@
     <version.jboss_as.distribution>jboss-as-7.3.0.Final-redhat-SNAPSHOT</version.jboss_as.distribution>
 
     <!-- Current version of PicketLink libraries -->
-    <version.picketlink>2.5.2.Final</version.picketlink>
+    <version.picketlink>2.5.3.Beta1</version.picketlink>
 
     <!-- Version of libraries used for testing-->
     <version.htmlunit>2.4</version.htmlunit>

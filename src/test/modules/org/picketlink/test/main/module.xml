@@ -17,7 +17,7 @@
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink.test">
   <resources>
-    <resource-root path="picketlink-as-extension-1.2.2-SNAPSHOT-test-module.jar"/>
+    <resource-root path="picketlink-as-extension-1.2.2.Final-test-module.jar"/>
   </resources>
   <dependencies>
     <module name="javax.api"/>
