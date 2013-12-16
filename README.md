@@ -65,13 +65,9 @@ You can get some examples about how to configure the PicketLink Subsystem from t
 
 ## How to use ##
 
-### Identity Management Services ###
+### Documentation ###
 
-Please, follow the documentation at https://community.jboss.org/wiki/PicketLink3Subsystem#Identity_Management_Services_PicketLink_IDM.
-
-### Authentication and Authorization Services ###
-
-Please, follow the documentation at https://community.jboss.org/wiki/PicketLink3Subsystem#Authentication_and_Authorization_Services_PicketLink_Core.
+Please, follow the documentation at http://docs.jboss.org/picketlink/2/latest/reference/html/ch10.html.
 
 ## Running and Debugging the Integration Tests in Eclipse ##
 
