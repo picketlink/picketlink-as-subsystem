@@ -65,8 +65,6 @@ You can get some examples about how to configure the PicketLink Subsystem from t
 
 ## How to use ##
 
-### Documentation ###
-
 Please, follow the documentation at http://docs.jboss.org/picketlink/2/latest/reference/html/ch10.html.
 
 ## Running and Debugging the Integration Tests in Eclipse ##
