@@ -29,9 +29,7 @@ public class LDAPBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                                         .create(WebArchive.class, "test.war")
                                         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(
-                                                                      LDAPBasedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                  "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addAsManifestResource(LDAPBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                                         .addClass(LDAPBasedPartitionManagerTestCase.class);
 
         return deployment;

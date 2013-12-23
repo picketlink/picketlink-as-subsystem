@@ -94,6 +94,15 @@
     </identity-configuration>
   </identity-management>
 
+  <identity-management jndi-name="picketlink/FileEmbeddedBasedPartitionManager" alias="file.embedded.based.partition.manager">
+    <identity-configuration name="file.config">
+      <file-store working-dir="/tmp/pl-idm-embedded" always-create-files="true" async-write="true"
+                  async-write-thread-pool="10">
+        <supportedTypes supportsAll="true"/>
+      </file-store>
+    </identity-configuration>
+  </identity-management>
+
   <identity-management jndi-name="picketlink/JPADSBasedPartitionManager" alias="jpa.ds.based.partition.manager">
     <identity-configuration name="jpa.config">
       <jpa-store data-source="jboss/datasources/ExampleDS">

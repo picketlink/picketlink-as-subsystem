@@ -36,9 +36,7 @@ public class JPADSBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                                         .create(WebArchive.class, "test.war")
                                         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(
-                                                                      JPADSBasedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                   "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addAsManifestResource(JPADSBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                                         .addClass(JPADSBasedPartitionManagerTestCase.class);
 
         return deployment;

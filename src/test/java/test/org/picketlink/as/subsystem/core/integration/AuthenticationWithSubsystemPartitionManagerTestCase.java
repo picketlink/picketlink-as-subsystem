@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.picketlink.Identity;
+import org.picketlink.annotations.PicketLink;
 import org.picketlink.credential.DefaultLoginCredentials;
 import org.picketlink.idm.IdentityManager;
 import org.picketlink.idm.PartitionManager;
@@ -20,6 +21,8 @@ import org.picketlink.idm.model.basic.Role;
 import org.picketlink.idm.model.basic.User;
 
 import javax.annotation.Resource;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
 import javax.inject.Inject;
 
 import static org.junit.Assert.assertTrue;
@@ -30,30 +33,26 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 public class AuthenticationWithSubsystemPartitionManagerTestCase {
 
+    @Resource(mappedName = "picketlink/FileEmbeddedBasedPartitionManager")
+    private PartitionManager partitionManager;
+    @Inject
+    private Identity identity;
+    @Inject
+    private IdentityManager identityManager;
+    @Inject
+    private RelationshipManager relationshipManager;
+    @Inject
+    private DefaultLoginCredentials credentials;
+
     @Deployment
     public static WebArchive createDeployment() {
         return ShrinkWrap
                    .create(WebArchive.class, "test.war")
                    .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                   .addAsWebInfResource(AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/web-idm-resource-ref.xml"), "web.xml")
                    .addAsManifestResource(AuthenticationWithSubsystemPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
-                   .addClass(AuthenticationWithSubsystemPartitionManagerTestCase.class);
+                   .addClass(AuthenticationWithSubsystemPartitionManagerTestCase.class)
+                   .addClass(MyPartitionManagerProducer.class);
     }
-
-    @Resource(mappedName = "picketlink/FileBasedPartitionManager")
-    private PartitionManager partitionManager;
-
-    @Inject
-    private Identity identity;
-
-    @Inject
-    private IdentityManager identityManager;
-
-    @Inject
-    private RelationshipManager relationshipManager;
-
-    @Inject
-    private DefaultLoginCredentials credentials;
 
     @Before
     public void onBefore() throws Exception {
@@ -98,5 +97,14 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
         role = BasicModel.getRole(identityManager, "admin");
 
         assertTrue(BasicModel.hasRole(relationshipManager, user, role));
+    }
+
+    @ApplicationScoped
+    public static class MyPartitionManagerProducer {
+
+        @Produces
+        @PicketLink
+        @Resource(mappedName = "picketlink/FileEmbeddedBasedPartitionManager")
+        private PartitionManager partitionManager;
     }
 }

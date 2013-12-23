@@ -23,17 +23,12 @@ package org.picketlink.as.subsystem.core.deployment;
 
 import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.Phase;
-import org.jboss.as.web.deployment.WarMetaData;
-import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleLoadException;
-import org.picketlink.as.subsystem.core.PicketLinkCoreSubsystemExtension;
 import org.picketlink.as.subsystem.deployment.AbstractWeldDeploymentUnitProcessor;
-import org.picketlink.idm.PartitionManager;
 
 import javax.enterprise.inject.spi.Extension;
 
-import static org.jboss.as.web.deployment.WarMetaData.ATTACHMENT_KEY;
 import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 import static org.picketlink.as.subsystem.PicketLinkMessages.MESSAGES;
 import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
@@ -54,12 +49,6 @@ public class PicketLinkCoreDeploymentProcessor extends AbstractWeldDeploymentUni
     public void doDeploy(DeploymentUnit deploymentUnit) throws Exception {
         if (isCoreDeployment(deploymentUnit)) {
             ROOT_LOGGER.configuringDeployment("PicketLink Core CDI Extension", deploymentUnit.getName());
-            String partitionManagerJNDIUrl = getPartitionManagerJNDIUrl(deploymentUnit);
-
-            if (partitionManagerJNDIUrl != null) {
-                addExtension(deploymentUnit, new PicketLinkCoreSubsystemExtension(partitionManagerJNDIUrl));
-            }
-
             addPicketLinkCoreExtensions(deploymentUnit);
         }
     }
@@ -80,19 +69,5 @@ public class PicketLinkCoreDeploymentProcessor extends AbstractWeldDeploymentUni
         for (Extension e : module.loadService(Extension.class)) {
             addExtension(deploymentUnit, e);
         }
-    }
-
-    private String getPartitionManagerJNDIUrl(final DeploymentUnit deployment) {
-        WarMetaData warMetadata = deployment.getAttachment(ATTACHMENT_KEY);
-
-        if (warMetadata != null && warMetadata.getWebMetaData() != null && warMetadata.getWebMetaData().getResourceReferences() != null) {
-            for (ResourceReferenceMetaData resourceReferenceMetaData : warMetadata.getWebMetaData().getResourceReferences()) {
-                if (PartitionManager.class.getName().equals(resourceReferenceMetaData.getType())) {
-                    return resourceReferenceMetaData.getName();
-                }
-            }
-        }
-
-        return null;
     }
 }

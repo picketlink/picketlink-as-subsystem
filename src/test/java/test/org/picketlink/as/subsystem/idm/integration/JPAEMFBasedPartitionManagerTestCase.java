@@ -36,12 +36,8 @@ public class JPAEMFBasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                                         .create(WebArchive.class, "test.war")
                                         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsResource(
-                                                              JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                            "deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                                        .addAsManifestResource(
-                                                                      JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                    "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addAsResource(JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                                        .addAsManifestResource(JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                                         .addClass(JPAEMFBasedPartitionManagerTestCase.class);
 
         return deployment;

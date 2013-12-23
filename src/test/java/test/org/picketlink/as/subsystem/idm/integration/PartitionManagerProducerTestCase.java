@@ -35,9 +35,7 @@ public class PartitionManagerProducerTestCase {
         WebArchive deployment = ShrinkWrap
                                         .create(WebArchive.class, "test.war")
                                         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(
-                                                                      PartitionManagerProducerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                 "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addAsManifestResource(PartitionManagerProducerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                                         .addClass(PartitionManagerProducerTestCase.class).addClass(MyPartitionManagerProducer.class);
 
         return deployment;

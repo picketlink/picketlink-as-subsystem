@@ -34,9 +34,7 @@ public class IdentityConfigurationProducerTestCase {
         WebArchive deployment = ShrinkWrap
                                         .create(WebArchive.class, "test.war")
                                         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(
-                                                                      IdentityConfigurationProducerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                      "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addAsManifestResource(IdentityConfigurationProducerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                                         .addClass(IdentityConfigurationProducerTestCase.class).addClass(MyIdentityConfigurationProducer.class);
 
         return deployment;

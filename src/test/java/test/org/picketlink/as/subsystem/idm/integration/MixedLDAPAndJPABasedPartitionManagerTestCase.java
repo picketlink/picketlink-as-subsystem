@@ -37,9 +37,7 @@ public class MixedLDAPAndJPABasedPartitionManagerTestCase {
         WebArchive deployment = ShrinkWrap
                                         .create(WebArchive.class, "test.war")
                                         .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(
-                                                                      MixedLDAPAndJPABasedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                             "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addAsManifestResource(MixedLDAPAndJPABasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
                                         .addClass(MixedLDAPAndJPABasedPartitionManagerTestCase.class).addClass(SaleAgent.class);
 
         return deployment;

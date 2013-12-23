@@ -75,8 +75,10 @@
     <maven.compiler.source>1.6</maven.compiler.source>
     <maven.compiler.target>1.6</maven.compiler.target>
 
+    <!-- Used to allow use the checkstyle configuration from Wildfly -->
+    <version.wildfly.build.config>8.0.0.Beta1</version.wildfly.build.config>
+
     <!-- Current version of JBoss AS7 supported by this subsystem. -->
-    <version.wildfly>8.0.0.Beta1</version.wildfly>
     <version.jboss_as>7.2.0.Final</version.jboss_as>
     <version.jboss_as.dist>7.2.0.Alpha1-redhat-4</version.jboss_as.dist>
     <version.jboss_as.distribution>jboss-eap-6.1</version.jboss_as.distribution>
@@ -85,11 +87,13 @@
     <version.picketlink>2.5.3.Beta1</version.picketlink>
 
     <!-- Version of libraries used for testing-->
-    <version.htmlunit>2.4</version.htmlunit>
+    <version.htmlunit>2.7</version.htmlunit>
     <version.shrinkwrap>2.0.0-alpha-5</version.shrinkwrap>
     <version.picketbox.ldap>1.0.2.Final</version.picketbox.ldap>
     <version.slf4j>1.5.6</version.slf4j>
     <linkXRef>false</linkXRef>
+    <version.apacheds>1.5.7</version.apacheds>
+    <version.slf4j>1.5.7</version.slf4j>
   </properties>
 
   <dependencyManagement>
@@ -194,6 +198,44 @@
         <groupId>org.jboss.shrinkwrap.resolver</groupId>
         <artifactId>shrinkwrap-resolver-api-maven</artifactId>
         <version>${version.shrinkwrap}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.directory.server</groupId>
+        <artifactId>apacheds-all</artifactId>
+        <version>${version.apacheds}</version>
+        <scope>test</scope>
+        <exclusions>
+          <exclusion>
+            <artifactId>shared-ldap</artifactId>
+            <groupId>org.apache.directory.shared</groupId>
+          </exclusion>
+          <exclusion>
+            <artifactId>shared-ldap-schema</artifactId>
+            <groupId>org.apache.directory.shared</groupId>
+          </exclusion>
+          <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+          </exclusion>
+        </exclusions>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${version.slf4j}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>${version.slf4j}</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>jcl-over-slf4j</artifactId>
+        <version>${version.slf4j}</version>
         <scope>test</scope>
       </dependency>
     </dependencies>
@@ -323,6 +365,16 @@
       <scope>test</scope>
       <type>test-jar</type>
     </dependency>
+    <dependency>
+      <groupId>org.apache.directory.server</groupId>
+      <artifactId>apacheds-all</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -375,7 +427,7 @@
             <dependency>
               <groupId>org.wildfly</groupId>
               <artifactId>wildfly-build-config</artifactId>
-              <version>${version.wildfly}</version>
+              <version>${version.wildfly.build.config}</version>
             </dependency>
           </dependencies>
           <executions>
