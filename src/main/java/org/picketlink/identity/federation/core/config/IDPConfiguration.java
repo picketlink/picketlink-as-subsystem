@@ -66,12 +66,12 @@ public class IDPConfiguration extends IDPType implements ProviderConfiguration {
     }
 
     public void addTrustDomain(String domain, String certAlias) {
-        if (this.getTrust().getDomains() != null && this.getTrust().getDomains().indexOf(domain) == -1) {
-            if (!this.getTrust().getDomains().isEmpty()) {
-                this.getTrust().setDomains(this.getTrust().getDomains() + ",");
+        if (getTrust().getDomains() != null && getTrust().getDomains().indexOf(domain) == -1) {
+            if (!getTrust().getDomains().isEmpty()) {
+                getTrust().setDomains(getTrust().getDomains() + ",");
             }
 
-            this.getTrust().setDomains(this.getTrust().getDomains() + domain);
+            getTrust().setDomains(getTrust().getDomains() + domain);
         }
 
         if (certAlias != null && !certAlias.trim().isEmpty()) {
