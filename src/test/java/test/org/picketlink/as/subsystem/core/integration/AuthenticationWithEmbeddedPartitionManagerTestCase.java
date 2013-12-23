@@ -29,15 +29,11 @@ public class AuthenticationWithEmbeddedPartitionManagerTestCase {
 
     @Deployment
     public static WebArchive createDeployment() {
-        WebArchive deployment = ShrinkWrap
-                                        .create(WebArchive.class, "test.war")
-                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsManifestResource(
-                                                                      AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                                   "deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
-                                        .addClass(AuthenticationWithEmbeddedPartitionManagerTestCase.class);
-
-        return deployment;
+        return ShrinkWrap
+                   .create(WebArchive.class, "test.war")
+                   .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                   .addAsManifestResource(AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
+                   .addClass(AuthenticationWithEmbeddedPartitionManagerTestCase.class);
     }
 
     @Inject

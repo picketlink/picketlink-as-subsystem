@@ -7,4 +7,8 @@ import org.picketlink.trust.jbossws.handler.AbstractSAML2Handler;
  */
 public class EmptySAML2Handler extends AbstractSAML2Handler {
 
+    public EmptySAML2Handler() {
+
+    }
+
 }

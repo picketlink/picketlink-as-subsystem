@@ -32,18 +32,12 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
 
     @Deployment
     public static WebArchive createDeployment() {
-        WebArchive deployment = ShrinkWrap
-                                        .create(WebArchive.class, "test.war")
-                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                                        .addAsWebInfResource(
-                                                                    AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                                 "deployment/web-idm-resource-ref.xml"), "web.xml")
-                                        .addAsManifestResource(
-                                                                      AuthenticationWithSubsystemPartitionManagerTestCase.class.getClassLoader().getResource(
-                                                                                                                                                                    "deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
-                                        .addClass(AuthenticationWithSubsystemPartitionManagerTestCase.class);
-
-        return deployment;
+        return ShrinkWrap
+                   .create(WebArchive.class, "test.war")
+                   .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                   .addAsWebInfResource(AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/web-idm-resource-ref.xml"), "web.xml")
+                   .addAsManifestResource(AuthenticationWithSubsystemPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
+                   .addClass(AuthenticationWithSubsystemPartitionManagerTestCase.class);
     }
 
     @Resource(mappedName = "picketlink/FileBasedPartitionManager")
@@ -69,9 +63,7 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
             this.partitionManager.remove(defaultRealm);
         }
 
-        defaultRealm = new Realm(Realm.DEFAULT_REALM);
-
-        this.partitionManager.add(defaultRealm);
+        this.partitionManager.add(new Realm(Realm.DEFAULT_REALM));
     }
 
     @Test
