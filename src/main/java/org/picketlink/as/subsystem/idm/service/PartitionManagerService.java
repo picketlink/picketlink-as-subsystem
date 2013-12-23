@@ -45,32 +45,32 @@ import org.picketlink.idm.internal.DefaultPartitionManager;
 
 import javax.transaction.TransactionManager;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.*;
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
 
 /**
- * <p>
- * This {@link Service} starts the {@link PartitionManager} using the configurationBuilder loaded from the domain model and
- * publishes it in JNDI.
- * </p>
+ * <p> This {@link Service} starts the {@link PartitionManager} using the configurationBuilder loaded from the domain model and publishes it in
+ * JNDI. </p>
  *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  * @author Pedro Igor
  */
 public class PartitionManagerService implements Service<PartitionManager> {
 
-    private static String SERVICE_NAME_PREFIX = "PartitionManagerService";
-
+    private static final String SERVICE_NAME_PREFIX = "PartitionManagerService";
     private final InjectedValue<TransactionManager> transactionManager = new InjectedValue<TransactionManager>();
-
     private final String jndiName;
     private final String alias;
-    private PartitionManager partitionManager;
     private final IdentityConfigurationBuilder configurationBuilder;
+    private PartitionManager partitionManager;
 
     public PartitionManagerService(String alias, String jndiName, IdentityConfigurationBuilder configurationBuilder) {
         this.alias = alias;
         this.jndiName = jndiName;
         this.configurationBuilder = configurationBuilder;
+    }
+
+    public static ServiceName createServiceName(String alias) {
+        return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
     }
 
     @Override
@@ -89,15 +89,10 @@ public class PartitionManagerService implements Service<PartitionManager> {
     public void stop(StopContext context) {
         ROOT_LOGGER.debugf("Stopping PartitionManagerService for [%s]", this.alias);
         unpublishPartitionManager(context);
-        this.partitionManager = null;
     }
 
     public InjectedValue<TransactionManager> getTransactionManager() {
         return this.transactionManager;
-    }
-
-    public static ServiceName createServiceName(String alias) {
-        return ServiceName.JBOSS.append(SERVICE_NAME_PREFIX, alias);
     }
 
     private void publishPartitionManager(StartContext context) {
@@ -105,24 +100,23 @@ public class PartitionManagerService implements Service<PartitionManager> {
         ServiceName serviceName = bindInfo.getBinderServiceName();
         final BinderService binderService = new BinderService(serviceName.getCanonicalName());
         final ServiceBuilder<ManagedReferenceFactory> builder = context.getController().getServiceContainer()
-                .addService(serviceName, binderService).addAliases(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(jndiName));
+                                                                    .addService(serviceName, binderService)
+                                                                    .addAliases(ContextNames.JAVA_CONTEXT_SERVICE_NAME.append(this.jndiName));
 
         builder.addDependency(ContextNames.JAVA_CONTEXT_SERVICE_NAME, ServiceBasedNamingStore.class,
-                binderService.getNamingStoreInjector());
+                                 binderService.getNamingStoreInjector());
 
-        builder.addDependency(createServiceName(this.alias), PartitionManager.class,
-                new Injector<PartitionManager>() {
-                    @Override
-                    public void inject(final PartitionManager value) throws InjectionException {
-                        binderService.getManagedObjectInjector().inject(
-                                new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
-                    }
+        builder.addDependency(createServiceName(this.alias), PartitionManager.class, new Injector<PartitionManager>() {
+            @Override
+            public void inject(final PartitionManager value) throws InjectionException {
+                binderService.getManagedObjectInjector().inject(new ValueManagedReferenceFactory(new ImmediateValue<Object>(value)));
+            }
 
-                    @Override
-                    public void uninject() {
-                        binderService.getManagedObjectInjector().uninject();
-                    }
-                });
+            @Override
+            public void uninject() {
+                binderService.getManagedObjectInjector().uninject();
+            }
+        });
 
         builder.setInitialMode(Mode.PASSIVE).install();
 
@@ -131,7 +125,7 @@ public class PartitionManagerService implements Service<PartitionManager> {
 
     private void unpublishPartitionManager(StopContext context) {
         ServiceController<?> service = context.getController().getServiceContainer()
-                .getService(createPartitionManagerBindInfo().getBinderServiceName());
+                                           .getService(createPartitionManagerBindInfo().getBinderServiceName());
         if (service != null) {
             service.setMode(Mode.REMOVE);
         }
@@ -140,5 +134,4 @@ public class PartitionManagerService implements Service<PartitionManager> {
     private BindInfo createPartitionManagerBindInfo() {
         return ContextNames.bindInfoFor(this.jndiName);
     }
-
 }

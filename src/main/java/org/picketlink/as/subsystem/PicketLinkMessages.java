@@ -22,27 +22,39 @@
 
 package org.picketlink.as.subsystem;
 
-import org.jboss.logging.Message;
-import org.jboss.logging.MessageBundle;
+import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.logging.Messages;
+import org.jboss.logging.annotations.Cause;
+import org.jboss.logging.annotations.Message;
+import org.jboss.logging.annotations.MessageBundle;
+import org.picketlink.idm.config.SecurityConfigurationException;
 
 /**
- * <p>JBoss Logging message bundle.</p>
- * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
 @MessageBundle(projectCode = "JBAS")
 public interface PicketLinkMessages {
 
-    /**
-     * A logger with the category of the package name.
-     */
     PicketLinkMessages MESSAGES = Messages.getBundle(PicketLinkMessages.class);
 
     @Message(id = 12600, value = "No writer provided for element %s. Check if a writer is registered in PicketLinkSubsystemWriter.")
-    IllegalStateException noModelElementWriterProvided(String modelEmement);
+    IllegalStateException noModelElementWriterProvided(String modelElement);
 
     @Message(id = 12601, value = "No IdentityConfiguration provided. Maybe you forgot to provide a @Producer method for the IdentityConfiguration.")
     IllegalStateException idmNoConfigurationProvided();
+
+    @Message(id = 12602, value = "No Identity Provider configuration found for federation [%s]. ")
+    IllegalStateException federationIdentityProviderNotConfigured(String federationAlias);
+
+    @Message(id = 12603, value = "Failed to configure deployment [%s].")
+    DeploymentUnitProcessingException deploymentConfigurationFailed(String name, @Cause Throwable t);
+
+    @Message(id = 12604, value = "Could not load module [%s].")
+    RuntimeException moduleCouldNotLoad(String s, @Cause Throwable t);
+
+    @Message (id = 12605, value = "PartitionManager JNDI url not defined. Check your web.xml.")
+    SecurityConfigurationException coreNullPartitionManagerJNDIUrl();
+
+    @Message (id = 12606, value = "Error looking up PartitionManager from [%s].")
+    SecurityConfigurationException coreCouldNotLookupPartitionManager(String jndiUrl, @Cause Throwable e);
 }

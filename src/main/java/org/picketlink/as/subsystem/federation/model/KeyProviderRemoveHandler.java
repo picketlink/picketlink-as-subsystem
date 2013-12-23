@@ -19,14 +19,16 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-package org.picketlink.as.subsystem.federation.model;
 
+package org.picketlink.as.subsystem.federation.model;
 
 import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
-import org.picketlink.as.subsystem.federation.service.FederationService;
+import org.picketlink.as.subsystem.federation.service.KeyProviderService;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
@@ -37,16 +39,13 @@ public class KeyProviderRemoveHandler extends AbstractRemoveStepHandler {
 
     private KeyProviderRemoveHandler() {
     }
-    
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext, org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
+
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
             throws OperationFailedException {
-        FederationService federationService = FederationService.getService(context.getServiceRegistry(true), operation);
-        
-        federationService.setKeyProvider(null);
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String federationAlias = pathAddress.subAddress(0, pathAddress.size() - 1).getLastElement().getValue();
+
+        context.removeService(KeyProviderService.createServiceName(federationAlias));
     }
-    
 }

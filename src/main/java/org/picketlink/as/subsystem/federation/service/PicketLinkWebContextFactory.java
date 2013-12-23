@@ -30,40 +30,26 @@ import org.picketlink.identity.federation.bindings.tomcat.idp.IDPWebBrowserSSOVa
 import org.picketlink.identity.federation.bindings.tomcat.sp.ServiceProviderAuthenticator;
 
 /**
- * <p>
- * This {@link WebContextFactory} subclass is responsible do finish the configuration of a deployment/application as a
- * PicketLink deployment.
+ * <p> This {@link WebContextFactory} subclass is responsible do finish the configuration of a deployment/application as a PicketLink deployment.
  * </p>
- * 
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
  */
 public class PicketLinkWebContextFactory implements WebContextFactory {
 
     private final DomainModelConfigProvider configProvider;
-    private PicketLinkSubsystemMetrics auditHelper;
+    private final PicketLinkSubsystemMetrics auditHelper;
 
-    public PicketLinkWebContextFactory(DomainModelConfigProvider picketLinkSubsysteConfigProvider, PicketLinkSubsystemMetrics metrics) {
-        this.configProvider = picketLinkSubsysteConfigProvider;
+    public PicketLinkWebContextFactory(DomainModelConfigProvider configProvider, PicketLinkSubsystemMetrics metrics) {
+        this.configProvider = configProvider;
         this.auditHelper = metrics;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.web.ext.WebContextFactory#createContext(org.jboss.as.server.deployment.DeploymentUnit)
-     */
     @Override
     public StandardContext createContext(DeploymentUnit deploymentUnit) throws DeploymentUnitProcessingException {
         return new StandardContext();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.web.ext.WebContextFactory#postProcessContext(org.jboss.as.server.deployment.DeploymentUnit,
-     * org.apache.catalina.core.StandardContext)
-     */
     @Override
     public void postProcessContext(DeploymentUnit deploymentUnit, StandardContext webContext) {
         if (this.configProvider.isIdentityProviderConfiguration()) {
@@ -73,11 +59,6 @@ public class PicketLinkWebContextFactory implements WebContextFactory {
         }
     }
 
-    /**
-     * <p>Adds the Service Provider valves.</p>
-     * 
-     * @param webContext
-     */
     private void addServiceProviderValves(StandardContext webContext) {
         ServiceProviderAuthenticator valve = new ServiceProviderAuthenticator();
 
@@ -87,11 +68,6 @@ public class PicketLinkWebContextFactory implements WebContextFactory {
         webContext.addValve(valve);
     }
 
-    /**
-     * <p>Adds the Identity Provider valves.</p>
-     * 
-     * @param webContext
-     */
     private void addIdentityProviderValves(StandardContext webContext) {
         IDPWebBrowserSSOValve valve = new IDPWebBrowserSSOValve();
 
@@ -100,5 +76,4 @@ public class PicketLinkWebContextFactory implements WebContextFactory {
 
         webContext.addValve(valve);
     }
-
 }

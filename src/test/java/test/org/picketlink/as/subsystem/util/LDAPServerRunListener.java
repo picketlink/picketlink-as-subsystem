@@ -8,7 +8,7 @@ import org.junit.runner.notification.RunListener;
 import org.picketbox.test.ldap.AbstractLDAPTest;
 
 /**
- * <p>Used to start an embedded LDAP server before the tests execution.</p>
+ * <p> Used to start an embedded LDAP server before the tests execution. </p>
  *
  * @author Pedro Igor
  */
@@ -51,7 +51,5 @@ public class LDAPServerRunListener extends RunListener {
         public void importLDIF(String fileName) throws Exception {
             super.importLDIF(fileName);
         }
-
     }
-
 }

@@ -22,10 +22,11 @@ import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 
 import javax.annotation.Resource;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -34,16 +35,17 @@ public class MixedLDAPAndJPABasedPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(MixedLDAPAndJPABasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(MixedLDAPAndJPABasedPartitionManagerTestCase.class)
-                .addClass(SaleAgent.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsManifestResource(
+                                                                      MixedLDAPAndJPABasedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                             "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(MixedLDAPAndJPABasedPartitionManagerTestCase.class).addClass(SaleAgent.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/MultiConfigBasedPartitionManager")
+    @Resource(mappedName = "picketlink/MultiConfigBasedPartitionManager")
     private PartitionManager partitionManager;
 
     @Test
@@ -98,5 +100,4 @@ public class MixedLDAPAndJPABasedPartitionManagerTestCase {
         assertNotNull(user.getAttribute("testAttribute"));
         assertEquals("value", user.getAttribute("testAttribute").getValue());
     }
-
 }

@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model.idp;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
@@ -38,71 +37,35 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class IdentityProviderResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition URL = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_URL.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition SECURITY_DOMAIN = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_SECURITY_DOMAIN.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition ALIAS = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_ALIAS.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition ENCRYPT = new SimpleAttributeDefinitionBuilder(ModelElement.IDENTITY_PROVIDER_ENCRYPT.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set(false)).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition SUPPORTS_SIGNATURES = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_SUPPORTS_SIGNATURES.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set(false)).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition STRICT_POST_BINDING = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_STRICT_POST_BINDING.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set(true)).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition ATTRIBUTE_MANAGER = new SimpleAttributeDefinitionBuilder(ModelElement.IDENTITY_PROVIDER_ATTRIBUTE_MANAGER.getName(), ModelType.STRING, true).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition ROLE_GENERATOR = new SimpleAttributeDefinitionBuilder(ModelElement.IDENTITY_PROVIDER_ROLE_GENERATOR.getName(), ModelType.STRING, true).setAllowExpression(true).build();
+    private static final SimpleAttributeDefinition EXTERNAL = new SimpleAttributeDefinitionBuilder(ModelElement.IDENTITY_PROVIDER_EXTERNAL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set(false)).setAllowExpression(true).build();
     public static final IdentityProviderResourceDefinition INSTANCE = new IdentityProviderResourceDefinition();
 
-    public static final SimpleAttributeDefinition URL = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_URL.getName(),
-            ModelType.STRING, false).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition SECURITY_DOMAIN = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_SECURITY_DOMAIN.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition ALIAS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_ALIAS.getName(), ModelType.STRING, false).setDefaultValue(new ModelNode().set("idp"))
-            .setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition EXTERNAL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_PROVIDER_EXTERNAL.getName(), ModelType.BOOLEAN, true)
-            .setDefaultValue(new ModelNode().set(false)).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition ENCRYPT = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_PROVIDER_ENCRYPT.getName(), ModelType.BOOLEAN, true)
-            .setDefaultValue(new ModelNode().set(false)).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition SUPPORTS_SIGNATURES = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_SUPPORTS_SIGNATURES.getName(), ModelType.BOOLEAN, true)
-            .setDefaultValue(new ModelNode().set(false)).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition STRICT_POST_BINDING = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_STRICT_POST_BINDING.getName(), ModelType.BOOLEAN, true)
-            .setDefaultValue(new ModelNode().set(true)).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition ATTRIBUTE_MANAGER = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_PROVIDER_ATTRIBUTE_MANAGER.getName(), ModelType.STRING, true).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition ROLE_GENERATOR = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_PROVIDER_ROLE_GENERATOR.getName(), ModelType.STRING, true).setAllowExpression(false).build();
-    
-    static {
-        INSTANCE.addAttribute(URL);
-        INSTANCE.addAttribute(ALIAS);
-        INSTANCE.addAttribute(SECURITY_DOMAIN);
-        INSTANCE.addAttribute(EXTERNAL);
-        INSTANCE.addAttribute(ENCRYPT);
-        INSTANCE.addAttribute(SUPPORTS_SIGNATURES);
-        INSTANCE.addAttribute(STRICT_POST_BINDING);
-        INSTANCE.addAttribute(ATTRIBUTE_MANAGER);
-        INSTANCE.addAttribute(ROLE_GENERATOR);
-    }
-    
     private IdentityProviderResourceDefinition() {
-        super(ModelElement.IDENTITY_PROVIDER, IdentityProviderAddHandler.INSTANCE, IdentityProviderRemoveHandler.INSTANCE);
+        super(ModelElement.IDENTITY_PROVIDER, IdentityProviderAddHandler.INSTANCE, IdentityProviderRemoveHandler.INSTANCE, URL,
+                 ALIAS, SECURITY_DOMAIN, EXTERNAL, ENCRYPT, SUPPORTS_SIGNATURES, STRICT_POST_BINDING, ATTRIBUTE_MANAGER,
+                 ROLE_GENERATOR);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.SimpleResourceDefinition#registerChildren(org.jboss.as.controller.registry.
-     * ManagementResourceRegistration)
-     */
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(TrustDomainResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(HandlerResourceDefinition.INSTANCE, resourceRegistration);
     }
-    
+
     @Override
     public void registerAttributes(ManagementResourceRegistration resourceRegistration) {
         super.registerAttributes(resourceRegistration);
-        
+
         for (final SimpleAttributeDefinition def : IdentityProviderMetricsOperationHandler.ATTRIBUTES) {
             resourceRegistration.registerMetric(def, IdentityProviderMetricsOperationHandler.INSTANCE);
         }
-    }
-    
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return IDPWriteAttributeHandler.INSTANCE;
     }
 }

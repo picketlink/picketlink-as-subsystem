@@ -22,9 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model;
 
-import static org.picketlink.as.subsystem.model.ModelElement.COMMON_ALIAS;
-
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
@@ -36,45 +33,26 @@ import org.picketlink.as.subsystem.federation.model.sp.ServiceProviderResourceDe
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 
+import static org.picketlink.as.subsystem.model.ModelElement.COMMON_ALIAS;
+
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 16, 2012
  */
 public class FederationResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition ALIAS = new SimpleAttributeDefinitionBuilder(COMMON_ALIAS.getName(), ModelType.STRING, false).setDefaultValue(new ModelNode().set("localhost")).setAllowExpression(true).build();
     public static final FederationResourceDefinition INSTANCE = new FederationResourceDefinition();
 
-    public static final SimpleAttributeDefinition ALIAS = new SimpleAttributeDefinitionBuilder(COMMON_ALIAS.getName(),
-            ModelType.STRING, false).setDefaultValue(new ModelNode().set("localhost")).setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(ALIAS);
-    }
-
     private FederationResourceDefinition() {
-        super(ModelElement.FEDERATION, FederationAddHandler.INSTANCE, FederationRemoveHandler.INSTANCE);
+        super(ModelElement.FEDERATION, FederationAddHandler.INSTANCE, FederationRemoveHandler.INSTANCE, ALIAS);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.SimpleResourceDefinition#registerChildren(org.jboss.as.controller.registry.
-     * ManagementResourceRegistration)
-     */
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(KeyProviderResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(IdentityProviderResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(ServiceProviderResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(SAMLResourceDefinition.INSTANCE, resourceRegistration);
-//        addChildResourceDefinition(STSResourceDefinition.INSTANCE, resourceRegistration);
-    }
-
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.model.AbstractResourceDefinition#doGetAttributeWriterHandler()
-     */
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return FederationWriteAttributeHandler.INSTANCE;
     }
 }

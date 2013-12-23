@@ -26,16 +26,16 @@ import org.jboss.as.server.deployment.DeploymentUnit;
 import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
 import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
-import org.picketlink.as.subsystem.PicketLinkLogger;
 import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 
-import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.*;
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.FEDERATION_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isFederationDeployment;
 
 /**
- * <p>{@link DeploymentUnitProcessor} that configures a {@link PicketLinkFederationService} associated with deployments..</p>
- * 
+ * <p> {@link DeploymentUnitProcessor} that configures a {@link PicketLinkFederationService} associated with deployments.. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
  */
 public class FederationDeploymentProcessor implements DeploymentUnitProcessor {
 
@@ -46,20 +46,21 @@ public class FederationDeploymentProcessor implements DeploymentUnitProcessor {
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deploymentUnit = phaseContext.getDeploymentUnit();
 
-        PicketLinkFederationService<?> attachment = deploymentUnit.getAttachment(FEDERATION_ATTACHMENT_KEY);
-
-        if (attachment != null) {
-            PicketLinkFederationService<?> service = (PicketLinkFederationService<?>) attachment.getValue();
+        if (isFederationDeployment(deploymentUnit)) {
+            PicketLinkFederationService service = getFederationService(deploymentUnit);
 
             if (service != null) {
-                PicketLinkLogger.ROOT_LOGGER.configuringDeployment(service.getClass().getSimpleName(), deploymentUnit.getName());
+                ROOT_LOGGER.configuringDeployment("PicketLink Federation", deploymentUnit.getName());
                 service.configure(deploymentUnit);
             }
         }
     }
 
     @Override
-    public void undeploy(DeploymentUnit context) {
+    public void undeploy(DeploymentUnit deploymentUnit) {
     }
 
+    private PicketLinkFederationService getFederationService(final DeploymentUnit deploymentUnit) {
+        return deploymentUnit.getAttachment(FEDERATION_ATTACHMENT_KEY);
+    }
 }

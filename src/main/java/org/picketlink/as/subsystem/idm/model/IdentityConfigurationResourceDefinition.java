@@ -22,11 +22,7 @@
 
 package org.picketlink.as.subsystem.idm.model;
 
-import org.jboss.as.controller.SimpleAttributeDefinition;
-import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.ModelType;
 import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 
@@ -36,21 +32,16 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class IdentityConfigurationResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition NAME = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_NAME.getName(), ModelType.STRING, false)
-            .setAllowExpression(false).build();
+    public static final IdentityConfigurationResourceDefinition INSTANCE = new IdentityConfigurationResourceDefinition();
 
-    public static final IdentityConfigurationResourceDefinition INSTANCE = new IdentityConfigurationResourceDefinition(NAME);
-
-    private IdentityConfigurationResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.IDENTITY_CONFIGURATION, new IDMConfigAddStepHandler(attributes), attributes);
+    private IdentityConfigurationResourceDefinition() {
+        super(ModelElement.IDENTITY_CONFIGURATION, new IDMConfigAddStepHandler());
     }
-    
+
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(JPAStoreResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(FileStoreResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(LDAPStoreResourceDefinition.INSTANCE, resourceRegistration);
     }
-    
 }

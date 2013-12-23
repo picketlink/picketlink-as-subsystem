@@ -22,135 +22,51 @@
 
 package org.picketlink.as.subsystem.federation.service;
 
-
-import static org.picketlink.identity.federation.core.config.PicketLinkConfigUtil.addHandler;
-
-import java.util.HashMap;
-
-import org.jboss.as.controller.OperationContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceName;
-import org.jboss.msc.service.ServiceRegistry;
-import org.jboss.msc.service.StartContext;
-import org.jboss.msc.service.StartException;
-import org.jboss.msc.service.StopContext;
-import org.picketlink.as.subsystem.model.ModelUtils;
+import org.picketlink.identity.federation.core.config.IDPConfiguration;
 import org.picketlink.identity.federation.core.config.SPConfiguration;
-import org.picketlink.identity.federation.core.saml.v2.interfaces.SAML2Handler;
-import org.picketlink.identity.federation.web.handlers.saml2.RolesGenerationHandler;
-import org.picketlink.identity.federation.web.handlers.saml2.SAML2AuthenticationHandler;
-import org.picketlink.identity.federation.web.handlers.saml2.SAML2LogOutHandler;
-import org.picketlink.identity.federation.web.handlers.saml2.SAML2SignatureGenerationHandler;
-import org.picketlink.identity.federation.web.handlers.saml2.SAML2SignatureValidationHandler;
+
+import static org.picketlink.as.subsystem.PicketLinkMessages.MESSAGES;
 
 /**
- * <p>
- * Service implementation to enable a deployed applications as a Service Provider.
- * </p>
- * 
+ * <p> Service implementation to enable a deployed applications as a Service Provider. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-
-public class ServiceProviderService extends AbstractEntityProviderService<ServiceProviderService, SPConfiguration> {
+public class ServiceProviderService extends EntityProviderService<ServiceProviderService, SPConfiguration> {
 
     private static final String SERVICE_NAME = "SPConfigurationService";
 
-    public ServiceProviderService(OperationContext context, ModelNode modelNode) {
-        super(context, modelNode);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.jboss.msc.service.Service#start(org.jboss.msc.service.StartContext)
-     */
-    @Override
-    public void start(StartContext context) throws StartException {
-        super.start(context); 
+    public ServiceProviderService(SPConfiguration configuration) {
+        super(configuration);
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.msc.service.Service#stop(org.jboss.msc.service.StopContext)
-     */
-    @Override
-    public void stop(StopContext context) {
-        super.stop(context);
-        this.setConfiguration(null);
+    public static ServiceName createServiceName(String alias) {
+        return ServiceName.JBOSS.append(SERVICE_NAME, alias);
     }
 
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#doConfigureDeployment(org.jboss.as.server.deployment.DeploymentUnit)
-     */
+    @Override
     public void doConfigureDeployment(DeploymentUnit deploymentUnit) {
         configureBindingType();
+        configureIdentityProvider();
     }
- 
+
+    private void configureIdentityProvider() {
+        IDPConfiguration idpConfiguration = getFederationService().getValue().getIdpConfiguration();
+
+        if (idpConfiguration == null) {
+            throw MESSAGES.federationIdentityProviderNotConfigured(getFederationService().getValue().getAlias());
+        }
+
+        getConfiguration().setIdentityURL(idpConfiguration.getIdentityURL());
+    }
+
     private void configureBindingType() {
         if (getConfiguration().isPostBinding()) {
             getConfiguration().setBindingType("POST");
         } else {
             getConfiguration().setBindingType("REDIRECT");
         }
-    }
-    
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#configureCommonHandlers()
-     */
-    protected void doAddHandlers() {
-        addHandler(SAML2LogOutHandler.class, getPicketLinkType());
-        
-        HashMap<String, String> options = new HashMap<String, String>();
-        
-        options.put(SAML2Handler.CLOCK_SKEW_MILIS, String.valueOf(getPicketLinkType().getStsType().getClockSkew()));
-        
-        addHandler(SAML2AuthenticationHandler.class, options, getPicketLinkType());
-        
-        addHandler(RolesGenerationHandler.class, getPicketLinkType());
-        addHandler(SAML2SignatureGenerationHandler.class, getPicketLinkType());
-        addHandler(SAML2SignatureValidationHandler.class, getPicketLinkType());
-    }
-
-    
-    public static ServiceName createServiceName(String alias) {
-        return ServiceName.JBOSS.append(SERVICE_NAME, alias);
-    }
-
-    /**
-     * Returns a instance of the service associated with the given name.
-     * 
-     * @param registry
-     * @param name
-     * @return
-     */
-    public static ServiceProviderService getService(ServiceRegistry registry, String name) {
-        ServiceController<?> container = registry.getService(ServiceProviderService.createServiceName(name));
-        
-        if (container != null) {
-            return (ServiceProviderService) container.getValue();
-        }
-        
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#getConfigurationBuilder()
-     */
-    @Override
-    public SPConfiguration getConfiguration() {
-        SPConfiguration configuration = super.getConfiguration();
-        
-        if (getFederationService().getIdentityProviderService() != null) {
-            configuration.setIdentityURL(getFederationService().getIdentityProviderService().getConfiguration().getIdentityURL());            
-        }
-        
-        return configuration;
-    }
-    
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#toProviderType(org.jboss.dmr.ModelNode)
-     */
-    @Override
-    protected SPConfiguration toProviderType(ModelNode operation) {
-        return ModelUtils.toSPConfig(operation);
     }
 }

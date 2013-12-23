@@ -3,7 +3,7 @@
  * Copyright 2012, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
- * 
+ *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; either version 2.1 of
@@ -21,11 +21,6 @@
  */
 package test.org.picketlink.as.subsystem;
 
-import java.io.File;
-import java.io.IOException;
-
-import junit.framework.Assert;
-
 import org.apache.commons.io.FileUtils;
 import org.jboss.as.subsystem.test.AbstractSubsystemTest;
 import org.jboss.as.subsystem.test.AdditionalInitialization;
@@ -37,15 +32,19 @@ import org.jboss.msc.service.ServiceName;
 import org.junit.Before;
 import org.picketlink.as.subsystem.PicketLinkExtension;
 
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.Assert.fail;
+
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
  */
 public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsystemTest {
 
     protected static final String FAKE_AS7_INSTALLATION_DIR = "target/jboss-as7-fake";
     protected static final String FAKE_AS7_DEPLOYMENTS = FAKE_AS7_INSTALLATION_DIR + "/deployments";
-    
+
     private ModelNode resultingModelNode;
     private KernelServices kernelServices;
 
@@ -60,9 +59,7 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
     }
 
     /**
-     * <p>
-     * Creates a directory at FAKE_AS7_INSTALLATION_DIR to be used as a fake as7 installation.
-     * </p>
+     * <p> Creates a directory at FAKE_AS7_INSTALLATION_DIR to be used as a fake as7 installation. </p>
      */
     private void configureFakeAS7Installation() {
         File fakeAsInstallation = new File(FAKE_AS7_INSTALLATION_DIR);
@@ -81,25 +78,24 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
     }
 
     /**
-     * <p>
-     * Returns the resulting {@link ModelNode} instance after installing the XML into the controller.
-     * </p>
-     * 
+     * <p> Returns the resulting {@link ModelNode} instance after installing the XML into the controller. </p>
+     *
      * @return
      */
     private ModelNode installModelIntoController() {
         if (this.resultingModelNode == null) {
             try {
-                KernelServicesBuilder createKernelServicesBuilder = super.createKernelServicesBuilder(new AdditionalInitialization());
-                
+                KernelServicesBuilder createKernelServicesBuilder = super
+                                                                            .createKernelServicesBuilder(new AdditionalInitialization());
+
                 createKernelServicesBuilder.setSubsystemXml(getValidSubsystemXML());
-                
+
                 this.kernelServices = createKernelServicesBuilder.build();
-                
+
                 this.resultingModelNode = this.kernelServices.readWholeModel();
             } catch (Exception e) {
                 e.printStackTrace();
-                Assert.fail("Error while installing the subsystem in the controller.");
+                fail("Error while installing the subsystem in the controller.");
             }
         }
 
@@ -108,7 +104,7 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
 
     /**
      * Returns a valid XML for the subsystem.
-     * 
+     *
      * @return
      */
     protected String getValidSubsystemXML() {
@@ -116,9 +112,9 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
 
         try {
             content = FileUtils.readFileToString(new File(Thread.currentThread().getContextClassLoader()
-                    .getResource(getSubsystemXmlFileName()).getFile()));
+                                                                  .getResource(getSubsystemXmlFileName()).getFile()));
         } catch (IOException e) {
-            Assert.fail("Error while reading the subsystem configuration file.");
+            fail("Error while reading the subsystem configuration file.");
         }
 
         return content;
@@ -127,11 +123,10 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
     protected abstract String getSubsystemXmlFileName();
 
     /**
-     * <p>
-     * Returns a installed service from the container.
-     * </p>
-     * 
-     * @param serviceName
+     * <p> Returns a installed service from the container. </p>
+     *
+     * @param serviceName The service name.
+     *
      * @return
      */
     protected ServiceController<?> getInstalledService(ServiceName serviceName) {
@@ -145,5 +140,4 @@ public abstract class AbstractPicketLinkSubsystemTestCase extends AbstractSubsys
     protected KernelServices getKernelServices() {
         return kernelServices;
     }
-
 }

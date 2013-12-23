@@ -21,118 +21,65 @@
  */
 package org.picketlink.as.subsystem.federation.service;
 
-import java.io.InputStream;
-
 import org.picketlink.common.exceptions.ParsingException;
-import org.picketlink.common.exceptions.ProcessingException;
 import org.picketlink.config.federation.IDPType;
 import org.picketlink.config.federation.PicketLinkType;
+import org.picketlink.config.federation.ProviderType;
 import org.picketlink.config.federation.SPType;
 import org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider;
-import org.picketlink.identity.federation.web.util.SAMLConfigurationProvider;
+
+import java.io.InputStream;
 
 /**
- * <p>
- * This class is a custom {@link SAMLConfigurationProvider} to be used to configure identity providers and service providers
- * with the configurations defined in the subsystem.
- * </p>
- * 
+ * <p> {@link org.picketlink.identity.federation.web.util.SAMLConfigurationProvider} to be used to with identity providers and service providers
+ * deployments considering the configurations defined in the subsystem. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
- * @param <C>
  */
 public class DomainModelConfigProvider extends AbstractSAMLConfigurationProvider {
 
-    private PicketLinkType configuration;
+    private final PicketLinkType configuration;
 
     public DomainModelConfigProvider(PicketLinkType picketLinkType) {
         this.configuration = picketLinkType;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider#getIDPConfiguration()
-     */
     @Override
-    public IDPType getIDPConfiguration() throws ProcessingException {
-        if (this.getPicketLinkConfiguration().getIdpOrSP() != null && this.getPicketLinkConfiguration().getIdpOrSP() instanceof IDPType) {
-            return (IDPType) this.getPicketLinkConfiguration().getIdpOrSP();
+    public IDPType getIDPConfiguration() {
+        ProviderType providerType = this.getPicketLinkConfiguration().getIdpOrSP();
+
+        if (providerType instanceof IDPType) {
+            return (IDPType) providerType;
         }
 
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider#getSPConfiguration()
-     */
     @Override
-    public SPType getSPConfiguration() throws ProcessingException {
-        if (this.getPicketLinkConfiguration().getIdpOrSP() != null && this.getPicketLinkConfiguration().getIdpOrSP() instanceof SPType) {
-            return (SPType) this.getPicketLinkConfiguration().getIdpOrSP();
+    public SPType getSPConfiguration() {
+        ProviderType providerType = this.getPicketLinkConfiguration().getIdpOrSP();
+
+        if (providerType instanceof SPType) {
+            return (SPType) providerType;
         }
 
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider#getPicketLinkConfiguration()
-     */
     @Override
-    public PicketLinkType getPicketLinkConfiguration() throws ProcessingException {
-        if (super.configParsedPicketLinkType != null) {
-            if (super.configParsedPicketLinkType.getHandlers() != null) {
-                this.configuration.setHandlers(super.configParsedPicketLinkType.getHandlers());
+    public PicketLinkType getPicketLinkConfiguration() {
+        if (this.configParsedPicketLinkType != null) {
+            if (this.configParsedPicketLinkType.getHandlers() != null) {
+                this.configuration.setHandlers(this.configParsedPicketLinkType.getHandlers());
             }
-            if (super.configParsedPicketLinkType.getStsType() != null) {
-                this.configuration.setStsType(super.configParsedPicketLinkType.getStsType());
+            if (this.configParsedPicketLinkType.getStsType() != null) {
+                this.configuration.setStsType(this.configParsedPicketLinkType.getStsType());
             }
         }
 
         return this.configuration;
     }
 
-    /**
-     * <p>
-     * Indicates if this provider is a Service Provider Configuration Provider.
-     * </p>
-     * 
-     * @return
-     */
-    public boolean isServiceProviderConfiguration() {
-        try {
-            return getSPConfiguration() != null;
-        } catch (ProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /**
-     * <p>
-     * Indicates if this provider is an Identity Provider Configuration Provider.
-     * </p>
-     * 
-     * @return
-     */
-    public boolean isIdentityProviderConfiguration() {
-        try {
-            return getIDPConfiguration() != null;
-        } catch (ProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return false;
-    }
-
-    /* (non-Javadoc)
-     * @see org.picketlink.identity.federation.web.config.AbstractSAMLConfigurationProvider#setConsolidatedConfigFile(java.io.InputStream)
-     */
     @Override
     public void setConsolidatedConfigFile(InputStream is) throws ParsingException {
         try {
@@ -140,5 +87,9 @@ public class DomainModelConfigProvider extends AbstractSAMLConfigurationProvider
         } catch (Exception e) {
             logger.trace("Configurations defined in picketlink.xml will be ignored.");
         }
+    }
+
+    boolean isIdentityProviderConfiguration() {
+        return getIDPConfiguration() != null;
     }
 }

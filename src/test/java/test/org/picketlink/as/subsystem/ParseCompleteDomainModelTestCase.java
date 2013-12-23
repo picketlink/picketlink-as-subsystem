@@ -3,7 +3,7 @@
  * Copyright 2012, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
- * 
+ *
  * This is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as
  * published by the Free Software Foundation; either version 2.1 of
@@ -21,16 +21,13 @@
  */
 package test.org.picketlink.as.subsystem;
 
-import junit.framework.Assert;
 import org.jboss.dmr.ModelNode;
+import org.junit.Assert;
 import org.junit.Test;
 
-
 /**
- * <p>
- * Parses a subsystem configuration considering all domain model elements.
- * </p>
- * 
+ * <p> Parses a subsystem configuration considering all domain model elements. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 9, 2012
  */
@@ -46,13 +43,13 @@ public class ParseCompleteDomainModelTestCase extends AbstractPicketLinkSubsyste
 
     /**
      * Tests that the xml installs properly into the controller.
-     * 
+     *
      * @throws Exception
      */
     @Test
     public void testInstallIntoController() throws Exception {
         ModelNode model = getResultingModelNode();
-        
+
         Assert.assertNotNull("Expected a populated model.", model);
         Assert.assertNotNull("ModelNode instance is not defined.", model.isDefined());
     }
@@ -61,5 +58,4 @@ public class ParseCompleteDomainModelTestCase extends AbstractPicketLinkSubsyste
     protected String getSubsystemXmlFileName() {
         return "picketlink-subsystem.xml";
     }
-
 }

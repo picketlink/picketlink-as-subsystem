@@ -23,11 +23,11 @@
   -->
 
 <module xmlns="urn:jboss:module:1.1" name="org.picketlink">
-    <resources>
-    </resources>
+  <resources>
+  </resources>
 
-    <dependencies>
-        <module name="org.picketlink.federation" export="true" />
-        <module name="org.picketlink.federation.bindings" export="true" />
-    </dependencies>
+  <dependencies>
+    <module name="org.picketlink.federation" export="true"/>
+    <module name="org.picketlink.federation.bindings" export="true"/>
+  </dependencies>
 </module>

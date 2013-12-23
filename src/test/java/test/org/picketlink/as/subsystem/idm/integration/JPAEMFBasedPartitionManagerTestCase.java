@@ -20,11 +20,12 @@ import org.picketlink.idm.model.basic.User;
 
 import javax.annotation.Resource;
 
-import static org.junit.Assert.*;
-import static org.picketlink.idm.credential.Credentials.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.picketlink.idm.credential.Credentials.Status;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -33,16 +34,20 @@ public class JPAEMFBasedPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsResource(JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
-                .addAsManifestResource(JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(JPAEMFBasedPartitionManagerTestCase.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsResource(
+                                                              JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                            "deployment/emf-jndi-persistence.xml"), "META-INF/persistence.xml")
+                                        .addAsManifestResource(
+                                                                      JPAEMFBasedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                    "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(JPAEMFBasedPartitionManagerTestCase.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/JPAEMFBasedPartitionManager")
+    @Resource(mappedName = "picketlink/JPAEMFBasedPartitionManager")
     private PartitionManager jpaEMFBasedPartitionManager;
 
     @Test
@@ -95,5 +100,4 @@ public class JPAEMFBasedPartitionManagerTestCase {
         assertNotNull(user.getAttribute("testAttribute"));
         assertEquals("value", user.getAttribute("testAttribute").getValue());
     }
-
 }

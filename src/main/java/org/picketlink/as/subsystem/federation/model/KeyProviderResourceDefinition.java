@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.dmr.ModelType;
@@ -35,30 +34,13 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class KeyProviderResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition URL = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_URL.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition PASSWD = new SimpleAttributeDefinitionBuilder(ModelElement.KEY_STORE_PASSWD.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition SIGN_KEY_ALIAS = new SimpleAttributeDefinitionBuilder(ModelElement.KEY_STORE_SIGN_KEY_ALIAS.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition SIGN_KEY_PASSWD = new SimpleAttributeDefinitionBuilder(ModelElement.KEY_STORE_SIGN_KEY_PASSWD.getName(), ModelType.STRING, false).setAllowExpression(true).build();
     public static final KeyProviderResourceDefinition INSTANCE = new KeyProviderResourceDefinition();
 
-    public static final SimpleAttributeDefinition URL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_URL.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition PASSWD = new SimpleAttributeDefinitionBuilder(
-            ModelElement.KEY_STORE_PASSWD.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition SIGN_KEY_ALIAS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.KEY_STORE_SIGN_KEY_ALIAS.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition SIGN_KEY_PASSWD = new SimpleAttributeDefinitionBuilder(
-            ModelElement.KEY_STORE_SIGN_KEY_PASSWD.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(URL);
-        INSTANCE.addAttribute(PASSWD);
-        INSTANCE.addAttribute(SIGN_KEY_ALIAS);
-        INSTANCE.addAttribute(SIGN_KEY_PASSWD);
-    }
-    
     private KeyProviderResourceDefinition() {
-        super(ModelElement.KEY_STORE, KeyProviderAddHandler.INSTANCE, KeyProviderRemoveHandler.INSTANCE);
-    }
-    
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return KeyProviderWriteAttributeHandler.INSTANCE;
+        super(ModelElement.KEY_STORE, KeyProviderAddHandler.INSTANCE, KeyProviderRemoveHandler.INSTANCE, URL, PASSWD, SIGN_KEY_ALIAS, SIGN_KEY_PASSWD);
     }
 }

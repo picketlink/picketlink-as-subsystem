@@ -11,7 +11,8 @@
     <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.GroupTypeEntity</class>
     <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.IdentityTypeEntity</class>
     <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.RelationshipTypeEntity</class>
-    <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.RelationshipIdentityTypeReferenceEntity</class>
+    <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.RelationshipIdentityTypeReferenceEntity
+    </class>
     <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.PartitionTypeEntity</class>
     <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.PasswordCredentialTypeEntity</class>
     <class>test.org.picketlink.as.subsystem.module.idm.multiconfig.entity.SalesAgentEntity</class>

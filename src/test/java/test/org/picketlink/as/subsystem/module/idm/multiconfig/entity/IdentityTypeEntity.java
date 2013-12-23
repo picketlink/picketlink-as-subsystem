@@ -34,7 +34,7 @@ import java.util.Date;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@IdentityManaged (IdentityType.class)
+@IdentityManaged(IdentityType.class)
 public class IdentityTypeEntity extends AttributedTypeEntity {
 
     private static final long serialVersionUID = -6533395974259723600L;
@@ -107,8 +107,8 @@ public class IdentityTypeEntity extends AttributedTypeEntity {
 
         IdentityTypeEntity other = (IdentityTypeEntity) obj;
 
-        return getId() != null && other.getId() != null && getId().equals(other.getId())
-                && getTypeName() != null && other.getTypeName() != null && getTypeName().equals(other.getTypeName());
+        return getId() != null && other.getId() != null && getId().equals(other.getId()) && getTypeName() != null
+                       && other.getTypeName() != null && getTypeName().equals(other.getTypeName());
     }
 
     @Override

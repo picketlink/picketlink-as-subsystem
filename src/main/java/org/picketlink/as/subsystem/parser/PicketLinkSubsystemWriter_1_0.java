@@ -36,67 +36,104 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.picketlink.as.subsystem.model.ModelElement.COMMON_HANDLER;
+import static org.picketlink.as.subsystem.model.ModelElement.COMMON_HANDLER_PARAMETER;
+import static org.picketlink.as.subsystem.model.ModelElement.COMMON_NAME;
+import static org.picketlink.as.subsystem.model.ModelElement.FEDERATION;
+import static org.picketlink.as.subsystem.model.ModelElement.FILE_STORE;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_CONFIGURATION;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_MANAGEMENT;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER_SAML_METADATA;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER_SAML_METADATA_ORGANIZATION;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN;
+import static org.picketlink.as.subsystem.model.ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER;
+import static org.picketlink.as.subsystem.model.ModelElement.JPA_STORE;
+import static org.picketlink.as.subsystem.model.ModelElement.KEY_STORE;
+import static org.picketlink.as.subsystem.model.ModelElement.LDAP_STORE;
+import static org.picketlink.as.subsystem.model.ModelElement.LDAP_STORE_ATTRIBUTE;
+import static org.picketlink.as.subsystem.model.ModelElement.LDAP_STORE_MAPPING;
+import static org.picketlink.as.subsystem.model.ModelElement.SAML;
+import static org.picketlink.as.subsystem.model.ModelElement.SERVICE_PROVIDER;
+import static org.picketlink.as.subsystem.model.ModelElement.SUPPORTED_TYPE;
+import static org.picketlink.as.subsystem.model.ModelElement.SUPPORTED_TYPES;
+import static org.picketlink.as.subsystem.model.XMLElement.HANDLERS;
+import static org.picketlink.as.subsystem.model.XMLElement.SERVICE_PROVIDERS;
+
 /**
- * <p>
- * XML Writer for the subsystem schema, version 1.0.
- * </p>
- * 
+ * <p> XML Writer for the subsystem schema, version 1.0. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
 public class PicketLinkSubsystemWriter_1_0 implements XMLStreamConstants, XMLElementWriter<SubsystemMarshallingContext> {
 
-    private static final Map<String, ModelWriter> writers;
-    
+    private static final Map<String, ModelXMLElementWriter> writers = new HashMap<String, ModelXMLElementWriter>();
+
     static {
-        writers = new HashMap<String, ModelWriter>();
-        
-        writers.put(ModelElement.IDENTITY_MANAGEMENT.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_MANAGEMENT, writers));
-        writers.put(ModelElement.IDENTITY_CONFIGURATION.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_CONFIGURATION, writers));
-        writers.put(ModelElement.JPA_STORE.getName(), new GenericModelElementWriter(ModelElement.JPA_STORE, writers));
-        writers.put(ModelElement.FILE_STORE.getName(), new GenericModelElementWriter(ModelElement.FILE_STORE, writers));
-        writers.put(ModelElement.LDAP_STORE.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE, writers));
-        writers.put(ModelElement.LDAP_STORE_MAPPING.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE_MAPPING, XMLElement.LDAP_MAPPINGS, writers));
-        writers.put(ModelElement.LDAP_STORE_ATTRIBUTE.getName(), new GenericModelElementWriter(ModelElement.LDAP_STORE_ATTRIBUTE, writers));
-        writers.put(ModelElement.SUPPORTED_TYPES.getName(), new GenericModelElementWriter(ModelElement.SUPPORTED_TYPES, writers));
-        writers.put(ModelElement.SUPPORTED_TYPE.getName(), new GenericModelElementWriter(ModelElement.SUPPORTED_TYPE, writers));
-        writers.put(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER, XMLElement.IDENTITY_STORE_CREDENTIAL_HANDLERS, writers));
-        writers.put(ModelElement.FEDERATION.getName(), new GenericModelElementWriter(ModelElement.FEDERATION, writers));
-        writers.put(ModelElement.IDENTITY_PROVIDER.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_PROVIDER, writers));
-        writers.put(ModelElement.KEY_STORE.getName(), new GenericModelElementWriter(ModelElement.KEY_STORE, writers));
-        writers.put(ModelElement.IDENTITY_PROVIDER_SAML_METADATA.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_PROVIDER_SAML_METADATA, writers));
-        writers.put(ModelElement.IDENTITY_PROVIDER_SAML_METADATA_ORGANIZATION.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_PROVIDER_SAML_METADATA_ORGANIZATION, writers));
-        writers.put(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN.getName(), new GenericModelElementWriter(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN, XMLElement.TRUST, writers));
-        writers.put(ModelElement.COMMON_HANDLER.getName(), new GenericModelElementWriter(ModelElement.COMMON_HANDLER, XMLElement.HANDLERS, writers));
-        writers.put(ModelElement.COMMON_HANDLER_PARAMETER.getName(), new GenericModelElementWriter(ModelElement.COMMON_HANDLER_PARAMETER, writers));
-        writers.put(ModelElement.SERVICE_PROVIDER.getName(), new GenericModelElementWriter(ModelElement.SERVICE_PROVIDER, XMLElement.SERVICE_PROVIDERS, writers));
-        writers.put(ModelElement.SAML.getName(), new GenericModelElementWriter(ModelElement.SAML, writers));
+        // identity management elements writers
+        registerWriter(IDENTITY_MANAGEMENT, COMMON_NAME);
+        registerWriter(IDENTITY_CONFIGURATION, COMMON_NAME);
+        registerWriter(JPA_STORE);
+        registerWriter(FILE_STORE);
+        registerWriter(LDAP_STORE);
+        registerWriter(LDAP_STORE_MAPPING, XMLElement.LDAP_MAPPINGS);
+        registerWriter(LDAP_STORE_ATTRIBUTE);
+        registerWriter(SUPPORTED_TYPES);
+        registerWriter(SUPPORTED_TYPE);
+        registerWriter(IDENTITY_STORE_CREDENTIAL_HANDLER, XMLElement.IDENTITY_STORE_CREDENTIAL_HANDLERS);
+
+        // federation elements writers
+        registerWriter(FEDERATION);
+        registerWriter(IDENTITY_PROVIDER);
+        registerWriter(KEY_STORE);
+        registerWriter(IDENTITY_PROVIDER_SAML_METADATA);
+        registerWriter(IDENTITY_PROVIDER_SAML_METADATA_ORGANIZATION);
+        registerWriter(IDENTITY_PROVIDER_TRUST_DOMAIN, XMLElement.TRUST, COMMON_NAME);
+        registerWriter(COMMON_HANDLER, HANDLERS);
+        registerWriter(COMMON_HANDLER_PARAMETER, COMMON_NAME);
+        registerWriter(SERVICE_PROVIDER, SERVICE_PROVIDERS);
+        registerWriter(SAML);
     }
-    
-    /** {@inheritDoc} */
+
     @Override
     public void writeContent(XMLExtendedStreamWriter writer, SubsystemMarshallingContext context) throws XMLStreamException {
         if (!context.getModelNode().isDefined()) {
             return;
         }
-        
+
         context.startSubsystemElement(Namespace.CURRENT.getUri(), false);
-        
+
         List<ModelNode> federation = context.getModelNode().asList();
 
         for (ModelNode modelNode : federation) {
             String modelName = modelNode.asProperty().getName();
-            
-            if (modelName.equals(ModelElement.FEDERATION.getName())) {
-                writers.get(ModelElement.FEDERATION.getName()).write(writer, modelNode);         
-            } else if (modelName.equals(ModelElement.IDENTITY_MANAGEMENT.getName())) {
-                writers.get(ModelElement.IDENTITY_MANAGEMENT.getName()).write(writer, modelNode);
+
+            if (modelName.equals(FEDERATION.getName())) {
+                writers.get(FEDERATION.getName()).write(writer, modelNode);
+            } else if (modelName.equals(IDENTITY_MANAGEMENT.getName())) {
+                writers.get(IDENTITY_MANAGEMENT.getName()).write(writer, modelNode);
             } else {
-                throw new XMLStreamException("Not supported element [" + modelName + "]");
+                throw new XMLStreamException("Unexpected element [" + modelName + "]");
             }
         }
-        
+
         // End subsystem
         writer.writeEndElement();
     }
 
+    private static void registerWriter(final ModelElement element, final ModelElement keyAttribute) {
+        writers.put(element.getName(), new ModelXMLElementWriter(element, keyAttribute.getName(), writers));
+    }
+
+    private static void registerWriter(final ModelElement element) {
+        writers.put(element.getName(), new ModelXMLElementWriter(element, writers));
+    }
+
+    private static void registerWriter(final ModelElement element, final XMLElement parent) {
+        writers.put(element.getName(), new ModelXMLElementWriter(element, parent, writers));
+    }
+
+    private static void registerWriter(final ModelElement element, final XMLElement parent, final ModelElement keyAttribute) {
+        writers.put(element.getName(), new ModelXMLElementWriter(element, parent, keyAttribute.getName(), writers));
+    }
 }

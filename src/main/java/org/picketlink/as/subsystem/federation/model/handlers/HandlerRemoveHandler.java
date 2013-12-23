@@ -21,64 +21,30 @@
  */
 package org.picketlink.as.subsystem.federation.model.handlers;
 
-
-import java.util.ArrayList;
-
 import org.jboss.as.controller.AbstractRemoveStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
-import org.picketlink.as.subsystem.federation.service.AbstractEntityProviderService;
-import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
-import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
-import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.config.federation.handler.Handler;
-import org.picketlink.config.federation.handler.Handlers;
+import org.picketlink.as.subsystem.federation.service.SAMLHandlerService;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
 public class HandlerRemoveHandler extends AbstractRemoveStepHandler {
 
-    public static final HandlerRemoveHandler INSTANCE = new HandlerRemoveHandler();
+    static final HandlerRemoveHandler INSTANCE = new HandlerRemoveHandler();
 
     private HandlerRemoveHandler() {
     }
-    
-    @SuppressWarnings("rawtypes")
+
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
-            throws OperationFailedException {
-        String providerAlias = operation.get(ModelDescriptionConstants.ADDRESS).asPropertyList().get(2).getValue().asString();
-        String className = operation.get(ModelElement.COMMON_CLASS.getName()).asString();
-        
-        AbstractEntityProviderService providerService = getParentProviderService(context, providerAlias);
-        
-        Handlers handlerChain = providerService.getPicketLinkType().getHandlers();
-        
-        for (Handler handler : new ArrayList<Handler>(handlerChain.getHandler())) {
-            if (handler.getClazz().equals(className)) {
-                handlerChain.remove(handler);
-            }
-        }
+    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model) throws OperationFailedException {
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String providerAlias = pathAddress.subAddress(0, pathAddress.size() - 1).getLastElement().getValue();
+        String className = pathAddress.getLastElement().getValue();
+
+        context.removeService(SAMLHandlerService.createServiceName(providerAlias, className));
     }
-    
-    /**
-     * <p>Returns the {@link AbstractEntityProviderService} instance to be used during the handler configuration.</p>
-     * 
-     * @param context
-     * @param providerAlias
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    private AbstractEntityProviderService getParentProviderService(OperationContext context, String providerAlias) {
-        AbstractEntityProviderService providerService = IdentityProviderService.getService(context.getServiceRegistry(true), providerAlias);
-        
-        if (providerService == null) {
-            providerService = ServiceProviderService.getService(context.getServiceRegistry(true), providerAlias);
-        }
-        return providerService;
-    }
-    
 }

@@ -34,14 +34,10 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class CredentialHandlerResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false)
-            .setAllowExpression(false).build();
+    public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final CredentialHandlerResourceDefinition INSTANCE = new CredentialHandlerResourceDefinition();
 
-    public static final CredentialHandlerResourceDefinition INSTANCE = new CredentialHandlerResourceDefinition(CLASS);
-
-    private CredentialHandlerResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER, new IDMConfigAddStepHandler(attributes), attributes);
+    private CredentialHandlerResourceDefinition() {
+        super(ModelElement.IDENTITY_STORE_CREDENTIAL_HANDLER, new IDMConfigAddStepHandler(CLASS), CLASS);
     }
-    
 }

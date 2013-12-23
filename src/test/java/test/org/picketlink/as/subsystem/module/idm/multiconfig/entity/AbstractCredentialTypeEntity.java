@@ -30,7 +30,8 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * <p>Base mapping for credentials.</p>
+ * <p> Base mapping for credentials. </p>
+ *
  * @author pedroigor
  */
 @MappedSuperclass

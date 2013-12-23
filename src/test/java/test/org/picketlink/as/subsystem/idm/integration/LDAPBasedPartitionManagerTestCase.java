@@ -15,11 +15,10 @@ import org.picketlink.idm.model.basic.User;
 
 import javax.annotation.Resource;
 
-import static org.junit.Assert.*;
-import static org.picketlink.idm.credential.Credentials.*;
+import static org.junit.Assert.assertEquals;
+import static org.picketlink.idm.credential.Credentials.Status;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -28,15 +27,17 @@ public class LDAPBasedPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(LDAPBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(LDAPBasedPartitionManagerTestCase.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsManifestResource(
+                                                                      LDAPBasedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                  "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(LDAPBasedPartitionManagerTestCase.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/LDAPBasedPartitionManager")
+    @Resource(mappedName = "picketlink/LDAPBasedPartitionManager")
     private PartitionManager ldapBasedPartitionManager;
 
     @Test
@@ -57,5 +58,4 @@ public class LDAPBasedPartitionManagerTestCase {
 
         assertEquals(Status.VALID, credentials.getStatus());
     }
-
 }

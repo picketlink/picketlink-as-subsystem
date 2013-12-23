@@ -33,14 +33,18 @@ import org.jboss.modules.ModuleIdentifier;
 import org.jboss.modules.ModuleLoader;
 import org.jboss.modules.filter.PathFilters;
 
-import static org.picketlink.as.subsystem.PicketLinkLogger.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_API_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_IDM_API_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_IDM_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isFederationDeployment;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isIDMDeployment;
 
 /**
- * <p>
- * Specific {@link DeploymentUnitProcessor} to automatically configure the PicketLink module dependencies.
- * </p>
+ * <p> {@link DeploymentUnitProcessor} to automatically configure PicketLink module dependencies for deployments.. </p>
  *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 9, 2012
@@ -73,9 +77,7 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
     }
 
     /**
-     * <p>
-     * Add the PicketLink Federation dependencies to the {@link DeploymentUnit}.
-     * </p>
+     * <p> Add the PicketLink Federation dependencies to the {@link DeploymentUnit}. </p>
      *
      * @param deployment
      */
@@ -85,22 +87,19 @@ public class PicketLinkDependencyDeploymentProcessor implements DeploymentUnitPr
     }
 
     /**
-     * <p>
-     * Add the PicketLink IDM dependencies to the {@link DeploymentUnit}.
-     * </p>
+     * <p> Add the PicketLink IDM dependencies to the {@link DeploymentUnit}. </p>
      *
      * @param deployment
      */
     private void configureIDMDependencies(DeploymentUnit deployment) {
         addModuleDependency(deployment, ORG_PICKETLINK_IDM_API_MODULE);
+        addModuleDependency(deployment, ORG_PICKETLINK_CORE_API_MODULE);
         addModuleDependency(deployment, ORG_PICKETLINK_IDM_MODULE);
         ROOT_LOGGER.configuringDeployment("PicketLink IDM Dependencies", deployment.getName());
     }
 
     /**
-     * <p>
-     * Add the PicketLink Core dependencies to the {@link DeploymentUnit}.
-     * </p>
+     * <p> Add the PicketLink Core dependencies to the {@link DeploymentUnit}. </p>
      *
      * @param deployment
      */

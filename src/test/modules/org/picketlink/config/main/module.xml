@@ -30,8 +30,8 @@
   </resources>
 
   <dependencies>
-    <module name="javax.api" />
-    <module name="org.picketlink.common" />
+    <module name="javax.api"/>
+    <module name="org.picketlink.common"/>
   </dependencies>
 
 </module>

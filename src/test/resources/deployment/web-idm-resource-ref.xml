@@ -9,13 +9,13 @@
 	OR CONDITIONS OF ANY KIND, either express or implied. ~ See the License for 
 	the specific language governing permissions and ~ limitations under the License. -->
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
-	<resource-ref>
-		<description>Development PartitionManager</description>
-		<res-ref-name>java:picketlink/FileBasedPartitionManager</res-ref-name>
-		<res-type>org.picketlink.idm.PartitionManager</res-type>
-	</resource-ref>
+  <resource-ref>
+    <description>Development PartitionManager</description>
+    <res-ref-name>java:picketlink/FileBasedPartitionManager</res-ref-name>
+    <res-type>org.picketlink.idm.PartitionManager</res-type>
+  </resource-ref>
 
 </web-app>

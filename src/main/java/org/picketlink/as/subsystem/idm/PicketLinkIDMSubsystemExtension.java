@@ -22,22 +22,19 @@
 package org.picketlink.as.subsystem.idm;
 
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 
 /**
- * <p>
- * CDI {@link Extension} to enable PicketLink IDM when deploying CDI applications using the subsystem.
- * </p>
- * 
+ * <p> CDI {@link Extension} to enable PicketLink IDM when deploying CDI applications using the subsystem. </p>
+ *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  * @author Pedro Igor
  */
 public class PicketLinkIDMSubsystemExtension implements Extension {
 
-    public void installPartitionManagerBeanDefinition(@Observes AfterBeanDiscovery event, BeanManager beanManager) {
-        event.addBean(new PartitionManagerBeanDefinition(beanManager));
+    public void installSubsystemIdentityManagerProducer(@Observes BeforeBeanDiscovery event, BeanManager beanManager) {
+        event.addAnnotatedType(beanManager.createAnnotatedType(PartitionManagerProducer.class));
     }
-
 }

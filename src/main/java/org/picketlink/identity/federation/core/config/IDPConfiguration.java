@@ -24,79 +24,35 @@ package org.picketlink.identity.federation.core.config;
 import org.picketlink.config.federation.IDPType;
 import org.picketlink.config.federation.TrustType;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-
 /**
- * <p>
- * This class is responsible to store all informations about a given Identity Provider deployment. The state is populated with
- * values from the subsystem configuration.
- * </p>
- * 
+ * <p> This class is responsible to store all information about a given Identity Provider deployment. The state is populated with values from the
+ * subsystem configuration. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 12, 2012
  */
 public class IDPConfiguration extends IDPType implements ProviderConfiguration {
 
+    private String federationAlias;
     private String alias;
     private String securityDomain;
-    
-    private Map<String, String> trustDomainAlias = new HashMap<String, String>();
+    private final Map<String, String> trustDomainAlias = new HashMap<String, String>();
 
     public IDPConfiguration() {
         this.setTrust(new TrustType());
         this.getTrust().setDomains("");
     }
 
+    @Override
     public String getAlias() {
-        return alias;
+        return this.alias;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
-    /**
-     * Adds a new trust domain
-     * 
-     * @param domain
-     */
-    public void addTrustDomain(String domain, String certAlias) {
-        if (this.getTrust().getDomains() != null 
-                && this.getTrust().getDomains().indexOf(domain) == -1) {
-            if (!this.getTrust().getDomains().isEmpty()) {
-                this.getTrust().setDomains(this.getTrust().getDomains() + ",");
-            }
-            
-            this.getTrust().setDomains(this.getTrust().getDomains() + domain);
-        }
-        
-        if (certAlias != null && !certAlias.trim().isEmpty()) {
-            getTrustDomainAlias().put(domain, certAlias);
-        } else {
-            getTrustDomainAlias().put(domain, domain);
-        }
-    }
-
-    public void removeTrustDomain(String domain) {
-        if (this.getTrust().getDomains() != null && !this.getTrust().getDomains().isEmpty()) {
-            this.getTrust().setDomains("");
-            
-            String[] domains = this.getTrust().getDomains().split(",");
-
-            for (String currentDomain : domains) {
-                if (!domain.equals(currentDomain) && !"".equals(currentDomain.trim())) {
-                    this.getTrust().setDomains(currentDomain + ",");
-                }
-            }
-        } else if (this.getTrust().getDomains() == null){
-            this.getTrust().setDomains("");
-        }
-        
-//        this.getTrustDomainAlias().remove(domain);
-    }
-
+    @Override
     public String getSecurityDomain() {
         return this.securityDomain;
     }
@@ -104,12 +60,46 @@ public class IDPConfiguration extends IDPType implements ProviderConfiguration {
     public void setSecurityDomain(String securityDomain) {
         this.securityDomain = securityDomain;
     }
- 
-    public Map<String, String> getTrustDomainAlias() {
-        return trustDomainAlias;
+
+    public void setAlias(String alias) {
+        this.alias = alias;
     }
-    
-    public void setTrustDomainAlias(Map<String, String> trustDomainAlias) {
-        this.trustDomainAlias = trustDomainAlias;
+
+    public void addTrustDomain(String domain, String certAlias) {
+        if (this.getTrust().getDomains() != null && this.getTrust().getDomains().indexOf(domain) == -1) {
+            if (!this.getTrust().getDomains().isEmpty()) {
+                this.getTrust().setDomains(this.getTrust().getDomains() + ",");
+            }
+
+            this.getTrust().setDomains(this.getTrust().getDomains() + domain);
+        }
+
+        if (certAlias != null && !certAlias.trim().isEmpty()) {
+            this.trustDomainAlias.put(domain, certAlias);
+        } else {
+            this.trustDomainAlias.put(domain, domain);
+        }
+    }
+
+    public void removeTrustDomain(String domain) {
+        if (getTrust().getDomains() == null) {
+            this.getTrust().setDomains("");
+        }
+
+        if (getTrust().getDomains() != null && !getTrust().getDomains().isEmpty()) {
+            String[] domains = this.getTrust().getDomains().split(",");
+
+            getTrust().setDomains("");
+
+            for (String currentDomain : domains) {
+                if (!domain.equals(currentDomain) && !"".equals(currentDomain.trim())) {
+                    getTrust().setDomains(currentDomain + ",");
+                }
+            }
+        }
+    }
+
+    public Map<String, String> getTrustDomainAlias() {
+        return Collections.unmodifiableMap(this.trustDomainAlias);
     }
 }

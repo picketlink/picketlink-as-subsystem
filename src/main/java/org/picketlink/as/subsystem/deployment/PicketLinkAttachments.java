@@ -27,12 +27,10 @@ import org.picketlink.as.subsystem.federation.service.PicketLinkFederationServic
 
 /**
  * @author Pedro Igor
- * 
  */
 public interface PicketLinkAttachments {
 
     AttachmentKey<PicketLinkFederationService<?>> FEDERATION_ATTACHMENT_KEY = AttachmentKey.create(PicketLinkFederationService.class);
     AttachmentKey<Boolean> IDM_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
     AttachmentKey<Boolean> CORE_ATTACHMENT_KEY = AttachmentKey.create(Boolean.class);
-
 }

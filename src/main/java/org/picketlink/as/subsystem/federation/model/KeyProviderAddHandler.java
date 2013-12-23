@@ -22,43 +22,98 @@
 
 package org.picketlink.as.subsystem.federation.model;
 
-import static org.picketlink.as.subsystem.model.ModelUtils.toKeyProviderType;
-
-import java.util.List;
-
+import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.picketlink.as.subsystem.federation.service.FederationService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
-import org.picketlink.as.subsystem.model.ModelElement;
+import org.picketlink.as.subsystem.federation.service.KeyProviderService;
+import org.picketlink.config.federation.AuthPropertyType;
 import org.picketlink.config.federation.KeyProviderType;
+import org.picketlink.identity.federation.core.impl.KeyStoreKeyManager;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class KeyProviderAddHandler extends AbstractResourceAddStepHandler {
+public class KeyProviderAddHandler extends AbstractAddStepHandler {
 
     public static final KeyProviderAddHandler INSTANCE = new KeyProviderAddHandler();
 
     private KeyProviderAddHandler() {
-        super(ModelElement.KEY_STORE);
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext, org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-            throws OperationFailedException {
-        KeyProviderType keyProviderType = toKeyProviderType(model);
-        
-        FederationService federationService = FederationService.getService(context.getServiceRegistry(true), operation);
-        
-        federationService.setKeyProvider(keyProviderType);
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (AttributeDefinition attribute : KeyProviderResourceDefinition.INSTANCE.getAttributes()) {
+            attribute.validateAndSet(operation, model);
+        }
     }
-    
+
+    @Override
+    protected void performRuntime(final OperationContext context, final ModelNode operation, final ModelNode model,
+                                     final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
+        throws OperationFailedException {
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String federationAlias = pathAddress.subAddress(0, pathAddress.size() - 1).getLastElement().getValue();
+
+        KeyProviderService service = new KeyProviderService(toKeyProviderType(context, model));
+
+        ServiceBuilder<KeyProviderService> serviceBuilder = context.getServiceTarget().addService(KeyProviderService.createServiceName(federationAlias), service);
+
+        serviceBuilder.addDependency(FederationService.createServiceName(federationAlias), FederationService.class,
+                                        service.getFederationService());
+
+        ServiceController<KeyProviderService> controller = serviceBuilder.addListener(verificationHandler)
+                                                               .setInitialMode(ServiceController.Mode.PASSIVE).install();
+
+        if (newControllers != null) {
+            newControllers.add(controller);
+        }
+    }
+
+    private KeyProviderType toKeyProviderType(OperationContext context, ModelNode model) throws OperationFailedException {
+        KeyProviderType keyProviderType = new KeyProviderType();
+
+        keyProviderType.setClassName(KeyStoreKeyManager.class.getName());
+
+        keyProviderType.setSigningAlias(KeyProviderResourceDefinition.SIGN_KEY_ALIAS.resolveModelAttribute(context, model).asString());
+
+        AuthPropertyType keyStoreURL = new AuthPropertyType();
+
+        keyStoreURL.setKey("KeyStoreURL");
+        keyStoreURL.setValue(KeyProviderResourceDefinition.URL.resolveModelAttribute(context, model).asString());
+
+        keyProviderType.add(keyStoreURL);
+
+        AuthPropertyType keyStorePass = new AuthPropertyType();
+
+        keyStorePass.setKey("KeyStorePass");
+        keyStorePass.setValue(KeyProviderResourceDefinition.PASSWD.resolveModelAttribute(context, model).asString());
+
+        keyProviderType.add(keyStorePass);
+
+        AuthPropertyType signingKeyPass = new AuthPropertyType();
+
+        signingKeyPass.setKey("SigningKeyPass");
+        signingKeyPass.setValue(KeyProviderResourceDefinition.SIGN_KEY_PASSWD.resolveModelAttribute(context, model).asString());
+
+        keyProviderType.add(signingKeyPass);
+
+        AuthPropertyType signingKeyAlias = new AuthPropertyType();
+
+        signingKeyAlias.setKey("SigningKeyAlias");
+        signingKeyAlias.setValue(KeyProviderResourceDefinition.SIGN_KEY_ALIAS.resolveModelAttribute(context, model).asString());
+
+        keyProviderType.add(signingKeyAlias);
+
+        return keyProviderType;
+    }
 }

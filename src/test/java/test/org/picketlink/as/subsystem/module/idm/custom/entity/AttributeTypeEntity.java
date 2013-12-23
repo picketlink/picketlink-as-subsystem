@@ -52,7 +52,8 @@ public class AttributeTypeEntity implements Serializable {
     private String name;
 
     @AttributeValue
-    @Column(length = 1024) private String value;
+    @Column(length = 1024)
+    private String value;
 
     public Long getId() {
         return id;
@@ -115,5 +116,4 @@ public class AttributeTypeEntity implements Serializable {
         result = 31 * result + (getId() != null ? getId().hashCode() : 0);
         return result;
     }
-
 }

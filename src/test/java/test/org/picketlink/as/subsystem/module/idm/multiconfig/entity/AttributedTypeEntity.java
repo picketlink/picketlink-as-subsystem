@@ -67,5 +67,4 @@ public abstract class AttributedTypeEntity implements Serializable {
         result = 31 * result + (getId() != null ? getId().hashCode() : 0);
         return result;
     }
-
 }

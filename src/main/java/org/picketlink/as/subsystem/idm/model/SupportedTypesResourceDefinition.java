@@ -36,19 +36,15 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class SupportedTypesResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition SUPPORTS_ALL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_SUPPORTS_ALL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set("true"))
-            .setAllowExpression(false).build();
-
+    public static final SimpleAttributeDefinition SUPPORTS_ALL = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_SUPPORTS_ALL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode().set("false")).setAllowExpression(true).build();
     public static final SupportedTypesResourceDefinition INSTANCE = new SupportedTypesResourceDefinition(SUPPORTS_ALL);
-    
+
     private SupportedTypesResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.SUPPORTED_TYPES, new IDMConfigAddStepHandler(attributes), attributes);
     }
-    
+
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(SupportedTypeResourceDefinition.INSTANCE, resourceRegistration);
     }
-    
 }

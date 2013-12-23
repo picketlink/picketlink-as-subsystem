@@ -37,71 +37,76 @@ import org.junit.runner.RunWith;
 
 import java.net.URL;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
 @RunWith(Arquillian.class)
 public class AbstractIntegrationTests {
-    
+
     private static final String DEPLOYMENT_ROOT_DIR = "deployment";
     private static final String IDP_DEPLOYMENT_ROOT_DIR = DEPLOYMENT_ROOT_DIR + "/idp";
     private static final String SP_DEPLOYMENT_ROOT_DIR = DEPLOYMENT_ROOT_DIR + "/sp";
-
 
     @ArquillianResource
     private URL contextPath;
 
     /**
-     * <p>
-     * Creates an Identity Provider {@link WebArchive} instance. The contents used are located at <code>IDP_DEPLOYMENT_ROOT_DIR</code>
-     * </p>
-     * 
-     * @param warName
+     * <p> Creates an Identity Provider {@link WebArchive} instance. The contents used are located at <code>IDP_DEPLOYMENT_ROOT_DIR</code> </p>
+     *
+     * @param warName Final name of the web archive.
+     *
      * @return
      */
     protected static WebArchive createIdentityProviderWebArchive(String warName) {
         WebArchive webArchive = ShrinkWrap
-                .create(WebArchive.class, warName).setWebXML(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/web.xml")
-                .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/jboss-web.xml", "WEB-INF/jboss-web.xml")
-                .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/classes/users.properties", "WEB-INF/classes/users.properties")
-                .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/classes/roles.properties", "WEB-INF/classes/roles.properties")
-                .addAsWebResource(DEPLOYMENT_ROOT_DIR + "/jbid_test_keystore.jks", "WEB-INF/classes/jbid_test_keystore.jks")
-                .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/jsp/login.jsp", "jsp/login.jsp")
-                .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/jsp/error.jsp", "jsp/error.jsp")
-                .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/index.jsp", "index.jsp");
+                                        .create(WebArchive.class, warName)
+                                        .setWebXML(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/web.xml")
+                                        .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/jboss-web.xml", "WEB-INF/jboss-web.xml")
+                                        .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/classes/users.properties",
+                                                                 "WEB-INF/classes/users.properties")
+                                        .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/classes/roles.properties",
+                                                                 "WEB-INF/classes/roles.properties")
+                                        .addAsWebResource(DEPLOYMENT_ROOT_DIR + "/jbid_test_keystore.jks", "WEB-INF/classes/jbid_test_keystore.jks")
+                                        .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/jsp/login.jsp", "jsp/login.jsp")
+                                        .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/jsp/error.jsp", "jsp/error.jsp")
+                                        .addAsWebResource(IDP_DEPLOYMENT_ROOT_DIR + "/index.jsp", "index.jsp")
+                                        .addAsManifestResource(
+                                                                      AbstractIntegrationTests.class.getClassLoader().getResource(
+                                                                                                                                         "deployment/jboss-deployment-structure-fed.xml"), "jboss-deployment-structure.xml");
 
         return webArchive;
     }
 
     /**
-     * <p>
-     * Creates a Service Provider {@link WebArchive} instance. The contents used are located at <code>SP_DEPLOYMENT_ROOT_DIR</code>
-     * </p>
-     * 
-     * @param warName
+     * <p> Creates a Service Provider {@link WebArchive} instance. The contents used are located at <code>SP_DEPLOYMENT_ROOT_DIR</code> </p>
+     *
+     * @param warName Final name of the web archive.
+     *
      * @return
      */
     protected static WebArchive createServiceProviderWebArchive(String warName) {
         WebArchive webArchive = ShrinkWrap
-                .create(WebArchive.class, warName).setWebXML(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/web.xml")
-                .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/jboss-web.xml", "WEB-INF/jboss-web.xml")
-                .addAsWebResource(DEPLOYMENT_ROOT_DIR + "/jbid_test_keystore.jks", "WEB-INF/classes/jbid_test_keystore.jks")
-                .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/index.jsp", "index.jsp")
-                .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/customErrorPage.jsp", "customErrorPage.jsp")
-                .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/logout.jsp", "logout.jsp");
+                                        .create(WebArchive.class, warName)
+                                        .setWebXML(IDP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/web.xml")
+                                        .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/WEB-INF/jboss-web.xml", "WEB-INF/jboss-web.xml")
+                                        .addAsWebResource(DEPLOYMENT_ROOT_DIR + "/jbid_test_keystore.jks", "WEB-INF/classes/jbid_test_keystore.jks")
+                                        .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/index.jsp", "index.jsp")
+                                        .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/customErrorPage.jsp", "customErrorPage.jsp")
+                                        .addAsWebResource(SP_DEPLOYMENT_ROOT_DIR + "/logout.jsp", "logout.jsp")
+                                        .addAsManifestResource(
+                                                                      AbstractIntegrationTests.class.getClassLoader().getResource(
+                                                                                                                                         "deployment/jboss-deployment-structure-fed.xml"), "jboss-deployment-structure.xml");
 
         return webArchive;
     }
 
     /**
-     * <p>
-     * Asserts a successful login. Try to login at the Identity Provider and asserts if the welcome page is displayed.
-     * After that try to logout.
-     * </p>
-     * 
+     * <p> Asserts a successful login. Try to login at the Identity Provider and asserts if the welcome page is displayed. After that try to
+     * logout. </p>
+     *
      * @throws InterruptedException
      */
     protected void assertLoginAndLogout() throws Exception {
@@ -130,13 +135,6 @@ public class AbstractIntegrationTests {
         return null;
     }
 
-    /**
-     * <p>
-     * Try to login at the Identity Provider and asserts if the welcome page is displayed.
-     * </p>
-     * 
-     * @throws InterruptedException
-     */
     protected HtmlPage login(WebClient client) throws Exception {
         HtmlPage loginPage = client.getPage(this.contextPath);
 
@@ -156,5 +154,4 @@ public class AbstractIntegrationTests {
 
         return (HtmlPage) loginButton.click();
     }
-
 }

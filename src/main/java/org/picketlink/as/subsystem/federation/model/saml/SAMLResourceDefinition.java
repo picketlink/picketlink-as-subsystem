@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model.saml;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.dmr.ModelNode;
@@ -36,27 +35,11 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class SAMLResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition TOKEN_TIMEOUT = new SimpleAttributeDefinitionBuilder(ModelElement.SAML_TOKEN_TIMEOUT.getName(), ModelType.INT, true).setDefaultValue(new ModelNode().set(5000)).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition CLOCK_SKEW = new SimpleAttributeDefinitionBuilder(ModelElement.SAML_CLOCK_SKEW.getName(), ModelType.INT, true).setDefaultValue(new ModelNode().set(0)).setAllowExpression(true).build();
     public static final SAMLResourceDefinition INSTANCE = new SAMLResourceDefinition();
 
-    public static final SimpleAttributeDefinition TOKEN_TIMEOUT = new SimpleAttributeDefinitionBuilder(
-            ModelElement.SAML_TOKEN_TIMEOUT.getName(), ModelType.INT, true).setDefaultValue(new ModelNode().set(5000))
-            .setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition CLOCK_SKEW = new SimpleAttributeDefinitionBuilder(
-            ModelElement.SAML_CLOCK_SKEW.getName(), ModelType.INT, true).setDefaultValue(new ModelNode().set(0))
-            .setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(TOKEN_TIMEOUT);
-        INSTANCE.addAttribute(CLOCK_SKEW);
-    }
-    
     private SAMLResourceDefinition() {
-        super(ModelElement.SAML, SAMLAddHandler.INSTANCE, SAMLRemoveHandler.INSTANCE);
-    }
-    
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return SAMLWriteAttributeHandler.INSTANCE;
+        super(ModelElement.SAML, SAMLAddHandler.INSTANCE, SAMLRemoveHandler.INSTANCE, TOKEN_TIMEOUT, CLOCK_SKEW);
     }
 }

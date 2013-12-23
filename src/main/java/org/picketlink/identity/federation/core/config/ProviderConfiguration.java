@@ -22,29 +22,15 @@
 package org.picketlink.identity.federation.core.config;
 
 import org.picketlink.config.federation.KeyProviderType;
-import org.picketlink.config.federation.TrustType;
-
-import java.util.Map;
-
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
 public interface ProviderConfiguration {
 
     String getAlias();
-    
+
     String getSecurityDomain();
 
-    KeyProviderType getKeyProvider();
-    
-    void setKeyProvider(KeyProviderType keyProvider);
-
-    String getIdentityURL();
-    
-    TrustType getTrust();
-    
-    Map<String, String> getTrustDomainAlias();
-    
+    void setKeyProvider(KeyProviderType keyProviderType);
 }

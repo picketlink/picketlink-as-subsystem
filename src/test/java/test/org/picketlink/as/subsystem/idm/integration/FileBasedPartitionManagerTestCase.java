@@ -20,11 +20,12 @@ import org.picketlink.idm.model.basic.User;
 
 import javax.annotation.Resource;
 
-import static org.junit.Assert.*;
-import static org.picketlink.idm.credential.Credentials.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.picketlink.idm.credential.Credentials.Status;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -33,15 +34,17 @@ public class FileBasedPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(FileBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(FileBasedPartitionManagerTestCase.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsManifestResource(
+                                                                      FileBasedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                  "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(FileBasedPartitionManagerTestCase.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/FileBasedPartitionManager")
+    @Resource(mappedName = "picketlink/FileBasedPartitionManager")
     private PartitionManager fileBasedPartitionManager;
 
     @Test
@@ -96,5 +99,4 @@ public class FileBasedPartitionManagerTestCase {
         assertNotNull(user.getAttribute("testAttribute"));
         assertEquals("value", user.getAttribute("testAttribute").getValue());
     }
-
 }

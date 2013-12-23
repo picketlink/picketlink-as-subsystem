@@ -22,46 +22,104 @@
 
 package org.picketlink.as.subsystem.federation.model.sp;
 
-
-import java.util.List;
-
+import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
-import org.jboss.msc.service.ServiceController.Mode;
-import org.jboss.msc.service.ServiceName;
+import org.picketlink.as.subsystem.federation.service.FederationService;
 import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
-import org.picketlink.as.subsystem.model.ModelElement;
+import org.picketlink.identity.federation.core.config.SPConfiguration;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class ServiceProviderAddHandler extends AbstractResourceAddStepHandler {
+public class ServiceProviderAddHandler extends AbstractAddStepHandler {
 
     public static final ServiceProviderAddHandler INSTANCE = new ServiceProviderAddHandler();
 
     private ServiceProviderAddHandler() {
-        super(ModelElement.SERVICE_PROVIDER);
+
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext, org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-            throws OperationFailedException {
-        ServiceProviderService service = new ServiceProviderService(context, operation);
-        
-        ServiceName name = ServiceProviderService.createServiceName(service.getConfiguration().getAlias());
-        
-        ServiceController<ServiceProviderService> controller = context.getServiceTarget().addService(name, service)
-                .addListener(verificationHandler).setInitialMode(Mode.ACTIVE).install();
-
-        newControllers.add(controller);
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (AttributeDefinition attribute : ServiceProviderResourceDefinition.INSTANCE.getAttributes()) {
+            attribute.validateAndSet(operation, model);
+        }
     }
 
+    @Override
+    protected void performRuntime(final OperationContext context, final ModelNode operation, final ModelNode model,
+                                     final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers)
+        throws OperationFailedException {
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String alias = pathAddress.getLastElement().getValue();
+        ServiceProviderService service = new ServiceProviderService(toSPConfig(context, model));
+        ServiceBuilder<ServiceProviderService> serviceBuilder = context.getServiceTarget().addService(ServiceProviderService.createServiceName(alias), service);
+        String federationAlias = pathAddress.subAddress(0, pathAddress.size() - 1).getLastElement().getValue();
+
+        serviceBuilder.addDependency(FederationService.createServiceName(federationAlias), FederationService.class,
+                                        service.getFederationService());
+
+        ServiceController<ServiceProviderService> controller = serviceBuilder
+                                                                   .addListener(verificationHandler)
+                                                                   .setInitialMode(ServiceController.Mode.PASSIVE)
+                                                                   .install();
+
+        if (newControllers != null) {
+            newControllers.add(controller);
+        }
+    }
+
+    private SPConfiguration toSPConfig(OperationContext context, ModelNode fromModel) throws OperationFailedException {
+        SPConfiguration spType = new SPConfiguration();
+
+        String alias = ServiceProviderResourceDefinition.ALIAS.resolveModelAttribute(context, fromModel).asString();
+
+        spType.setAlias(alias);
+
+        String url = ServiceProviderResourceDefinition.URL.resolveModelAttribute(context, fromModel).asString();
+
+        spType.setServiceURL(url);
+
+        String securityDomain = ServiceProviderResourceDefinition.SECURITY_DOMAIN.resolveModelAttribute(context, fromModel).asString();
+
+        spType.setSecurityDomain(securityDomain);
+
+        boolean postBinding = ServiceProviderResourceDefinition.POST_BINDING.resolveModelAttribute(context, fromModel).asBoolean();
+
+        if (postBinding) {
+            spType.setBindingType("POST");
+        } else {
+            spType.setBindingType("REDIRECT");
+        }
+
+        spType.setPostBinding(postBinding);
+
+        boolean supportsSignatures = ServiceProviderResourceDefinition.SUPPORTS_SIGNATURES.resolveModelAttribute(context, fromModel).asBoolean();
+
+        spType.setSupportsSignature(supportsSignatures);
+
+        boolean strictPostBinding = ServiceProviderResourceDefinition.STRICT_POST_BINDING.resolveModelAttribute(context, fromModel).asBoolean();
+
+        spType.setIdpUsesPostBinding(strictPostBinding);
+
+        String errorPage = ServiceProviderResourceDefinition.ERROR_PAGE.resolveModelAttribute(context, fromModel).asString();
+
+        spType.setErrorPage(errorPage);
+
+        String logoutPage = ServiceProviderResourceDefinition.LOGOUT_PAGE.resolveModelAttribute(context, fromModel).asString();
+
+        spType.setLogOutPage(logoutPage);
+
+        return spType;
+    }
 }

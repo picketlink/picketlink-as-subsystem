@@ -22,115 +22,77 @@
 
 package org.picketlink.as.subsystem.federation.service;
 
-import org.jboss.as.controller.OperationContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceName;
-import org.jboss.msc.service.ServiceRegistry;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
-import org.picketlink.as.subsystem.model.ModelUtils;
 import org.picketlink.config.federation.KeyValueType;
 import org.picketlink.config.federation.TrustType;
 import org.picketlink.identity.federation.core.config.IDPConfiguration;
+import org.picketlink.identity.federation.web.handlers.saml2.SAML2IssuerTrustHandler;
 
-/** ty Provider.
- * </p>
- * 
+/**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class IdentityProviderService extends AbstractEntityProviderService<IdentityProviderService, IDPConfiguration> {
+public class IdentityProviderService extends EntityProviderService<IdentityProviderService, IDPConfiguration> {
 
     private static final String SERVICE_NAME = "IDPConfigurationService";
-    
-    public IdentityProviderService(OperationContext context, ModelNode modelNode) {
-        super(context, modelNode);
-    }
-    
-    /* (non-Javadoc)
-     * @see org.jboss.msc.service.Service#start(org.jboss.msc.service.StartContext)
-     */
-    @Override
-    public void start(StartContext context) throws StartException {
-        super.start(context);
-        this.getFederationService().setIdentityProviderService(this);
-    }
 
-    /* (non-Javadoc)
-     * @see org.jboss.msc.service.Service#stop(org.jboss.msc.service.StopContext)
-     */
-    @Override
-    public void stop(StopContext context) {
-        super.stop(context);
-        this.setConfiguration(new IDPConfiguration());
-        this.getFederationService().setIdentityProviderService(null);
-    }
-
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#doConfigureDeployment(org.jboss.as.server.deployment.DeploymentUnit)
-     */
-    protected void doConfigureDeployment(DeploymentUnit deploymentUnit) {
-        if (getFederationService().getKeyProvider() != null) {
-            TrustType trustType = this.getConfiguration().getTrust();
-            
-            if (trustType != null) {
-                String domainsStr = trustType.getDomains();
-                
-                if (domainsStr != null) {
-                    String[] domains = domainsStr.split(",");
-                    
-                    for (int i = 0; i < domains.length; i++) {
-                        KeyValueType kv = new KeyValueType();
-                        
-                        kv.setKey(domains[i]);
-                        
-                        String value = domains[i];
-                        
-                        if (this.getConfiguration().getTrustDomainAlias() != null) {
-                            value = this.getConfiguration().getTrustDomainAlias().get(domains[i]);
-                        }
-                        
-                        kv.setValue(value);
-                        
-                        getFederationService().getKeyProvider().remove(kv);
-                        getFederationService().getKeyProvider().add(kv);
-                    }
-                }
-            }
-        }
-    }
-    
-    /**
-     * Returns a instance of the service associated with the given name.
-     * 
-     * @param registry
-     * @param name
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public static IdentityProviderService getService(ServiceRegistry registry, String name) {
-        ServiceController<IdentityProviderService> container = (ServiceController<IdentityProviderService>) registry.getService(IdentityProviderService.createServiceName(name));
-        
-        if (container != null) {
-            return container.getValue();
-        }
-        
-        return null;
+    public IdentityProviderService(IDPConfiguration idpConfiguration) {
+        super(idpConfiguration);
     }
 
     public static ServiceName createServiceName(String alias) {
         return ServiceName.JBOSS.append(SERVICE_NAME, alias);
     }
 
-    /* (non-Javadoc)
-     * @see org.picketlink.as.subsystem.service.AbstractEntityProviderService#toProviderType(org.jboss.dmr.ModelNode)
-     */
     @Override
-    protected IDPConfiguration toProviderType(ModelNode operation) {
-        return ModelUtils.toIDPConfig(operation);
+    public void start(final StartContext context) throws StartException {
+        super.start(context);
+        getFederationService().getValue().setIdpConfiguration(getConfiguration());
     }
 
+    @Override
+    public void stop(final StopContext context) {
+        super.stop(context);
+        getFederationService().getValue().setIdpConfiguration(null);
+    }
 
+    @Override
+    protected void doAddHandlers() {
+        addHandler(SAML2IssuerTrustHandler.class, getPicketLinkType().getHandlers());
+    }
+
+    @Override
+    protected void doConfigureDeployment(DeploymentUnit deploymentUnit) {
+        if (getConfiguration().getKeyProvider() != null) {
+            TrustType trustType = getConfiguration().getTrust();
+
+            if (trustType != null) {
+                String domainsStr = trustType.getDomains();
+
+                if (domainsStr != null) {
+                    String[] domains = domainsStr.split(",");
+
+                    for (String domain : domains) {
+                        KeyValueType kv = new KeyValueType();
+
+                        kv.setKey(domain);
+
+                        String value = domain;
+
+                        if (this.getConfiguration().getTrustDomainAlias() != null) {
+                            value = this.getConfiguration().getTrustDomainAlias().get(domain);
+                        }
+
+                        kv.setValue(value);
+
+                        getConfiguration().getKeyProvider().remove(kv);
+                        getConfiguration().getKeyProvider().add(kv);
+                    }
+                }
+            }
+        }
+    }
 }

@@ -24,14 +24,10 @@ package org.picketlink.identity.federation.core.config;
 
 import org.picketlink.config.federation.SPType;
 
-import java.util.Map;
-
 /**
- * <p>
- * This class is responsible to store all informations about a given Service Provider deployment. The state is
- * populated with values from the subsystem configuration. 
- * </p>
- * 
+ * <p> This class is responsible to store all information about a given Service Provider deployment. The state is populated with values from the
+ * subsystem configuration. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 12, 2012
  */
@@ -41,22 +37,17 @@ public class SPConfiguration extends SPType implements ProviderConfiguration {
     private String securityDomain;
     private String alias;
 
-    /**
-     * @param url
-     */
     public void setPostBinding(boolean url) {
         this.postBinding = url;
     }
-    
-    /**
-     * @return the postBinding
-     */
+
     public boolean isPostBinding() {
         return this.postBinding;
     }
 
+    @Override
     public String getSecurityDomain() {
-        return securityDomain;
+        return this.securityDomain;
     }
 
     public void setSecurityDomain(String securityDomain) {
@@ -66,15 +57,10 @@ public class SPConfiguration extends SPType implements ProviderConfiguration {
     public void setAlias(String alias) {
         this.alias = alias;
     }
-    
-    public String getAlias() {
-        return alias;
-    }
 
     @Override
-    public Map<String, String> getTrustDomainAlias() {
-        // TODO Auto-generated method stub
-        return null;
+    public String getAlias() {
+        return this.alias;
     }
-    
+
 }

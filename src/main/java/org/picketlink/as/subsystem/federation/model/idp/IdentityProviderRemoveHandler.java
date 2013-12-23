@@ -35,23 +35,17 @@ import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
  */
 public class IdentityProviderRemoveHandler extends AbstractRemoveStepHandler {
 
-    public static final IdentityProviderRemoveHandler INSTANCE = new IdentityProviderRemoveHandler();
+    static final IdentityProviderRemoveHandler INSTANCE = new IdentityProviderRemoveHandler();
 
     private IdentityProviderRemoveHandler() {
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
             throws OperationFailedException {
-        String idpAlias = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        
-        context.removeService(IdentityProviderService.createServiceName(idpAlias));
-    }
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String alias = pathAddress.getLastElement().getValue();
 
+        context.removeService(IdentityProviderService.createServiceName(alias));
+    }
 }

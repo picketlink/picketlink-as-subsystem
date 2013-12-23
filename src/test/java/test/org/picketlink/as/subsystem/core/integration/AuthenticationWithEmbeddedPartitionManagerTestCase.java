@@ -19,10 +19,9 @@ import org.picketlink.idm.model.basic.User;
 
 import javax.inject.Inject;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -31,10 +30,12 @@ public class AuthenticationWithEmbeddedPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
-                .addClass(AuthenticationWithEmbeddedPartitionManagerTestCase.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsManifestResource(
+                                                                      AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                                   "deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(AuthenticationWithEmbeddedPartitionManagerTestCase.class);
 
         return deployment;
     }
@@ -82,5 +83,4 @@ public class AuthenticationWithEmbeddedPartitionManagerTestCase {
 
         assertTrue(BasicModel.hasRole(this.relationshipManager, user, role));
     }
-
 }

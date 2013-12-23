@@ -22,10 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.metrics;
 
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
-import static org.jboss.as.web.WebMessages.MESSAGES;
-
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.OperationStepHandler;
@@ -39,70 +35,27 @@ import org.jboss.msc.service.ServiceName;
 import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 import org.picketlink.as.subsystem.model.ModelElement;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.OP_ADDR;
+import static org.jboss.as.web.WebMessages.MESSAGES;
+
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
 public abstract class AbstractPicketLinkMetricsOperationHandler implements OperationStepHandler {
 
-    protected static final SimpleAttributeDefinition CREATED_ASSERTIONS_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_CREATED_ASSERTIONS_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
+    protected static final SimpleAttributeDefinition ERROR_RESPONSE_TO_SP_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_ERROR_RESPONSE_TO_SP_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition ERROR_SIGN_VALIDATION_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_ERROR_SIGN_VALIDATION_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition ERROR_TRUSTED_DOMAIN_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_ERROR_TRUSTED_DOMAIN_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition EXPIRED_ASSERTIONS_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_EXPIRED_ASSERTIONS_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition LOGIN_INIT_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_LOGIN_INIT_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition LOGIN_COMPLETE_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_LOGIN_COMPLETE_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition REQUEST_FROM_IDP_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_REQUEST_FROM_IDP_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition RESPONSE_FROM_IDP_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_RESPONSE_FROM_IDP_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition REQUEST_TO_IDP_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_REQUEST_TO_IDP_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition CREATED_ASSERTIONS_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_CREATED_ASSERTIONS_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
+    protected static final SimpleAttributeDefinition RESPONSE_TO_SP_COUNT = new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_RESPONSE_TO_SP_COUNT.getName(), ModelType.INT, true).setStorageRuntime().build();
 
-    protected static final SimpleAttributeDefinition RESPONSE_TO_SP_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_RESPONSE_TO_SP_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition ERROR_RESPONSE_TO_SP_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_ERROR_RESPONSE_TO_SP_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition ERROR_SIGN_VALIDATION_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_ERROR_SIGN_VALIDATION_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition ERROR_TRUSTED_DOMAIN_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_ERROR_TRUSTED_DOMAIN_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition EXPIRED_ASSERTIONS_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_EXPIRED_ASSERTIONS_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition LOGIN_INIT_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_LOGIN_INIT_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition LOGIN_COMPLETE_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_LOGIN_COMPLETE_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition REQUEST_FROM_IDP_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_REQUEST_FROM_IDP_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition RESPONSE_FROM_IDP_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_RESPONSE_FROM_IDP_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    protected static final SimpleAttributeDefinition REQUEST_TO_IDP_COUNT =
-            new SimpleAttributeDefinitionBuilder(ModelElement.METRICS_REQUEST_TO_IDP_COUNT.getName(), ModelType.INT, true)
-                    .setStorageRuntime()
-                    .build();
-
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.OperationStepHandler#execute(org.jboss.as.controller.OperationContext, org.jboss.dmr.ModelNode)
-     */
     @Override
     public void execute(OperationContext context, ModelNode operation) throws OperationFailedException {
         if (context.isNormalServer()) {
@@ -112,12 +65,12 @@ public abstract class AbstractPicketLinkMetricsOperationHandler implements Opera
                     final PathAddress address = PathAddress.pathAddress(operation.require(OP_ADDR));
                     final String name = address.getLastElement().getValue();
                     final String attributeName = operation.require(NAME).asString();
+                    final ServiceController<?> controller = context.getServiceRegistry(false).getRequiredService(createServiceName(name));
 
-                    final ServiceController<?> controller = context.getServiceRegistry(false).getService(createServiceName(name));
                     if (controller != null) {
                         try {
                             PicketLinkFederationService<?> service = (PicketLinkFederationService<?>) controller.getValue();
-                            
+
                             doPopulateResult(service.getMetrics(), context.getResult(), attributeName);
                         } catch (Exception e) {
                             throw new OperationFailedException(new ModelNode().set(MESSAGES.failedToGetMetrics(e.getMessage())));
@@ -125,18 +78,19 @@ public abstract class AbstractPicketLinkMetricsOperationHandler implements Opera
                     } else {
                         context.getResult().set(MESSAGES.noMetricsAvailable());
                     }
+
                     context.completeStep(OperationContext.RollbackHandler.NOOP_ROLLBACK_HANDLER);
                 }
             }, OperationContext.Stage.RUNTIME);
         } else {
             context.getResult().set(MESSAGES.noMetricsAvailable());
         }
+
         context.completeStep(OperationContext.RollbackHandler.NOOP_ROLLBACK_HANDLER);
     }
-    
+
     protected void doPopulateResult(PicketLinkSubsystemMetrics metrics, ModelNode result, String attributeName) {
     }
 
     protected abstract ServiceName createServiceName(String name);
-
 }

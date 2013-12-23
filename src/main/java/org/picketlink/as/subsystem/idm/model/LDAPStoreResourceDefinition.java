@@ -25,42 +25,20 @@ package org.picketlink.as.subsystem.idm.model;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
-import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.ModelType;
-import org.picketlink.as.subsystem.model.AbstractResourceDefinition;
 import org.picketlink.as.subsystem.model.ModelElement;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  * @since Mar 16, 2012
  */
-public class LDAPStoreResourceDefinition extends AbstractResourceDefinition {
+public class LDAPStoreResourceDefinition extends AbstractIdentityStoreResourceDefinition {
 
-    public static final SimpleAttributeDefinition URL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_URL.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition BIND_DN = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_BIND_DN.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition BIND_CREDENTIAL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_BIND_CREDENTIAL.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition BASE_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(
-            ModelElement.LDAP_STORE_BASE_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition MODULE = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_MODULE.getName(), ModelType.STRING, true).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition SUPPORT_ATTRIBUTE = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_STORE_SUPPORT_ATTRIBUTE.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
-            .setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition SUPPORT_CREDENTIAL = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_STORE_SUPPORT_CREDENTIAL.getName(), ModelType.BOOLEAN, true).setDefaultValue(new ModelNode(true))
-            .setAllowExpression(false).build();
-
-    public static final LDAPStoreResourceDefinition INSTANCE = new LDAPStoreResourceDefinition(URL, BIND_DN, BIND_CREDENTIAL,
-            BASE_DN_SUFFIX, MODULE, SUPPORT_ATTRIBUTE, SUPPORT_CREDENTIAL);
+    public static final SimpleAttributeDefinition URL = new SimpleAttributeDefinitionBuilder(ModelElement.LDAP_STORE_URL.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition BIND_DN = new SimpleAttributeDefinitionBuilder(ModelElement.LDAP_STORE_BIND_DN.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition BIND_CREDENTIAL = new SimpleAttributeDefinitionBuilder(ModelElement.LDAP_STORE_BIND_CREDENTIAL.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SimpleAttributeDefinition BASE_DN_SUFFIX = new SimpleAttributeDefinitionBuilder(ModelElement.LDAP_STORE_BASE_DN_SUFFIX.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final LDAPStoreResourceDefinition INSTANCE = new LDAPStoreResourceDefinition(URL, BIND_DN, BIND_CREDENTIAL, BASE_DN_SUFFIX, MODULE, SUPPORT_ATTRIBUTE, SUPPORT_CREDENTIAL);
 
     private LDAPStoreResourceDefinition(SimpleAttributeDefinition... attributes) {
         super(ModelElement.LDAP_STORE, new IDMConfigAddStepHandler(attributes), attributes);
@@ -72,5 +50,4 @@ public class LDAPStoreResourceDefinition extends AbstractResourceDefinition {
         addChildResourceDefinition(SupportedTypesResourceDefinition.INSTANCE, resourceRegistration);
         addChildResourceDefinition(CredentialHandlerResourceDefinition.INSTANCE, resourceRegistration);
     }
-
 }

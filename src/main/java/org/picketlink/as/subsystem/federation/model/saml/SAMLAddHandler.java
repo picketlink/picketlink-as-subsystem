@@ -22,43 +22,66 @@
 
 package org.picketlink.as.subsystem.federation.model.saml;
 
-
-import java.util.List;
-
+import org.jboss.as.controller.AbstractAddStepHandler;
+import org.jboss.as.controller.AttributeDefinition;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.picketlink.as.subsystem.federation.service.FederationService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
-import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.as.subsystem.model.ModelUtils;
+import org.picketlink.as.subsystem.federation.service.SAMLService;
+import org.picketlink.config.federation.STSType;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class SAMLAddHandler extends AbstractResourceAddStepHandler {
+public class SAMLAddHandler extends AbstractAddStepHandler {
 
-    public static final SAMLAddHandler INSTANCE = new SAMLAddHandler();
+    static final SAMLAddHandler INSTANCE = new SAMLAddHandler();
 
     private SAMLAddHandler() {
-        super(ModelElement.SAML);
+
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-            throws OperationFailedException {
-        FederationService federationService = FederationService.getService(context.getServiceRegistry(true), operation);
-        
-        federationService.setSamlConfig(ModelUtils.toSAMLConfig(model));
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (AttributeDefinition attribute : SAMLResourceDefinition.INSTANCE.getAttributes()) {
+            attribute.validateAndSet(operation, model);
+        }
     }
 
+    @Override
+    protected void performRuntime(final OperationContext context, final ModelNode operation, final ModelNode model,
+                                     final ServiceVerificationHandler verificationHandler, final List<ServiceController<?>> newControllers) throws OperationFailedException {
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String federationAlias = pathAddress.subAddress(0, pathAddress.size() - 1).getLastElement().getValue();
+        SAMLService service = new SAMLService(toSAMLConfig(context, model));
+        ServiceBuilder<SAMLService> serviceBuilder = context.getServiceTarget().addService(SAMLService.createServiceName(federationAlias), service);
+
+        serviceBuilder.addDependency(FederationService.createServiceName(federationAlias), FederationService.class, service.getFederationService());
+
+        ServiceController<SAMLService> controller = serviceBuilder.addListener(verificationHandler).setInitialMode(ServiceController.Mode.PASSIVE).install();
+
+        if (newControllers != null) {
+            newControllers.add(controller);
+        }
+    }
+
+    private STSType toSAMLConfig(OperationContext context, ModelNode fromModel) throws OperationFailedException {
+        int tokenTimeout = SAMLResourceDefinition.TOKEN_TIMEOUT.resolveModelAttribute(context, fromModel).asInt();
+        int clockSkew = SAMLResourceDefinition.CLOCK_SKEW.resolveModelAttribute(context, fromModel).asInt();
+
+        STSType stsType = new STSType();
+
+        stsType.setTokenTimeout(tokenTimeout);
+        stsType.setClockSkew(clockSkew);
+
+        return stsType;
+    }
 }

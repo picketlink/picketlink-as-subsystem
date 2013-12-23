@@ -37,11 +37,14 @@ import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
 import org.picketlink.as.subsystem.federation.service.PicketLinkFederationService;
 import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 
-import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.*;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.CORE_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.FEDERATION_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkAttachments.IDM_ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_IDM_MODULE;
 
 /**
- * <p>{@link DeploymentUnitProcessor} that marks PicketLink deployments according with structure of the deployment.</p>
+ * <p> {@link DeploymentUnitProcessor} that marks PicketLink deployments according with the structure of the deployment. </p>
  *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  */
@@ -49,6 +52,18 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
 
     public static final Phase PHASE = Phase.STRUCTURE;
     public static final int PRIORITY = 0x3000;
+
+    public static boolean isFederationDeployment(DeploymentUnit deployment) {
+        return deployment.getAttachment(FEDERATION_ATTACHMENT_KEY) != null;
+    }
+
+    public static boolean isIDMDeployment(DeploymentUnit deployment) {
+        return deployment.getAttachment(IDM_ATTACHMENT_KEY) != null;
+    }
+
+    public static boolean isCoreDeployment(DeploymentUnit deployment) {
+        return deployment.getAttachment(CORE_ATTACHMENT_KEY) != null;
+    }
 
     @Override
     public void deploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
@@ -59,18 +74,21 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
         markIDMDeployment(deploymentUnit);
     }
 
+    @Override
+    public void undeploy(DeploymentUnit context) {
+    }
+
     private void markFederationDeployment(DeploymentPhaseContext phaseContext) {
         DeploymentUnit deployment = phaseContext.getDeploymentUnit();
 
         ServiceRegistry serviceRegistry = phaseContext.getServiceRegistry();
 
-        ServiceController<?> federationService = serviceRegistry.getService(IdentityProviderService
-                .createServiceName(deployment.getName()));
+        ServiceController<?> federationService = serviceRegistry.getService(IdentityProviderService.createServiceName(deployment.getName()));
 
         if (federationService == null) {
             federationService = serviceRegistry.getService(ServiceProviderService.createServiceName(deployment.getName()));
         }
-        
+
         if (federationService != null) {
             deployment.putAttachment(FEDERATION_ATTACHMENT_KEY, (PicketLinkFederationService<?>) federationService.getValue());
         }
@@ -79,13 +97,11 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
     private void markIDMDeployment(DeploymentUnit deployment) {
         markDeploymentWithModuleDependency(ORG_PICKETLINK_IDM_MODULE, IDM_ATTACHMENT_KEY, deployment);
     }
-    
+
     private void markCoreDeployment(DeploymentUnit deployment) {
         markDeploymentWithModuleDependency(ORG_PICKETLINK_CORE_MODULE, CORE_ATTACHMENT_KEY, deployment);
     }
-    
 
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     private void markDeploymentWithModuleDependency(ModuleIdentifier moduleIdentifier, AttachmentKey attachment, DeploymentUnit deployment) {
         ModuleSpecification moduleSpecification = deployment.getAttachment(Attachments.MODULE_SPECIFICATION);
 
@@ -96,21 +112,4 @@ public class PicketLinkStructureDeploymentProcessor implements DeploymentUnitPro
             }
         }
     }
-
-    @Override
-    public void undeploy(DeploymentUnit context) {
-    }
-    
-    public static boolean isFederationDeployment(DeploymentUnit deployment) {
-        return deployment.getAttachment(FEDERATION_ATTACHMENT_KEY) != null;
-    }
-    
-    public static boolean isIDMDeployment(DeploymentUnit deployment) {
-        return deployment.getAttachment(IDM_ATTACHMENT_KEY) != null;
-    }
-
-    public static boolean isCoreDeployment(DeploymentUnit deployment) {
-        return deployment.getAttachment(CORE_ATTACHMENT_KEY) != null;
-    }
-
 }

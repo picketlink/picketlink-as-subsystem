@@ -16,6 +16,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.jboss</groupId>
+    <artifactId>jboss-parent</artifactId>
+    <version>12</version>
+  </parent>
+
 
   <groupId>org.picketlink</groupId>
   <artifactId>picketlink-as-extension</artifactId>
@@ -70,6 +76,7 @@
     <maven.compiler.target>1.6</maven.compiler.target>
 
     <!-- Current version of JBoss AS7 supported by this subsystem. -->
+    <version.wildfly>8.0.0.Beta1</version.wildfly>
     <version.jboss_as>7.2.0.Final</version.jboss_as>
     <version.jboss_as.dist>7.2.0.Alpha1-redhat-4</version.jboss_as.dist>
     <version.jboss_as.distribution>jboss-eap-6.1</version.jboss_as.distribution>
@@ -81,8 +88,8 @@
     <version.htmlunit>2.4</version.htmlunit>
     <version.shrinkwrap>2.0.0-alpha-5</version.shrinkwrap>
     <version.picketbox.ldap>1.0.2.Final</version.picketbox.ldap>
-    <version.apacheds>1.5.7</version.apacheds>
     <version.slf4j>1.5.6</version.slf4j>
+    <linkXRef>false</linkXRef>
   </properties>
 
   <dependencyManagement>
@@ -322,51 +329,67 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-source-plugin</artifactId>
-        <version>2.1.2</version>
-        <executions>
-          <execution>
-            <id>attach-sources</id>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
+        <artifactId>maven-checkstyle-plugin</artifactId>
       </plugin>
       <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.1</version>
-        <configuration>
-          <source>${maven.compiler.source}</source>
-          <target>${maven.compiler.target}</target>
-          <showWarnings>true</showWarnings>
-        </configuration>
-      </plugin>
-      <!-- Do not run the integration tests by default. -->
-      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.12</version>
-        <configuration>
-          <skip>true</skip>
-        </configuration>
-        <!-- Test execution for unit tests. -->
-        <executions>
-          <execution>
-            <id>unit-test</id>
-            <phase>test</phase>
-            <goals>
-              <goal>test</goal>
-            </goals>
-            <configuration>
-              <skip>false</skip>
-              <excludes>
-                <exclude>test/**/integration/*TestCase.java</exclude>
-              </excludes>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
     </plugins>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${version.surefire.plugin}</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+          <!-- Test execution for unit tests. -->
+          <executions>
+            <execution>
+              <id>unit-test</id>
+              <phase>test</phase>
+              <goals>
+                <goal>test</goal>
+              </goals>
+              <configuration>
+                <skip>false</skip>
+                <excludes>
+                  <exclude>test/**/integration/*TestCase.java</exclude>
+                </excludes>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${version.checkstyle.plugin}</version>
+          <configuration>
+            <configLocation>jboss-as-checkstyle/checkstyle.xml</configLocation>
+            <consoleOutput>true</consoleOutput>
+            <failsOnError>true</failsOnError>
+            <useFile/>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>org.wildfly</groupId>
+              <artifactId>wildfly-build-config</artifactId>
+              <version>${version.wildfly}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>check-style</id>
+              <phase>compile</phase>
+              <goals>
+                <goal>checkstyle</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>
@@ -388,42 +411,11 @@
       <build>
         <plugins>
           <!-- The tests are organized in Unit Tests and Integration Tests. -->
-          <plugin>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <version>2.12</version>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-            <executions>
-              <!-- Test execution for integration tests. -->
-              <execution>
-                <id>integration-test</id>
-                <phase>integration-test</phase>
-                <goals>
-                  <goal>test</goal>
-                </goals>
-                <configuration>
-                  <skip>false</skip>
-                  <systemPropertyVariables>
-                    <jbossHome>${jboss.as.home}</jbossHome>
-                  </systemPropertyVariables>
-                  <includes>
-                    <include>**/integration/*TestCase.java</include>
-                  </includes>
-                  <properties>
-                    <property>
-                      <name>listener</name>
-                      <value>test.org.picketlink.as.subsystem.util.LDAPServerRunListener</value>
-                    </property>
-                  </properties>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
+
           <!-- Create jars for custom modules used during the tests -->
           <plugin>
             <artifactId>maven-assembly-plugin</artifactId>
-            <version>2.4</version>
+            <version>${version.assembly.plugin}</version>
             <configuration>
               <descriptors>
                 <descriptor>${basedir}/src/test/assembly/modules/org/picketlink/test/assembly.xml</descriptor>
@@ -444,7 +436,6 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-dependency-plugin</artifactId>
-            <version>2.1</version>
             <executions>
               <execution>
                 <id>unpack</id>
@@ -653,6 +644,39 @@
             </executions>
           </plugin>
         </plugins>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <artifactId>maven-surefire-plugin</artifactId>
+              <version>${version.surefire.plugin}</version>
+              <executions>
+                <!-- Test execution for integration tests. -->
+                <execution>
+                  <id>integration-test</id>
+                  <phase>integration-test</phase>
+                  <goals>
+                    <goal>test</goal>
+                  </goals>
+                  <configuration>
+                    <skip>false</skip>
+                    <systemPropertyVariables>
+                      <jbossHome>${jboss.as.home}</jbossHome>
+                    </systemPropertyVariables>
+                    <includes>
+                      <include>**/integration/*TestCase.java</include>
+                    </includes>
+                    <properties>
+                      <property>
+                        <name>listener</name>
+                        <value>test.org.picketlink.as.subsystem.util.LDAPServerRunListener</value>
+                      </property>
+                    </properties>
+                  </configuration>
+                </execution>
+              </executions>
+            </plugin>
+          </plugins>
+        </pluginManagement>
       </build>
     </profile>
     <profile>
@@ -667,18 +691,6 @@
     </profile>
   </profiles>
 
-  <distributionManagement>
-    <repository>
-      <id>jboss-releases-repository</id>
-      <name>JBoss Releases Repository</name>
-      <url>https://repository.jboss.org/nexus/service/local/staging/deploy/maven2/</url>
-    </repository>
-    <snapshotRepository>
-      <id>jboss-snapshots-repository</id>
-      <name>JBoss Snapshots Repository</name>
-      <url>https://repository.jboss.org/nexus/content/repositories/snapshots/</url>
-    </snapshotRepository>
-  </distributionManagement>
 
   <repositories>
     <repository>

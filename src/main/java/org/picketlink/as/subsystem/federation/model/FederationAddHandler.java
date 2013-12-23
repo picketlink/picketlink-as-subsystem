@@ -21,65 +21,55 @@
  */
 package org.picketlink.as.subsystem.federation.model;
 
-import java.util.List;
-
+import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
 import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.web.WebSubsystemServices;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceController.Mode;
-import org.jboss.msc.service.ServiceName;
 import org.picketlink.as.subsystem.federation.service.FederationService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
-import org.picketlink.as.subsystem.model.ModelElement;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class FederationAddHandler extends AbstractResourceAddStepHandler {
+public class FederationAddHandler extends AbstractAddStepHandler {
 
-    public static final FederationAddHandler INSTANCE = new FederationAddHandler();
+    static final FederationAddHandler INSTANCE = new FederationAddHandler();
 
-    private FederationAddHandler() {
-        super(ModelElement.FEDERATION);
+    @Override
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (SimpleAttributeDefinition attribute : FederationResourceDefinition.INSTANCE.getAttributes()) {
+            attribute.validateAndSet(operation, model);
+        }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
+                                         ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
             throws OperationFailedException {
-        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
-
-        createFederationService(pathAddress.getLastElement().getValue(), context, verificationHandler, newControllers);
+        launchFederationServices(operation, context, verificationHandler, newControllers);
     }
 
-    /**
-     * <p>
-     * Creates a new {@link FederationService} instance for this configuration.
-     * </p>
-     * 
-     * @param alias
-     * @param context
-     * @param verificationHandler
-     * @param newControllers
-     */
-    private void createFederationService(String alias, OperationContext context,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers) {
-        FederationService service = new FederationService();
-        ServiceName serviceName = FederationService.createServiceName(alias);
-        ServiceController<FederationService> controller = context.getServiceTarget().addService(serviceName, service)
-                .addListener(verificationHandler).setInitialMode(Mode.ACTIVE).install();
+    void launchFederationServices(ModelNode operation, OperationContext context, ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers) {
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.OP_ADDR));
+        String alias = pathAddress.getLastElement().getValue();
+        FederationService service = new FederationService(alias);
+        ServiceBuilder<FederationService> serviceBuilder = context.getServiceTarget().addService(FederationService.createServiceName(alias), service);
 
-        newControllers.add(controller);
+        serviceBuilder.addDependency(WebSubsystemServices.JBOSS_WEB);
+
+        ServiceController<FederationService> controller = serviceBuilder.addListener(verificationHandler).setInitialMode(Mode.ACTIVE).install();
+
+        if (newControllers != null) {
+            newControllers.add(controller);
+        }
     }
-
 }

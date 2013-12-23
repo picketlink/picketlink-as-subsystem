@@ -30,21 +30,15 @@ import org.junit.Test;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
 public class FederationWithSignatureTestCase extends AbstractIntegrationTests {
 
-    /**
-     * Configures an IDP deployment.
-     * 
-     * @return
-     */
     @Deployment(name = "idp-sig", testable = false)
     @TargetsContainer("jboss-as7")
     public static WebArchive createIDPSigDeployment() {
         return createIdentityProviderWebArchive("idp-sig.war");
     }
-    
+
     @Deployment(name = "sales-post-sig", testable = false)
     @TargetsContainer("jboss-as7")
     public static WebArchive createSalesPostSigDeployment() {
@@ -56,7 +50,7 @@ public class FederationWithSignatureTestCase extends AbstractIntegrationTests {
     public static WebArchive createSalesRedirectSigDeployment() {
         return createServiceProviderWebArchive("sales-redirect-sig.war");
     }
-    
+
     @Test
     @OperateOnDeployment("sales-post-sig")
     public void testSalesPostSig() throws Exception {

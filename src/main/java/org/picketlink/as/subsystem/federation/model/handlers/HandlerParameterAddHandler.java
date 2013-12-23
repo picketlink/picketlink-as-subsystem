@@ -24,83 +24,44 @@ package org.picketlink.as.subsystem.federation.model.handlers;
 
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
+import org.jboss.as.controller.RestartParentResourceAddHandler;
 import org.jboss.as.controller.ServiceVerificationHandler;
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.dmr.ModelNode;
-import org.jboss.msc.service.ServiceController;
-import org.picketlink.as.subsystem.federation.service.AbstractEntityProviderService;
-import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
-import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
+import org.jboss.msc.service.ServiceName;
+import org.picketlink.as.subsystem.federation.service.SAMLHandlerService;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.config.federation.KeyValueType;
-import org.picketlink.config.federation.handler.Handler;
-import org.picketlink.config.federation.handler.Handlers;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class HandlerParameterAddHandler extends AbstractResourceAddStepHandler {
+public class HandlerParameterAddHandler extends RestartParentResourceAddHandler {
 
-    public static final HandlerParameterAddHandler INSTANCE = new HandlerParameterAddHandler();
+    static final HandlerParameterAddHandler INSTANCE = new HandlerParameterAddHandler();
 
     private HandlerParameterAddHandler() {
-        super(ModelElement.COMMON_HANDLER_PARAMETER);
+        super(ModelElement.COMMON_HANDLER.getName());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
-    @SuppressWarnings("rawtypes")
     @Override
-    protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-            throws OperationFailedException {
-        String providerAlias = operation.get(ModelDescriptionConstants.ADDRESS).asPropertyList().get(2).getValue().asString();
-        String handlerClassName = operation.get(ModelDescriptionConstants.ADDRESS).asPropertyList().get(3).getValue().asString();
-        String paramName = operation.get(ModelElement.COMMON_NAME.getName()).asString();
-        String paramValue = operation.get(ModelElement.COMMON_VALUE.getName()).asString();
-
-        AbstractEntityProviderService providerService = getParentProviderService(context, providerAlias);
-
-        Handlers handlerChain = providerService.getPicketLinkType().getHandlers();
-
-        for (Handler handler : new ArrayList<Handler>(handlerChain.getHandler())) {
-            if (handler.getClazz().equals(handlerClassName)) {
-                KeyValueType kv = new KeyValueType();
-                
-                kv.setKey(paramName);
-                kv.setValue(paramValue);
-                
-                handler.add(kv);
-            }
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (SimpleAttributeDefinition attribute : HandlerParameterResourceDefinition.INSTANCE.getAttributes()) {
+            attribute.validateAndSet(operation, model);
         }
     }
 
-    /**
-     * <p>
-     * Returns the {@link AbstractEntityProviderService} instance to be used during the handler configuration.
-     * </p>
-     * 
-     * @param context
-     * @param providerAlias
-     * @return
-     */
-    @SuppressWarnings("rawtypes")
-    private AbstractEntityProviderService getParentProviderService(OperationContext context, String providerAlias) {
-        AbstractEntityProviderService providerService = IdentityProviderService.getService(context.getServiceRegistry(true),
-                providerAlias);
-
-        if (providerService == null) {
-            providerService = ServiceProviderService.getService(context.getServiceRegistry(true), providerAlias);
-        }
-        return providerService;
+    @Override
+    protected void recreateParentService(OperationContext context, PathAddress parentAddress, ModelNode parentModel,
+                                            ServiceVerificationHandler verificationHandler) throws OperationFailedException {
+        HandlerAddHandler.INSTANCE.launchServices(context, parentAddress, parentModel, verificationHandler, null);
     }
 
+    @Override
+    protected ServiceName getParentServiceName(PathAddress parentAddress) {
+        String providerAlias = parentAddress.subAddress(0, parentAddress.size() - 1).getLastElement().getValue();
+        String className = parentAddress.getLastElement().getValue();
+
+        return SAMLHandlerService.createServiceName(providerAlias, className);
+    }
 }

@@ -34,14 +34,10 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class SupportedTypeResourceDefinition extends AbstractResourceDefinition {
 
-    public static final SimpleAttributeDefinition COMMON_CLASS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false)
-            .setAllowExpression(false).build();
+    public static final SimpleAttributeDefinition COMMON_CLASS = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false).setAllowExpression(true).build();
+    public static final SupportedTypeResourceDefinition INSTANCE = new SupportedTypeResourceDefinition();
 
-    public static final SupportedTypeResourceDefinition INSTANCE = new SupportedTypeResourceDefinition(COMMON_CLASS);
-    
-    private SupportedTypeResourceDefinition(SimpleAttributeDefinition... attributes) {
-        super(ModelElement.SUPPORTED_TYPE, new IDMConfigAddStepHandler(attributes), attributes);
+    private SupportedTypeResourceDefinition() {
+        super(ModelElement.SUPPORTED_TYPE, new IDMConfigAddStepHandler(COMMON_CLASS), COMMON_CLASS);
     }
-    
 }

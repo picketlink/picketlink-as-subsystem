@@ -30,15 +30,12 @@ import org.picketlink.identity.federation.core.audit.PicketLinkAuditEventType;
 import org.picketlink.identity.federation.core.audit.PicketLinkAuditHelper;
 
 /**
- * <p>
- * This class provides ways to store metrics collected from the PicketLink providers (IDPs and SPs).
- * </p>
- * 
- * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
+ * <p> This class provides ways to store metrics collected from the PicketLink providers (IDPs and SPs). </p>
  *
+ * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
 public class PicketLinkSubsystemMetrics extends PicketLinkAuditHelper {
-    
+
     private int createdAssertionsCount;
     private int responseToSPCount;
     private int errorResponseToSPCount;
@@ -54,124 +51,95 @@ public class PicketLinkSubsystemMetrics extends PicketLinkAuditHelper {
     public PicketLinkSubsystemMetrics(String securityDomainName) throws ConfigurationException {
         super(securityDomainName);
     }
-    
+
     @Override
     public void audit(AuditEvent event) {
         PicketLinkAuditEvent picketLinkEvent = (PicketLinkAuditEvent) event;
         PicketLinkAuditEventType eventType = picketLinkEvent.getType();
-        
+
         switch (eventType) {
             case CREATED_ASSERTION:
-                createdAssertionsCount++;
+                this.createdAssertionsCount++;
                 break;
             case RESPONSE_TO_SP:
-                responseToSPCount++;
+                this.responseToSPCount++;
                 break;
             case ERROR_RESPONSE_TO_SP:
-                errorResponseToSPCount++;
+                this.errorResponseToSPCount++;
                 break;
             case ERROR_SIG_VALIDATION:
-                errorSignValidationCount++;
+                this.errorSignValidationCount++;
                 break;
             case ERROR_TRUSTED_DOMAIN:
-                errorTrustedDomainCount++;
+                this.errorTrustedDomainCount++;
                 break;
             case EXPIRED_ASSERTION:
-                expiredAssertionsCount++;
+                this.expiredAssertionsCount++;
                 break;
             case LOGIN_INIT:
-                loginInitCount++;
+                this.loginInitCount++;
                 break;
             case LOGIN_COMPLETE:
-                loginCompleteCount++;
+                this.loginCompleteCount++;
                 break;
             case REQUEST_FROM_IDP:
-                requestFromIDPCount++;
+                this.requestFromIDPCount++;
                 break;
             case REQUEST_TO_IDP:
-                requestToIDPCount++;
+                this.requestToIDPCount++;
                 break;
             case RESPONSE_FROM_IDP:
-                responseFromIDPCount++;
+                this.responseFromIDPCount++;
                 break;
             default:
                 PicketLinkLogger.ROOT_LOGGER.warnf("Ignoring unexpected event type [%s]", eventType);
                 return;
         }
-        
+
         super.audit(picketLinkEvent);
     }
-    
+
     public int getCreatedAssertionsCount() {
-        return createdAssertionsCount;
+        return this.createdAssertionsCount;
     }
-    
+
     public int getResponseToSPCount() {
-        return responseToSPCount;
+        return this.responseToSPCount;
     }
 
-    /**
-     * @return the errorResponseToSPCount
-     */
     public int getErrorResponseToSPCount() {
-        return errorResponseToSPCount;
+        return this.errorResponseToSPCount;
     }
 
-    /**
-     * @return the errorSignValidationCount
-     */
     public int getErrorSignValidationCount() {
-        return errorSignValidationCount;
+        return this.errorSignValidationCount;
     }
 
-    /**
-     * @return the errorTrustedDomainCount
-     */
     public int getErrorTrustedDomainCount() {
-        return errorTrustedDomainCount;
+        return this.errorTrustedDomainCount;
     }
 
-    /**
-     * @return the expiredAssertionsCount
-     */
     public int getExpiredAssertionsCount() {
-        return expiredAssertionsCount;
+        return this.expiredAssertionsCount;
     }
 
-    /**
-     * @return the loginInitCount
-     */
     public int getLoginInitCount() {
-        return loginInitCount;
+        return this.loginInitCount;
     }
 
-    /**
-     * @return the loginCompleteCount
-     */
     public int getLoginCompleteCount() {
-        return loginCompleteCount;
+        return this.loginCompleteCount;
     }
 
-    /**
-     * @return the requestFromIDPCount
-     */
     public int getRequestFromIDPCount() {
-        return requestFromIDPCount;
+        return this.requestFromIDPCount;
     }
 
-    /**
-     * @return the responseFromIDPCount
-     */
     public int getResponseFromIDPCount() {
-        return responseFromIDPCount;
+        return this.responseFromIDPCount;
     }
 
-    /**
-     * @return the requestToIDPCount
-     */
     public int getRequestToIDPCount() {
-        return requestToIDPCount;
+        return this.requestToIDPCount;
     }
-    
-    
 }

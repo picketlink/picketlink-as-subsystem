@@ -29,14 +29,14 @@ import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * @since Mar 16, 2012
  */
 public class PicketLinkSubsystemRootResourceDefinition extends SimpleResourceDefinition {
 
     public static final PicketLinkSubsystemRootResourceDefinition INSTANCE = new PicketLinkSubsystemRootResourceDefinition();
-    
+
     private PicketLinkSubsystemRootResourceDefinition() {
         super(PathElement.pathElement(ModelDescriptionConstants.SUBSYSTEM, PicketLinkExtension.SUBSYSTEM_NAME),
-                PicketLinkExtension.getResourceDescriptionResolver(PicketLinkExtension.SUBSYSTEM_NAME), PicketLinkSubsystemAdd.INSTANCE, ReloadRequiredRemoveStepHandler.INSTANCE);
+                     PicketLinkExtension.getResourceDescriptionResolver(PicketLinkExtension.SUBSYSTEM_NAME),
+                     PicketLinkSubsystemAdd.INSTANCE, ReloadRequiredRemoveStepHandler.INSTANCE);
     }
 }

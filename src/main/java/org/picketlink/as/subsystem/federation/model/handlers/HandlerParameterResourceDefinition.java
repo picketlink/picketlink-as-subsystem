@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model.handlers;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.dmr.ModelType;
@@ -35,25 +34,10 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class HandlerParameterResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition VALUE = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_VALUE.getName(), ModelType.STRING, false).setAllowExpression(true).build();
     public static final HandlerParameterResourceDefinition INSTANCE = new HandlerParameterResourceDefinition();
 
-    public static final SimpleAttributeDefinition NAME = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_NAME.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    public static final SimpleAttributeDefinition VALUE = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_VALUE.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(NAME);
-        INSTANCE.addAttribute(VALUE);
-    }
-    
     private HandlerParameterResourceDefinition() {
-        super(ModelElement.COMMON_HANDLER_PARAMETER, HandlerParameterAddHandler.INSTANCE, HandlerParameterRemoveHandler.INSTANCE);
-    }
-
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return HandlerParameterWriteAttributeHandler.INSTANCE;
+        super(ModelElement.COMMON_HANDLER_PARAMETER, HandlerParameterAddHandler.INSTANCE, HandlerParameterRemoveHandler.INSTANCE, VALUE);
     }
 }

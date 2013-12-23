@@ -34,25 +34,16 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class IdentityManagementRemoveHandler extends AbstractRemoveStepHandler {
 
-    public static final IdentityManagementRemoveHandler INSTANCE = new IdentityManagementRemoveHandler();
+    static final IdentityManagementRemoveHandler INSTANCE = new IdentityManagementRemoveHandler();
 
     private IdentityManagementRemoveHandler() {
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
             throws OperationFailedException {
         String alias = operation.get(ModelElement.COMMON_ALIAS.getName()).asString();
-
         context.removeService(PartitionManagerService.createServiceName(alias));
-        context.reloadRequired();
         context.completeStep(OperationContext.ResultHandler.NOOP_RESULT_HANDLER);
     }
-
 }

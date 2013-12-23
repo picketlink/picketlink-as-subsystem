@@ -30,53 +30,36 @@ import org.junit.Test;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- *
  */
 public class FederationWithNoSignatureTestCase extends AbstractIntegrationTests {
 
-    /**
-     * Configures an IDP deployment.
-     * 
-     * @return
-     */
     @Deployment(name = "idp", testable = false)
     @TargetsContainer("jboss-as7")
     public static WebArchive createIDPDeployment() {
         return createIdentityProviderWebArchive("idp.war");
     }
-    
-    /**
-     * Configures an IDP deployment.
-     * 
-     * @return
-     */
+
     @Deployment(name = "sales-redirect", testable = false)
     @TargetsContainer("jboss-as7")
     public static WebArchive createSalesRedirectDeployment() {
         return createServiceProviderWebArchive("sales-redirect.war");
     }
 
-    /**
-     * Configures an IDP deployment.
-     * 
-     * @return
-     */
     @Deployment(name = "sales-post", testable = false)
     @TargetsContainer("jboss-as7")
     public static WebArchive createSalesPostDeployment() {
         return createServiceProviderWebArchive("sales-post.war");
     }
-    
+
     @Test
     @OperateOnDeployment("sales-post")
     public void testSalesPost() throws Exception {
         assertLoginAndLogout();
     }
-    
+
     @Test
     @OperateOnDeployment("sales-redirect")
     public void testSalesRedirect() throws Exception {
         assertLoginAndLogout();
     }
-    
 }

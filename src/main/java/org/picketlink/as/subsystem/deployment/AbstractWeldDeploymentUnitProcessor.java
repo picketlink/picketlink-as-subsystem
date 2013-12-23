@@ -10,29 +10,35 @@ import org.jboss.weld.metadata.MetadataImpl;
 
 import javax.enterprise.inject.spi.Extension;
 
-import static org.jboss.as.weld.WeldDeploymentMarker.*;
-import static org.jboss.as.weld.deployment.WeldAttachments.*;
+import static org.jboss.as.weld.WeldDeploymentMarker.isWeldDeployment;
+import static org.jboss.as.weld.deployment.WeldAttachments.PORTABLE_EXTENSIONS;
+import static org.picketlink.as.subsystem.PicketLinkMessages.MESSAGES;
 
 /**
  * @author Pedro Igor
  */
-public abstract class AbstractCDIDeploymentUnitProcessor implements DeploymentUnitProcessor {
+public abstract class AbstractWeldDeploymentUnitProcessor implements DeploymentUnitProcessor {
 
     @Override
     public void deploy(final DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
         DeploymentUnit deployment = phaseContext.getDeploymentUnit();
 
         if (isWeldDeployment(deployment)) {
-            if (!isAlreadyConfigured(deployment)) {
-                doDeploy(phaseContext);
+            if (deployment.getParent() != null) {
+                deployment = deployment.getParent();
+            }
+
+            try {
+                doDeploy(deployment);
+            } catch (Exception e) {
+                throw MESSAGES.deploymentConfigurationFailed(deployment.getName(), e);
             }
         }
     }
 
-    protected abstract void doDeploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException;
+    protected abstract void doDeploy(DeploymentUnit deploymentUnit) throws Exception;
 
-    protected abstract boolean isAlreadyConfigured(DeploymentUnit deployment);
-
+    @SuppressWarnings("unchecked")
     protected void addExtension(DeploymentUnit deployment, Extension extension) {
         if (!hasExtension(deployment, extension.getClass())) {
             Metadata<Extension> metadata = new MetadataImpl<Extension>(extension, deployment.getName());
@@ -40,17 +46,13 @@ public abstract class AbstractCDIDeploymentUnitProcessor implements DeploymentUn
         }
     }
 
-    protected AttachmentList<Metadata<Extension>> getExtensions(DeploymentUnit deployment) {
-        return deployment.getAttachment(PORTABLE_EXTENSIONS);
-    }
-
-    protected boolean hasExtension(DeploymentUnit deployment, Class<? extends Extension>... extensions) {
+    private boolean hasExtension(DeploymentUnit deployment, Class<? extends Extension>... extensions) {
         for (Class<? extends Extension> extension : extensions) {
-            AttachmentList<Metadata<Extension>> deploymentExtensions = getExtensions(deployment);
+            AttachmentList<Metadata<Extension>> deploymentExtensions = deployment.getAttachment(PORTABLE_EXTENSIONS);
 
             if (deploymentExtensions != null) {
-                for (Metadata<Extension> e : deploymentExtensions) {
-                    if (extension.equals(e.getValue().getClass())) {
+                for (Metadata<Extension> deployedExtension : deploymentExtensions) {
+                    if (extension.equals(deployedExtension.getValue().getClass())) {
                         return true;
                     }
                 }
@@ -59,5 +61,4 @@ public abstract class AbstractCDIDeploymentUnitProcessor implements DeploymentUn
 
         return false;
     }
-
 }

@@ -21,58 +21,41 @@
  */
 package org.picketlink.as.subsystem.core;
 
-import org.picketlink.producer.IdentityManagerProducer;
+import org.jboss.as.naming.deployment.ContextNames;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
 
 /**
- * <p>
- * {@link Extension} implementation to enable PicketLink Core when deploying the application using the subsystem.
- * </p>
- * 
+ * <p> {@link Extension} implementation to enable PicketLink Core when deploying the application using the subsystem. </p>
+ *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  * @author Pedro Igor
  */
-@ApplicationScoped
 public class PicketLinkCoreSubsystemExtension implements Extension {
 
-    private String partitionManagerJNDIUrl;
+    private final String partitionManagerJNDIUrl;
 
     public PicketLinkCoreSubsystemExtension() {
-
+        // should not be used. only necessary to meet CDI spec requirements.
+        this(null);
     }
 
     public PicketLinkCoreSubsystemExtension(String partitionManagerJNDIUrl) {
-        this.partitionManagerJNDIUrl = partitionManagerJNDIUrl;
-    }
-
-    /**
-     * <p>
-     * We should veto the {@link IdentityManagerProducer} when the {@link org.picketlink.idm.PartitionManager} must be used obtained from the JNDI,
-     * instead of internally produced. In this case, the {@link org.picketlink.idm.PartitionManager} will be properly produced by the
-     * {@link PicketLinkSubsystemIdentityManagerProducer}.
-     * </p>
-     * 
-     * @param event
-     */
-    public void vetoDefaultIdentityManagerProducer(@Observes ProcessAnnotatedType<IdentityManagerProducer> event) {
-        if (this.partitionManagerJNDIUrl != null) {
-            event.veto();
+        if (partitionManagerJNDIUrl == null) {
+            throw new IllegalArgumentException("PartitionManager JNDI url.");
         }
+
+        this.partitionManagerJNDIUrl = partitionManagerJNDIUrl.replaceAll(ContextNames.JAVA_CONTEXT_SERVICE_NAME.getSimpleName() + ":", "");
     }
 
-    public void installSubsystemIdentityManagerProducer(@Observes BeforeBeanDiscovery event, BeanManager beanManager) {
-        if (this.partitionManagerJNDIUrl != null) {
-            event.addAnnotatedType(beanManager.createAnnotatedType(PicketLinkSubsystemIdentityManagerProducer.class));
-        }
+    public void installJNDIPartitionManagerProducer(@Observes BeforeBeanDiscovery event, BeanManager beanManager) {
+        event.addAnnotatedType(beanManager.createAnnotatedType(JNDIPartitionManagerProducer.class));
     }
 
-    public String getPartitionManagerJNDIUrl() {
+    String getPartitionManagerJNDIUrl() {
         return this.partitionManagerJNDIUrl;
     }
 }

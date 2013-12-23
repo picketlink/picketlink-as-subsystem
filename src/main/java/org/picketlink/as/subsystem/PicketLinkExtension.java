@@ -33,56 +33,36 @@ import org.picketlink.as.subsystem.federation.model.FederationResourceDefinition
 import org.picketlink.as.subsystem.idm.model.IdentityManagementResourceDefinition;
 
 /**
- * <p>An extension to the JBoss Application Server to enable PicketLink configurations.</p>
- * <p>This class is the entry point for the initialization of the subsystem's configurations.</p>
- * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * @since Mar 16, 2012
  */
 public class PicketLinkExtension implements Extension {
 
-    /**
-     * PicketLink Subsystem name
-     */
     public static final String SUBSYSTEM_NAME = "picketlink";
-    
-    /**
-     * Resource bundle name/location used to load the model's description.
-     */
     private static final String RESOURCE_NAME = PicketLinkExtension.class.getPackage().getName() + ".LocalDescriptions";
 
-    /**
-     * Returns a instance of <code>ResourceDescriptionResolver</code> to be used to load the model description.
-     * 
-     * @param keyPrefix
-     * @return
-     */
     public static ResourceDescriptionResolver getResourceDescriptionResolver(final String keyPrefix) {
-        return new StandardResourceDescriptionResolver(keyPrefix, RESOURCE_NAME, PicketLinkExtension.class.getClassLoader(), true, true);
+        return new StandardResourceDescriptionResolver(keyPrefix, RESOURCE_NAME, PicketLinkExtension.class.getClassLoader(),
+                                                              true, true);
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.Extension#initializeParsers(org.jboss.as.controller.parsing.ExtensionParsingContext)
-     */
+    @Override
+    public void initialize(ExtensionContext context) {
+        SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, Namespace.CURRENT.getMajor(),
+                                                                           Namespace.CURRENT.getMinor());
+
+        ManagementResourceRegistration picketlink = subsystem
+                                                            .registerSubsystemModel(PicketLinkSubsystemRootResourceDefinition.INSTANCE);
+
+        picketlink.registerSubModel(FederationResourceDefinition.INSTANCE);
+        picketlink.registerSubModel(IdentityManagementResourceDefinition.INSTANCE);
+        picketlink.registerOperationHandler(GenericSubsystemDescribeHandler.DEFINITION,
+                                                   GenericSubsystemDescribeHandler.INSTANCE);
+
+        subsystem.registerXMLElementWriter(Namespace.CURRENT.getXMLWriter());
+    }
+
     @Override
     public void initializeParsers(ExtensionParsingContext context) {
         context.setSubsystemXmlMapping(SUBSYSTEM_NAME, Namespace.CURRENT.getUri(), Namespace.CURRENT.getXMLReader());
     }
-
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.Extension#initialize(org.jboss.as.controller.ExtensionContext)
-     */
-    @Override
-    public void initialize(ExtensionContext context) {
-        SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, Namespace.CURRENT.getMajor(), Namespace.CURRENT.getMinor());
-
-        ManagementResourceRegistration picketlink = subsystem.registerSubsystemModel(PicketLinkSubsystemRootResourceDefinition.INSTANCE);
-        
-        picketlink.registerSubModel(FederationResourceDefinition.INSTANCE);
-        picketlink.registerSubModel(IdentityManagementResourceDefinition.INSTANCE);
-        picketlink.registerOperationHandler(GenericSubsystemDescribeHandler.DEFINITION, GenericSubsystemDescribeHandler.INSTANCE);
-        
-        subsystem.registerXMLElementWriter(Namespace.CURRENT.getXMLWriter());
-    }
-
 }

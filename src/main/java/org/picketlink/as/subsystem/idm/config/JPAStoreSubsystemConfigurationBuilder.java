@@ -8,12 +8,11 @@ import org.picketlink.idm.config.JPAStoreConfigurationBuilder;
 import javax.transaction.TransactionManager;
 
 /**
- * Created with IntelliJ IDEA. User: pedroigor Date: 9/14/13 Time: 10:35 PM To change this template use File | Settings
- * | File Templates.
+ * Created with IntelliJ IDEA. User: pedroigor Date: 9/14/13 Time: 10:35 PM To change this template use File | Settings | File Templates.
  */
 public class JPAStoreSubsystemConfigurationBuilder extends JPAStoreConfigurationBuilder {
 
-    private String entityMoudule;
+    private String entityModule;
     private String entityModuleUnitName;
     private String dataSourceJndiUrl;
     private String entityManagerFactoryJndiName;
@@ -24,7 +23,7 @@ public class JPAStoreSubsystemConfigurationBuilder extends JPAStoreConfiguration
     }
 
     public JPAStoreSubsystemConfigurationBuilder entityModule(String entityModule) {
-        this.entityMoudule = entityModule;
+        this.entityModule = entityModule;
         return this;
     }
 
@@ -50,24 +49,10 @@ public class JPAStoreSubsystemConfigurationBuilder extends JPAStoreConfiguration
 
     @Override
     protected JPAIdentityStoreConfiguration create() {
-        return new JPAStoreSubsystemConfiguration(
-                this.entityMoudule,
-                this.entityModuleUnitName,
-                this.dataSourceJndiUrl,
-                this.entityManagerFactoryJndiName,
-                this.transactionManager,
-                getMappedEntities(),
-                getSupportedTypes(),
-                getUnsupportedTypes(),
-                getContextInitializers(),
-                getCredentialHandlerProperties(),
-                getCredentialHandlers(),
-                isSupportAttributes(),
-                isSupportCredentials());
+        return new JPAStoreSubsystemConfiguration(this.entityModule, this.entityModuleUnitName, this.dataSourceJndiUrl,
+                                                         this.entityManagerFactoryJndiName, this.transactionManager, getMappedEntities(), getSupportedTypes(),
+                                                         getUnsupportedTypes(), getContextInitializers(), getCredentialHandlerProperties(), getCredentialHandlers(),
+                                                         isSupportAttributes(), isSupportCredentials());
     }
 
-    @Override
-    protected void validate() {
-        super.validate();
-    }
 }

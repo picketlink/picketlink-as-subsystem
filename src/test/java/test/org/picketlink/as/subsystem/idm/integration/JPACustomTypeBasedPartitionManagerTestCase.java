@@ -20,11 +20,12 @@ import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 
 import javax.annotation.Resource;
 
-import static org.junit.Assert.*;
-import static org.picketlink.idm.credential.Credentials.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.picketlink.idm.credential.Credentials.Status;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -33,15 +34,17 @@ public class JPACustomTypeBasedPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsManifestResource(JPACustomTypeBasedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
-                .addClass(JPACustomTypeBasedPartitionManagerTestCase.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsManifestResource(
+                                                                      JPACustomTypeBasedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                           "deployment/jboss-deployment-structure-idm.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(JPACustomTypeBasedPartitionManagerTestCase.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/JPACustomEntityBasedPartitionManager")
+    @Resource(mappedName = "picketlink/JPACustomEntityBasedPartitionManager")
     private PartitionManager jpaCustomEntityBasedPartitionManager;
 
     @Test
@@ -78,7 +81,8 @@ public class JPACustomTypeBasedPartitionManagerTestCase {
 
         BasicModel.grantRole(relationshipManager, user, role);
 
-        user = identityManager.createIdentityQuery(SaleAgent.class).setParameter(SaleAgent.LOGIN_NAME, "johny").getResultList().get(0);
+        user = identityManager.createIdentityQuery(SaleAgent.class).setParameter(SaleAgent.LOGIN_NAME, "johny").getResultList()
+                       .get(0);
         role = BasicModel.getRole(identityManager, "admin");
 
         assertTrue(BasicModel.hasRole(relationshipManager, user, role));
@@ -89,10 +93,10 @@ public class JPACustomTypeBasedPartitionManagerTestCase {
 
         Thread.sleep(1000);
 
-        user = identityManager.createIdentityQuery(SaleAgent.class).setParameter(SaleAgent.LOGIN_NAME, "johny").getResultList().get(0);
+        user = identityManager.createIdentityQuery(SaleAgent.class).setParameter(SaleAgent.LOGIN_NAME, "johny").getResultList()
+                       .get(0);
 
         assertNotNull(user.getAttribute("testAttribute"));
         assertEquals("value", user.getAttribute("testAttribute").getValue());
     }
-
 }

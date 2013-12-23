@@ -8,10 +8,9 @@ import test.org.picketlink.as.subsystem.module.idm.SaleAgent;
 import javax.persistence.Entity;
 
 /**
- * Created with IntelliJ IDEA. User: pedroigor Date: 8/26/13 Time: 10:13 AM To change this template use File | Settings
- * | File Templates.
+ * Created with IntelliJ IDEA. User: pedroigor Date: 8/26/13 Time: 10:13 AM To change this template use File | Settings | File Templates.
  */
-@IdentityManaged (SaleAgent.class)
+@IdentityManaged(SaleAgent.class)
 @Entity
 public class SalesAgentEntity extends IdentityTypeEntity {
 

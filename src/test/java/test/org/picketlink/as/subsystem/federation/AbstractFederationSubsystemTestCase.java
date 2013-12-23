@@ -30,33 +30,30 @@ import org.picketlink.as.subsystem.federation.service.FederationService;
 import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
 import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 import org.picketlink.as.subsystem.model.ModelElement;
-
 import test.org.picketlink.as.subsystem.AbstractPicketLinkSubsystemTestCase;
 
 /**
  * @author Pedro Silva
- *
  */
 public class AbstractFederationSubsystemTestCase extends AbstractPicketLinkSubsystemTestCase {
 
     /**
-     * <p>
-     * Returns a {@link ModelNode} instance for the federation configuration being tested.
-     * </p>
-     * 
+     * <p> Returns a {@link ModelNode} instance for the federation configuration being tested. </p>
+     *
      * @param model
+     *
      * @return
      */
     protected ModelNode getFederationModel() {
-        ModelNode federationNode = getResultingModelNode().get(ModelDescriptionConstants.SUBSYSTEM, PicketLinkExtension.SUBSYSTEM_NAME,
-                ModelElement.FEDERATION.getName(), getFederationAliasToTest());
-        
+        ModelNode federationNode = getResultingModelNode().get(ModelDescriptionConstants.SUBSYSTEM,
+                                                                      PicketLinkExtension.SUBSYSTEM_NAME, ModelElement.FEDERATION.getName(), getFederationAliasToTest());
+
         return federationNode;
     }
 
     /**
-     * <p>Subclasses can override this method to specify the federation alias to test. Check the picketlink-subsystem.xml.</p>
-     * 
+     * <p> Subclasses can override this method to specify the federation alias to test. Check the picketlink-subsystem.xml. </p>
+     *
      * @return
      */
     protected String getFederationAliasToTest() {
@@ -70,33 +67,30 @@ public class AbstractFederationSubsystemTestCase extends AbstractPicketLinkSubsy
     }
 
     protected FederationService getFederationService() {
-        ServiceName serviceName = FederationService.createServiceName(getFederationModel().get(ModelElement.COMMON_ALIAS.getName()).asString());
+        ServiceName serviceName = FederationService.createServiceName(getFederationModel().get(
+                                                                                                      ModelElement.COMMON_ALIAS.getName()).asString());
 
         return (FederationService) getInstalledService(serviceName).getValue();
     }
 
     /**
-     * <p>
-     * Returns a {@link ModelNode} instance for the configured Identity Provider.
-     * </p>
-     * 
+     * <p> Returns a {@link ModelNode} instance for the configured Identity Provider. </p>
+     *
      * @return
      */
     protected ModelNode getIdentityProvider() {
         return getFederationModel().get(ModelElement.IDENTITY_PROVIDER.getName());
     }
-    
+
     /**
-     * <p>
-     * Returns a {@link ServiceProviderService} instance for the given alias.
-     * </p>
-     * 
+     * <p> Returns a {@link ServiceProviderService} instance for the given alias. </p>
+     *
      * @throws Exception
      */
     protected ServiceProviderService getServiceProviderService(String alias) throws Exception {
         return (ServiceProviderService) getInstalledService(ServiceProviderService.createServiceName(alias)).getValue();
     }
-    
+
     @Override
     protected String getSubsystemXmlFileName() {
         return "picketlink-subsystem-federation.xml";

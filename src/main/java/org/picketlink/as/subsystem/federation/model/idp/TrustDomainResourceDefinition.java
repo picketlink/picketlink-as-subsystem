@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model.idp;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.dmr.ModelType;
@@ -35,24 +34,10 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class TrustDomainResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition CERT_ALIAS = new SimpleAttributeDefinitionBuilder(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_CERT_ALIAS.getName(), ModelType.STRING, true).setAllowExpression(true).build();
     public static final TrustDomainResourceDefinition INSTANCE = new TrustDomainResourceDefinition();
 
-    public static final SimpleAttributeDefinition NAME = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_NAME.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-    public static final SimpleAttributeDefinition CERT_ALIAS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_CERT_ALIAS.getName(), ModelType.STRING, true).setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(NAME);
-        INSTANCE.addAttribute(CERT_ALIAS);
-    }
-    
     private TrustDomainResourceDefinition() {
-        super(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN, TrustDomainAddHandler.INSTANCE, TrustDomainRemoveHandler.INSTANCE);
-    }
-
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return TrustDomainWriteAttributeHandler.INSTANCE;
+        super(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN, TrustDomainAddHandler.INSTANCE, TrustDomainRemoveHandler.INSTANCE, CERT_ALIAS);
     }
 }

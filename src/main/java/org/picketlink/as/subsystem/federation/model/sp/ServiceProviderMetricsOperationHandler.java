@@ -30,22 +30,16 @@ import org.picketlink.as.subsystem.federation.service.ServiceProviderService;
 import org.picketlink.as.subsystem.model.ModelElement;
 
 /**
- * <p>
- * Provide access to the metrics collected from a specific Service Provider deployment.
- * </p>
- * 
+ * <p> Provide access to the metrics collected from a specific Service Provider deployment. </p>
+ *
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * 
  */
 public class ServiceProviderMetricsOperationHandler extends AbstractPicketLinkMetricsOperationHandler {
 
     public static final ServiceProviderMetricsOperationHandler INSTANCE = new ServiceProviderMetricsOperationHandler();
 
-    static final SimpleAttributeDefinition[] ATTRIBUTES = { 
-        EXPIRED_ASSERTIONS_COUNT,
-        REQUEST_FROM_IDP_COUNT,
-        REQUEST_TO_IDP_COUNT,
-        RESPONSE_FROM_IDP_COUNT};
+    static final SimpleAttributeDefinition[] ATTRIBUTES = {EXPIRED_ASSERTIONS_COUNT, REQUEST_FROM_IDP_COUNT,
+                                                                  REQUEST_TO_IDP_COUNT, RESPONSE_FROM_IDP_COUNT};
 
     private ServiceProviderMetricsOperationHandler() {
 
@@ -53,7 +47,7 @@ public class ServiceProviderMetricsOperationHandler extends AbstractPicketLinkMe
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.picketlink.as.subsystem.metrics.AbstractPicketLinkMetricsOperationHandler#doPopulateResult(org.jboss.as.controller
      * .OperationContext, java.lang.String, org.jboss.msc.service.ServiceController)
@@ -69,12 +63,10 @@ public class ServiceProviderMetricsOperationHandler extends AbstractPicketLinkMe
         } else if (ModelElement.METRICS_RESPONSE_FROM_IDP_COUNT.getName().equals(attributeName)) {
             result.set("" + metrics.getResponseFromIDPCount());
         }
-
     }
 
     @Override
     protected ServiceName createServiceName(String name) {
         return ServiceProviderService.createServiceName(name);
     }
-
 }

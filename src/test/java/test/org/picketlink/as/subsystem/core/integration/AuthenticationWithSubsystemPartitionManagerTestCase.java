@@ -22,10 +22,9 @@ import org.picketlink.idm.model.basic.User;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author pedroigor
  */
 @RunWith(Arquillian.class)
@@ -34,16 +33,20 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
     @Deployment
     public static WebArchive createDeployment() {
         WebArchive deployment = ShrinkWrap
-                .create(WebArchive.class, "test.war")
-                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
-                .addAsWebInfResource(AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource("deployment/web-idm-resource-ref.xml"), "web.xml")
-                .addAsManifestResource(AuthenticationWithSubsystemPartitionManagerTestCase.class.getClassLoader().getResource("deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
-                .addClass(AuthenticationWithSubsystemPartitionManagerTestCase.class);
+                                        .create(WebArchive.class, "test.war")
+                                        .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml")
+                                        .addAsWebInfResource(
+                                                                    AuthenticationWithEmbeddedPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                                 "deployment/web-idm-resource-ref.xml"), "web.xml")
+                                        .addAsManifestResource(
+                                                                      AuthenticationWithSubsystemPartitionManagerTestCase.class.getClassLoader().getResource(
+                                                                                                                                                                    "deployment/jboss-deployment-structure-core.xml"), "jboss-deployment-structure.xml")
+                                        .addClass(AuthenticationWithSubsystemPartitionManagerTestCase.class);
 
         return deployment;
     }
 
-    @Resource(mappedName="picketlink/FileBasedPartitionManager")
+    @Resource(mappedName = "picketlink/FileBasedPartitionManager")
     private PartitionManager partitionManager;
 
     @Inject
@@ -97,12 +100,11 @@ public class AuthenticationWithSubsystemPartitionManagerTestCase {
         IdentityManager identityManager = this.partitionManager.createIdentityManager();
         RelationshipManager relationshipManager = this.partitionManager.createRelationshipManager();
 
+        Thread.sleep(1000);
+
         user = BasicModel.getUser(identityManager, "johny");
         role = BasicModel.getRole(identityManager, "admin");
 
-        Thread.sleep(1000);
-
         assertTrue(BasicModel.hasRole(relationshipManager, user, role));
     }
-
 }

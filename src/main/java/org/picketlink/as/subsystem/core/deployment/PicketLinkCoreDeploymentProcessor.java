@@ -21,48 +21,46 @@
  */
 package org.picketlink.as.subsystem.core.deployment;
 
-import org.jboss.as.server.deployment.DeploymentPhaseContext;
 import org.jboss.as.server.deployment.DeploymentUnit;
-import org.jboss.as.server.deployment.DeploymentUnitProcessingException;
-import org.jboss.as.server.deployment.DeploymentUnitProcessor;
 import org.jboss.as.server.deployment.Phase;
 import org.jboss.as.web.deployment.WarMetaData;
 import org.jboss.metadata.javaee.spec.ResourceReferenceMetaData;
-import org.jboss.metadata.javaee.spec.ResourceReferencesMetaData;
 import org.jboss.modules.Module;
 import org.jboss.modules.ModuleLoadException;
 import org.picketlink.as.subsystem.core.PicketLinkCoreSubsystemExtension;
-import org.picketlink.as.subsystem.deployment.AbstractCDIDeploymentUnitProcessor;
+import org.picketlink.as.subsystem.deployment.AbstractWeldDeploymentUnitProcessor;
 import org.picketlink.idm.PartitionManager;
 
 import javax.enterprise.inject.spi.Extension;
-import java.util.Iterator;
 
-import static org.jboss.as.web.deployment.WarMetaData.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.*;
-import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.*;
+import static org.jboss.as.web.deployment.WarMetaData.ATTACHMENT_KEY;
+import static org.picketlink.as.subsystem.PicketLinkLogger.ROOT_LOGGER;
+import static org.picketlink.as.subsystem.PicketLinkMessages.MESSAGES;
+import static org.picketlink.as.subsystem.deployment.PicketLinkModuleIdentifiers.ORG_PICKETLINK_CORE_MODULE;
+import static org.picketlink.as.subsystem.deployment.PicketLinkStructureDeploymentProcessor.isCoreDeployment;
 
 /**
- * <p>{@link DeploymentUnitProcessor} that enables PicketLink Core functionality to deployments.</p>
+ * <p> Enables PicketLink Core functionality to deployments. </p>
  *
  * @author <a href="mailto:sthorger@redhat.com">Stian Thorgersen</a>
  * @author Pedro Igor
  */
-public class PicketLinkCoreDeploymentProcessor extends AbstractCDIDeploymentUnitProcessor {
+public class PicketLinkCoreDeploymentProcessor extends AbstractWeldDeploymentUnitProcessor {
 
     public static final Phase PHASE = Phase.POST_MODULE;
     public static final int PRIORITY = Phase.POST_MODULE_WELD_BEAN_ARCHIVE;
 
     @Override
-    public void doDeploy(DeploymentPhaseContext phaseContext) throws DeploymentUnitProcessingException {
-        DeploymentUnit deployment = phaseContext.getDeploymentUnit();
+    public void doDeploy(DeploymentUnit deploymentUnit) throws Exception {
+        if (isCoreDeployment(deploymentUnit)) {
+            ROOT_LOGGER.configuringDeployment("PicketLink Core CDI Extension", deploymentUnit.getName());
+            String partitionManagerJNDIUrl = getPartitionManagerJNDIUrl(deploymentUnit);
 
-        if (isCoreDeployment(deployment)) {
-            if (deployment.getParent() != null) {
-                deployment = deployment.getParent();
+            if (partitionManagerJNDIUrl != null) {
+                addExtension(deploymentUnit, new PicketLinkCoreSubsystemExtension(partitionManagerJNDIUrl));
             }
 
-            configureExtensions(deployment);
+            addPicketLinkCoreExtensions(deploymentUnit);
         }
     }
 
@@ -70,22 +68,17 @@ public class PicketLinkCoreDeploymentProcessor extends AbstractCDIDeploymentUnit
     public void undeploy(DeploymentUnit context) {
     }
 
-    @Override
-    protected boolean isAlreadyConfigured(DeploymentUnit deployment) {
-        return hasExtension(deployment, PicketLinkCoreSubsystemExtension.class);
-    }
-
-    private void configureExtensions(final DeploymentUnit deployment) throws DeploymentUnitProcessingException {
-        addExtension(deployment, new PicketLinkCoreSubsystemExtension(getPartitionManagerJNDIUrl(deployment)));
+    private void addPicketLinkCoreExtensions(DeploymentUnit deploymentUnit) {
+        Module module;
 
         try {
-            Module module = Module.getBootModuleLoader().loadModule(ORG_PICKETLINK_CORE_MODULE);
-
-            for (Extension e : module.loadService(Extension.class)) {
-                addExtension(deployment, e);
-            }
+            module = Module.getBootModuleLoader().loadModule(ORG_PICKETLINK_CORE_MODULE);
         } catch (ModuleLoadException e) {
-            throw new DeploymentUnitProcessingException("Failed to configure CDI extensions for deployment [" + deployment.getName() + "].", e);
+            throw MESSAGES.moduleCouldNotLoad(ORG_PICKETLINK_CORE_MODULE.getName(), e);
+        }
+
+        for (Extension e : module.loadService(Extension.class)) {
+            addExtension(deploymentUnit, e);
         }
     }
 
@@ -93,13 +86,7 @@ public class PicketLinkCoreDeploymentProcessor extends AbstractCDIDeploymentUnit
         WarMetaData warMetadata = deployment.getAttachment(ATTACHMENT_KEY);
 
         if (warMetadata != null && warMetadata.getWebMetaData() != null && warMetadata.getWebMetaData().getResourceReferences() != null) {
-            ResourceReferencesMetaData resourceReferences = warMetadata.getWebMetaData().getResourceReferences();
-
-            Iterator<ResourceReferenceMetaData> iterator = resourceReferences.iterator();
-
-            while (iterator.hasNext()) {
-                ResourceReferenceMetaData resourceReferenceMetaData = iterator.next();
-
+            for (ResourceReferenceMetaData resourceReferenceMetaData : warMetadata.getWebMetaData().getResourceReferences()) {
                 if (PartitionManager.class.getName().equals(resourceReferenceMetaData.getType())) {
                     return resourceReferenceMetaData.getName();
                 }
@@ -108,5 +95,4 @@ public class PicketLinkCoreDeploymentProcessor extends AbstractCDIDeploymentUnit
 
         return null;
     }
-
 }

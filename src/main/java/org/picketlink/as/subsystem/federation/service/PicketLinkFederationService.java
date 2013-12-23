@@ -26,27 +26,23 @@ import org.jboss.msc.service.Service;
 import org.picketlink.as.subsystem.federation.metrics.PicketLinkSubsystemMetrics;
 
 /**
- * <p>Interface for PicketLink specific services.</p>
- * 
- * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
+ * <p> Interface for PicketLink specific services. </p>
  *
- * @param <T>
+ * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
 public interface PicketLinkFederationService<T> extends Service<T> {
 
     /**
-     * <p>Configures a {@link DeploymentUnit} as a PicketLink deployment. For example: Identity Providers and Service Providers.</p>
-     * 
+     * <p> Configures a {@link DeploymentUnit} as a PicketLink deployment. For example: Identity Providers and Service Providers. </p>
+     *
      * @param deploymentUnit
      */
     void configure(DeploymentUnit deploymentUnit);
 
     /**
-     * <p>Returns a {@link PicketLinkSubsystemMetrics}.</p>
-     * 
+     * <p> Returns a {@link PicketLinkSubsystemMetrics}. </p>
+     *
      * @return
      */
     PicketLinkSubsystemMetrics getMetrics();
-    
-    
 }

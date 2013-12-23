@@ -24,7 +24,8 @@ import org.picketlink.idm.jpa.annotations.entity.ManagedCredential;
 import javax.persistence.Entity;
 
 /**
- * <p>This entity is mapped to support Password credential types using a {@link org.picketlink.idm.credential.storage.EncodedPasswordStorage}.</p>
+ * <p> This entity is mapped to support Password credential types using a {@link org.picketlink.idm.credential.storage.EncodedPasswordStorage}.
+ * </p>
  *
  * @author pedroigor
  */
@@ -55,5 +56,4 @@ public class PasswordCredentialTypeEntity extends AbstractCredentialTypeEntity {
     public void setPasswordSalt(String passwordSalt) {
         this.passwordSalt = passwordSalt;
     }
-
 }

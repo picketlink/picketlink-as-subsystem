@@ -22,67 +22,63 @@
 
 package org.picketlink.as.subsystem.federation.model.idp;
 
-import java.util.List;
-
+import org.jboss.as.controller.AbstractAddStepHandler;
 import org.jboss.as.controller.OperationContext;
 import org.jboss.as.controller.OperationFailedException;
+import org.jboss.as.controller.PathAddress;
 import org.jboss.as.controller.ServiceVerificationHandler;
+import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.msc.service.ServiceBuilder;
 import org.jboss.msc.service.ServiceController;
-import org.picketlink.as.subsystem.federation.service.AbstractEntityProviderService;
+import org.picketlink.as.subsystem.federation.service.FederationService;
 import org.picketlink.as.subsystem.federation.service.IdentityProviderService;
-import org.picketlink.as.subsystem.model.AbstractResourceAddStepHandler;
+import org.picketlink.as.subsystem.federation.service.TrustDomainService;
 import org.picketlink.as.subsystem.model.ModelElement;
-import org.picketlink.config.federation.KeyProviderType;
-import org.picketlink.config.federation.KeyValueType;
-import org.picketlink.identity.federation.core.config.IDPConfiguration;
+
+import java.util.List;
 
 /**
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
-public class TrustDomainAddHandler extends AbstractResourceAddStepHandler {
+public class TrustDomainAddHandler extends AbstractAddStepHandler {
 
-    public static final TrustDomainAddHandler INSTANCE = new TrustDomainAddHandler();
+    static final TrustDomainAddHandler INSTANCE = new TrustDomainAddHandler();
 
-    private TrustDomainAddHandler() {
-        super(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN);
+    @Override
+    protected void populateModel(ModelNode operation, ModelNode model) throws OperationFailedException {
+        for (SimpleAttributeDefinition attribute : TrustDomainResourceDefinition.INSTANCE.getAttributes()) {
+            attribute.validateAndSet(operation, model);
+        }
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.as.controller.AbstractAddStepHandler#performRuntime(org.jboss.as.controller.OperationContext, org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode, org.jboss.as.controller.ServiceVerificationHandler, java.util.List)
-     */
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model,
-            ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers)
-            throws OperationFailedException {
-        String alias = operation.get(ModelDescriptionConstants.ADDRESS).asPropertyList().get(2).getValue().asString();
-        String domain = operation.get(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_NAME.getName()).asString();
-        String certAlias = null;
+                                     ServiceVerificationHandler verificationHandler, List<ServiceController<?>> newControllers) throws OperationFailedException {
+        PathAddress pathAddress = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS));
+        String identityProviderAlias = pathAddress.subAddress(0, pathAddress.size() - 1).getLastElement().getValue();
+        String domainName = pathAddress.getLastElement().getValue();
+        ModelNode certAliasNode = TrustDomainResourceDefinition.CERT_ALIAS.resolveModelAttribute(context, model);
+        String domainCertAlias = null;
 
-        if (operation.get(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_CERT_ALIAS.getName()).isDefined()) {
-            certAlias = operation.get(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_CERT_ALIAS.getName()).asString();
+        if (certAliasNode.isDefined()) {
+            domainCertAlias = operation.get(ModelElement.IDENTITY_PROVIDER_TRUST_DOMAIN_CERT_ALIAS.getName()).asString();
         }
-        
-        AbstractEntityProviderService<IdentityProviderService, IDPConfiguration> service = IdentityProviderService.getService(context.getServiceRegistry(true), alias);
-        
-        KeyProviderType keyProvider = service.getConfiguration().getKeyProvider();
-        
-        if (keyProvider != null) {
-            KeyValueType keyValue = new KeyValueType();
-            
-            keyValue.setKey(domain);
-            
-            if (certAlias != null) {
-                keyValue.setValue(certAlias);                
-            } else {
-                keyValue.setValue(domain);
-            }
-            
-            keyProvider.add(keyValue);
+
+        TrustDomainService service = new TrustDomainService(domainName, domainCertAlias);
+        ServiceBuilder<TrustDomainService> serviceBuilder = context.getServiceTarget().addService(TrustDomainService.createServiceName(identityProviderAlias, domainName), service);
+
+        serviceBuilder.addDependency(IdentityProviderService.createServiceName(identityProviderAlias), IdentityProviderService.class, service.getIdentityProviderService());
+
+        String federationAlias = pathAddress.subAddress(0, pathAddress.size() - 2).getLastElement().getValue();
+
+        serviceBuilder.addDependency(FederationService.createServiceName(federationAlias), FederationService.class, service.getFederationService());
+
+        ServiceController<TrustDomainService> controller = serviceBuilder.addListener(verificationHandler).setInitialMode(ServiceController.Mode.PASSIVE).install();
+
+        if (newControllers != null) {
+            newControllers.add(controller);
         }
-        
-        service.getConfiguration().addTrustDomain(domain, certAlias);
     }
-    
 }

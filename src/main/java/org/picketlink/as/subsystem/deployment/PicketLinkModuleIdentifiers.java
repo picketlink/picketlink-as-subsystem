@@ -34,5 +34,4 @@ public interface PicketLinkModuleIdentifiers {
     ModuleIdentifier ORG_PICKETLINK_IDM_MODULE = ModuleIdentifier.create("org.picketlink.idm");
     ModuleIdentifier ORG_PICKETLINK_CORE_API_MODULE = ModuleIdentifier.create("org.picketlink.core.api");
     ModuleIdentifier ORG_PICKETLINK_CORE_MODULE = ModuleIdentifier.create("org.picketlink.core");
-
 }

@@ -21,109 +21,109 @@
  */
 package org.picketlink.as.subsystem.federation.service;
 
-import org.jboss.dmr.ModelNode;
 import org.jboss.msc.service.Service;
-import org.jboss.msc.service.ServiceController;
 import org.jboss.msc.service.ServiceName;
-import org.jboss.msc.service.ServiceRegistry;
 import org.jboss.msc.service.StartContext;
 import org.jboss.msc.service.StartException;
 import org.jboss.msc.service.StopContext;
-import org.picketlink.as.subsystem.model.ModelUtils;
 import org.picketlink.config.federation.KeyProviderType;
-import org.picketlink.identity.federation.core.config.STSConfiguration;
+import org.picketlink.config.federation.KeyValueType;
+import org.picketlink.config.federation.STSType;
+import org.picketlink.identity.federation.core.config.IDPConfiguration;
+
+import java.util.ArrayList;
 
 /**
- * <p>
- * Service implementation for the Federation configuration.
- * </p>
- * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
  */
 public class FederationService implements Service<FederationService> {
 
     private static final String SERVICE_NAME = "FederationService";
+    private KeyProviderType keyProviderType;
+    private STSType stsType;
+    private IDPConfiguration idpConfiguration;
+    private final String alias;
 
-    private KeyProviderType keyProvider;
-    private STSConfiguration samlConfig;
+    public FederationService(String alias) {
+        this.alias = alias;
+    }
 
-    private IdentityProviderService identityProviderService;
+    public static ServiceName createServiceName(String alias) {
+        return ServiceName.JBOSS.append(SERVICE_NAME, alias);
+    }
 
-    /* (non-Javadoc)
-     * @see org.jboss.msc.value.Value#getValue()
-     */
     @Override
     public FederationService getValue() throws IllegalStateException, IllegalArgumentException {
         return this;
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.msc.service.Service#start(org.jboss.msc.service.StartContext)
-     */
     @Override
     public void start(StartContext context) throws StartException {
-      //TODO: start identity provider service
     }
 
-    /* (non-Javadoc)
-     * @see org.jboss.msc.service.Service#stop(org.jboss.msc.service.StopContext)
-     */
     @Override
     public void stop(StopContext context) {
-      //TODO: start identity provider service
     }
 
-    /**
-     * Returns a instance of the service associated with the given name.
-     * 
-     * @param registry
-     * @param name
-     * @return
-     */
-    public static FederationService getService(ServiceRegistry registry, ModelNode model) {
-        ServiceController<?> container = registry.getService(FederationService.createServiceName(ModelUtils.getFederationAlias(model)));
-        
-        if (container != null) {
-            return (FederationService) container.getValue();
+    void addTrustedDomain(final String domainName, final String domainCertAlias) {
+        KeyProviderType keyProvider = getKeyProviderType();
+
+        if (keyProvider != null) {
+            KeyValueType keyValue = new KeyValueType();
+
+            keyValue.setKey(domainName);
+
+            if (domainCertAlias != null) {
+                keyValue.setValue(domainCertAlias);
+            } else {
+                keyValue.setValue(domainName);
+            }
+
+            keyProvider.add(keyValue);
         }
-        
-        return null;
-    }
-    
-    /**
-     * @return the idpConfiguration
-     */
-    public KeyProviderType getKeyProvider() {
-        return this.keyProvider;
-    }
-    
-    public void setKeyProvider(KeyProviderType keyProviderType) {
-        this.keyProvider = keyProviderType;
-    }
-    
-    public STSConfiguration getSamlConfig() {
-        return this.samlConfig;
-    }
-    
-    public void setSamlConfig(STSConfiguration samlConfig) {
-        this.samlConfig = samlConfig;
+
+        getIdpConfiguration().addTrustDomain(domainName, domainCertAlias);
     }
 
-    /**
-     * @param fedAlias
-     * @param alias2
-     * @return
-     */
-    public static ServiceName createServiceName(String alias) {
-        return ServiceName.JBOSS.append(SERVICE_NAME, alias);
-    }
-    
-    public void setIdentityProviderService(IdentityProviderService identityProviderService) {
-        this.identityProviderService = identityProviderService;
+    void removeTrustedDomain(final String domainName) {
+        KeyProviderType keyProvider = getKeyProviderType();
+
+        if (keyProvider != null) {
+            for (KeyValueType validatingAlias : new ArrayList<KeyValueType>(keyProvider.getValidatingAlias())) {
+                if (validatingAlias.getKey().equals(domainName)) {
+                    keyProvider.remove(validatingAlias);
+                }
+            }
+        }
+
+        getIdpConfiguration().removeTrustDomain(domainName);
     }
 
-    public IdentityProviderService getIdentityProviderService() {
-        return this.identityProviderService;
+    KeyProviderType getKeyProviderType() {
+        return this.keyProviderType;
     }
-    
+
+    void setKeyProviderType(final KeyProviderType keyProviderType) {
+        this.keyProviderType = keyProviderType;
+    }
+
+    void setSTSType(final STSType STSType) {
+        this.stsType = STSType;
+    }
+
+    STSType getStsType() {
+        return this.stsType;
+    }
+
+    IDPConfiguration getIdpConfiguration() {
+        return this.idpConfiguration;
+    }
+
+    void setIdpConfiguration(final IDPConfiguration idpConfiguration) {
+        this.idpConfiguration = idpConfiguration;
+    }
+
+    public String getAlias() {
+        return this.alias;
+    }
 }

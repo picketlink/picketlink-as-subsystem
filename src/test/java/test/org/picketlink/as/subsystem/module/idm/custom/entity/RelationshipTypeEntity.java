@@ -42,5 +42,4 @@ public class RelationshipTypeEntity extends AttributedTypeEntity {
     public void setTypeName(String typeName) {
         this.typeName = typeName;
     }
-
 }

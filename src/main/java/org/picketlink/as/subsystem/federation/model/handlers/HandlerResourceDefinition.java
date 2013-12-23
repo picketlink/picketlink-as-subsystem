@@ -22,7 +22,6 @@
 
 package org.picketlink.as.subsystem.federation.model.handlers;
 
-import org.jboss.as.controller.OperationStepHandler;
 import org.jboss.as.controller.SimpleAttributeDefinition;
 import org.jboss.as.controller.SimpleAttributeDefinitionBuilder;
 import org.jboss.as.controller.registry.ManagementResourceRegistration;
@@ -36,32 +35,15 @@ import org.picketlink.as.subsystem.model.ModelElement;
  */
 public class HandlerResourceDefinition extends AbstractResourceDefinition {
 
+    public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false).setAllowExpression(true).build();
     public static final HandlerResourceDefinition INSTANCE = new HandlerResourceDefinition();
 
-    public static final SimpleAttributeDefinition CLASS = new SimpleAttributeDefinitionBuilder(
-            ModelElement.COMMON_CLASS.getName(), ModelType.STRING, false).setAllowExpression(false).build();
-
-    static {
-        INSTANCE.addAttribute(CLASS);
-    }
-    
     private HandlerResourceDefinition() {
-        super(ModelElement.COMMON_HANDLER, HandlerAddHandler.INSTANCE, HandlerRemoveHandler.INSTANCE);
+        super(ModelElement.COMMON_HANDLER, HandlerAddHandler.INSTANCE, HandlerRemoveHandler.INSTANCE, CLASS);
     }
-    
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.SimpleResourceDefinition#registerChildren(org.jboss.as.controller.registry.
-     * ManagementResourceRegistration)
-     */
+
     @Override
     public void registerChildren(ManagementResourceRegistration resourceRegistration) {
         addChildResourceDefinition(HandlerParameterResourceDefinition.INSTANCE, resourceRegistration);
-    }
-
-    @Override
-    protected OperationStepHandler doGetAttributeWriterHandler() {
-        return HandlerWriteAttributeHandler.INSTANCE;
     }
 }

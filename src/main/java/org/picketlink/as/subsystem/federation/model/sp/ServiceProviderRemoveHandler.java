@@ -40,18 +40,10 @@ public class ServiceProviderRemoveHandler extends AbstractRemoveStepHandler {
     private ServiceProviderRemoveHandler() {
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.jboss.as.controller.AbstractRemoveStepHandler#performRuntime(org.jboss.as.controller.OperationContext,
-     * org.jboss.dmr.ModelNode, org.jboss.dmr.ModelNode)
-     */
     @Override
     protected void performRuntime(OperationContext context, ModelNode operation, ModelNode model)
             throws OperationFailedException {
         String spAlias = PathAddress.pathAddress(operation.get(ModelDescriptionConstants.ADDRESS)).getLastElement().getValue();
-        
         context.removeService(ServiceProviderService.createServiceName(spAlias));
     }
-
 }

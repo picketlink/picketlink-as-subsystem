@@ -21,10 +21,6 @@
  */
 package org.picketlink.as.subsystem;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.jboss.as.controller.persistence.SubsystemMarshallingContext;
 import org.jboss.dmr.ModelNode;
 import org.jboss.staxmapper.XMLElementReader;
@@ -32,30 +28,19 @@ import org.jboss.staxmapper.XMLElementWriter;
 import org.picketlink.as.subsystem.parser.PicketLinkSubsystemReader_1_0;
 import org.picketlink.as.subsystem.parser.PicketLinkSubsystemWriter_1_0;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
- * <p>
- * <code>Enum</code> class with informations about the subsystem's namespace and its versions, providing a register for
- * instances of <code>org.jboss.staxmapper.XMLElementReader</code> and <code>org.jboss.staxmapper.XMLElementWriter</code> for
- * each namespace version.
- * </p>
- * 
  * @author <a href="mailto:psilva@redhat.com">Pedro Silva</a>
- * @author Paul Ferraro
- * @author Tristan Tarrant
- * 
- * @since Mar 7, 2012
  */
 public enum Namespace {
 
     PICKETLINK_1_0(1, 0, new PicketLinkSubsystemReader_1_0(), new PicketLinkSubsystemWriter_1_0());
 
-    private static final String BASE_URN = "urn:jboss:domain:picketlink:";
-
-    /**
-     * The current namespace version.
-     */
     public static final Namespace CURRENT = PICKETLINK_1_0;
-
+    private static final String BASE_URN = "urn:jboss:domain:picketlink:";
     private static final Map<String, Namespace> namespaces;
 
     static {
@@ -63,8 +48,9 @@ public enum Namespace {
 
         for (Namespace namespace : values()) {
             final String name = namespace.getUri();
-            if (name != null)
+            if (name != null) {
                 map.put(name, namespace);
+            }
         }
 
         namespaces = map;
@@ -72,16 +58,26 @@ public enum Namespace {
 
     private final int major;
     private final int minor;
-
     private final XMLElementReader<List<ModelNode>> reader;
     private final XMLElementWriter<SubsystemMarshallingContext> writer;
 
     Namespace(int major, int minor, XMLElementReader<List<ModelNode>> reader,
-            XMLElementWriter<SubsystemMarshallingContext> writer) {
+                     XMLElementWriter<SubsystemMarshallingContext> writer) {
         this.major = major;
         this.minor = minor;
         this.reader = reader;
         this.writer = writer;
+    }
+
+    /**
+     * Converts the specified uri to a {@link Namespace}.
+     *
+     * @param uri a namespace uri
+     *
+     * @return the matching namespace enum.
+     */
+    public static Namespace forUri(String uri) {
+        return namespaces.get(uri) == null ? null : namespaces.get(uri);
     }
 
     /**
@@ -90,17 +86,17 @@ public enum Namespace {
     public int getMajor() {
         return this.major;
     }
-    
+
     /**
      * @return the minor
      */
     public int getMinor() {
         return this.minor;
     }
-    
+
     /**
      * Get the URI of this namespace.
-     * 
+     *
      * @return the URI
      */
     public String getUri() {
@@ -109,7 +105,7 @@ public enum Namespace {
 
     /**
      * Returns a xml reader for a specific namespace version.
-     * 
+     *
      * @return
      */
     public XMLElementReader<List<ModelNode>> getXMLReader() {
@@ -118,21 +114,11 @@ public enum Namespace {
 
     /**
      * Returns a xml writer for a specific namespace version.
-     * 
+     *
      * @return
      */
     public XMLElementWriter<SubsystemMarshallingContext> getXMLWriter() {
         return this.writer;
-    }
-
-    /**
-     * Converts the specified uri to a {@link Namespace}.
-     * 
-     * @param uri a namespace uri
-     * @return the matching namespace enum.
-     */
-    public static Namespace forUri(String uri) {
-        return namespaces.get(uri) == null ? null : namespaces.get(uri);
     }
 
 }

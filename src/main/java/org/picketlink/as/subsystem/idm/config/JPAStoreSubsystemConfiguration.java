@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.lang.reflect.Modifier.*;
-import static org.picketlink.common.util.StringUtil.*;
+import static java.lang.reflect.Modifier.isAbstract;
+import static org.picketlink.common.util.StringUtil.isNullOrEmpty;
 
 /**
  * @author Pedro Igor
@@ -45,29 +45,21 @@ import static org.picketlink.common.util.StringUtil.*;
 public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguration {
 
     private static final String JPA_ANNOTATION_PACKAGE = "org.picketlink.idm.jpa.annotations";
-
-    private EntityManagerFactory emf;
-
-    private String entityModuleUnitName = "identity";
     private final Module entityModule;
     private final String dataSourceJndiUrl;
     private final String entityManagerFactoryJndiName;
-    private InjectedValue<TransactionManager> transactionManager;
+    private EntityManagerFactory emf;
+    private String entityModuleUnitName = "identity";
+    private final InjectedValue<TransactionManager> transactionManager;
 
-    protected JPAStoreSubsystemConfiguration(
-            final String entityModuleName,
-            final String entityModuleUnitName,
-            final String dataSourceJndiUrl,
-            final String entityManagerFactoryJndiName,
-            final InjectedValue<TransactionManager> transactionManager,
-            final Set<Class<?>> entityTypes,
-            final Map<Class<? extends AttributedType>, Set<IdentityOperation>> supportedTypes,
-            final Map<Class<? extends AttributedType>, Set<IdentityOperation>> unsupportedTypes,
-            final List<ContextInitializer> contextInitializers,
-            final Map<String, Object> credentialHandlerProperties,
-            final Set<Class<? extends CredentialHandler>> credentialHandlers,
-            final boolean supportsAttribute,
-            final boolean supportsCredential) {
+    protected JPAStoreSubsystemConfiguration(final String entityModuleName, final String entityModuleUnitName,
+                                                final String dataSourceJndiUrl, final String entityManagerFactoryJndiName,
+                                                final InjectedValue<TransactionManager> transactionManager, final Set<Class<?>> entityTypes,
+                                                final Map<Class<? extends AttributedType>, Set<IdentityOperation>> supportedTypes,
+                                                final Map<Class<? extends AttributedType>, Set<IdentityOperation>> unsupportedTypes,
+                                                final List<ContextInitializer> contextInitializers, final Map<String, Object> credentialHandlerProperties,
+                                                final Set<Class<? extends CredentialHandler>> credentialHandlers, final boolean supportsAttribute,
+                                                final boolean supportsCredential) {
         super(entityTypes, supportedTypes, unsupportedTypes, contextInitializers, credentialHandlerProperties, credentialHandlers, supportsAttribute, supportsCredential);
 
         this.transactionManager = transactionManager;
@@ -92,7 +84,7 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
             configureEntityManagerFactory();
             configureEntities();
         } catch (Exception e) {
-            throw new SecurityConfigurationException("Could not configure JPA store.", e);
+            throw new SecurityConfigurationException("Could not configureDeployment JPA store.", e);
         }
     }
 
@@ -145,15 +137,17 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
     }
 
     private boolean isIdentityEntity(Class<?> cls) {
-        while (!cls.equals(Object.class)) {
-            for (Annotation a : cls.getAnnotations()) {
+        Class<?> checkClass = cls;
+
+        while (!checkClass.equals(Object.class)) {
+            for (Annotation a : checkClass.getAnnotations()) {
                 if (a.annotationType().getName().startsWith(JPA_ANNOTATION_PACKAGE)) {
                     return true;
                 }
             }
 
             // No class annotation was found, check the fields
-            for (Field f : cls.getDeclaredFields()) {
+            for (Field f : checkClass.getDeclaredFields()) {
                 for (Annotation a : f.getAnnotations()) {
                     if (a.annotationType().getName().startsWith(JPA_ANNOTATION_PACKAGE)) {
                         return true;
@@ -162,7 +156,7 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
             }
 
             // Check the superclass
-            cls = cls.getSuperclass();
+            checkClass = checkClass.getSuperclass();
         }
 
         return false;
@@ -185,9 +179,7 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
     }
 
     private EntityManager getEntityManager() {
-        return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
-                new Class<?>[]{EntityManager.class}, new EntityManagerInvocationHandler(emf.createEntityManager(),
-                entityModule));
+        return (EntityManager) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class<?>[]{EntityManager.class}, new EntityManagerInvocationHandler(this.emf.createEntityManager(), this.entityModule));
     }
 
     private class EntityManagerInvocationHandler implements InvocationHandler {
@@ -202,12 +194,13 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
 
         @Override
         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            TransactionManager transactionManager = getTransactionManager();
             Transaction tx = null;
 
-            if (isTxRequired(method, args)) {
-                if (transactionManager.getValue().getStatus() == Status.STATUS_NO_TRANSACTION) {
-                    transactionManager.getValue().begin();
-                    tx = transactionManager.getValue().getTransaction();
+            if (isTxRequired(method)) {
+                if (transactionManager.getStatus() == Status.STATUS_NO_TRANSACTION) {
+                    transactionManager.begin();
+                    tx = transactionManager.getTransaction();
                 }
 
                 this.em.joinTransaction();
@@ -226,31 +219,18 @@ public class JPAStoreSubsystemConfiguration extends JPAIdentityStoreConfiguratio
 
                 if (tx != null) {
                     tx.commit();
-                    transactionManager.getValue().suspend();
+                    transactionManager.suspend();
                 }
             }
         }
 
-        private boolean isTxRequired(Method method, Object[] args) {
-            String n = method.getName();
-            if (n.equals("flush")) {
-                return true;
-            } else if (n.equals("getLockMode")) {
-                return true;
-            } else if (n.equals("lock")) {
-                return true;
-            } else if (n.equals("merge")) {
-                return true;
-            } else if (n.equals("persist")) {
-                return true;
-            } else if (n.equals("refresh")) {
-                return true;
-            } else if (n.equals("remove")) {
-                return true;
-            } else {
-                return false;
-            }
+        private TransactionManager getTransactionManager() {
+            return JPAStoreSubsystemConfiguration.this.transactionManager.getValue();
         }
 
+        private boolean isTxRequired(Method method) {
+            String n = method.getName();
+            return "flush".equals(n) || "getLockMode".equals(n) || "lock".equals(n) || "merge".equals(n) || "persist".equals(n) || "refresh".equals(n) || "remove".equals(n);
+        }
     }
 }
